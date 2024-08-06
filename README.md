@@ -1,1 +1,6 @@
 # KVMemory
+
+## Run
+```
+CUDA_VISIBLE_DEVICES=1 python inference.py 
+```
