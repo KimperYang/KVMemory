@@ -1,14 +1,13 @@
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
-from transformers import DynamicCache
-import json
+from transformers import AutoTokenizer, AutoModelForCausalLM, DynamicCache
 
-max_memory = {}
+global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
+global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16, device_map="auto")
 
 def generate_kv(prompt):
 
-    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
-    model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16, device_map="auto")
+    tokenizer = global_tokenizer
+    model = global_model
     # inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
 
     # out = model(**inputs, use_cache=True)
@@ -28,9 +27,12 @@ def generate_kv(prompt):
         filtered_values = past_values[:, :, 1:, :] 
         filtered_past_key_values = filtered_past_key_values + ((filtered_keys, filtered_values),)
 
+    input_ids = input_ids[:, 1:]
+
     print(filtered_past_key_values[0][0].size())
     # print(filtered_past_key_values.get_seq_length())
-    return filtered_past_key_values
+
+    return input_ids, filtered_past_key_values
 
 def append_kv(kv_list):
     if not kv_list:
@@ -45,7 +47,6 @@ def append_kv(kv_list):
         keys_list = [kv[layer][0] for kv in kv_list]
         values_list = [kv[layer][1] for kv in kv_list]
 
-        # Concatenate keys and values along the sequence length dimension
         concatenated_keys = torch.cat(keys_list, dim=2)
         concatenated_values = torch.cat(values_list, dim=2) 
 
@@ -55,30 +56,38 @@ def append_kv(kv_list):
     # torch.save(values, "values.pt")
     return concatenated_past_key_values
 
-def inference_with_kv(prompt, past_key_values, model_name="meta-llama/Llama-2-7b-chat-hf", max_length=800, num_return_sequences=1):
+def inference_with_kv(id_list, past_key_values, model_name="meta-llama/Llama-2-7b-chat-hf", max_length=800, num_return_sequences=1):
 
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16, device_map="auto")
+    tokenizer = global_tokenizer
+    model = global_model
     
     # past_key_values = (
     #     (keys.to(model.device), values.to(model.device))
     #     for keys, values in past_key_values
     # )
 
-    input_ids = tokenizer(prompt, return_tensors="pt").input_ids
+    # id_list = []
+    # for mem in prompt:
+    #     input_id = tokenizer(prompt, return_tensors="pt").input_ids
+    #     id_list.extend(tokens['input_ids'].squeeze().tolist())
+    # input_ids = torch.tensor([id_list])
+
+
     # input_ids = input_ids[:, 1:]
-    print(input_ids)
+
     # for token_id in input_ids:
     #     token = tokenizer.decode([token_id], clean_up_tokenization_spaces=False)
     #     print(f"Token ID: {token_id}, Token: '{token}'")
+    for i in range(len(id_list)):
+        id_list[i].to(model.device)
+        print(id_list[i])
+    
+    input_ids = torch.cat(id_list, dim=1)
     input_ids = input_ids.to(model.device)
     # inputs = tokenizer(prompt, return_tensors="pt", add_special_tokens=True).to(model.device)
+    print("final",input_ids)
     model.eval()
 
-    # past_key_values = DynamicCache()
-    # past_key_values.key_cache = torch.load("keys.pt")
-    # past_key_values.value_cache =values = torch.load("values.pt")
-    # print("p2",past_key_values.get_seq_length())
     with torch.no_grad():
 
         outputs = model.generate(
@@ -95,7 +104,7 @@ def inference_with_kv(prompt, past_key_values, model_name="meta-llama/Llama-2-7b
 
 def count_tokens(input_text):
 
-    tokenizer = AutoTokenizer.from_pretrained('meta-llama/Llama-2-7b-chat-hf')
+    tokenizer = global_tokenizer
 
     tokens = tokenizer.encode(input_text, add_special_tokens=True)
 
@@ -110,17 +119,19 @@ memory_list = ["what is your name\n"]
 # template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
 
 template = "[INST] <<SYS>>\nYou're an assistant who answer the question with the knowledge provided in the prompt\n<</SYS>>\n\n"
-memory_list = [
-"Can brain cells move? By movement I mean long distance migration (preferably within the brain only).",
-"The question is relatively broad and one should take into account that the brain not only consists of neurons, but also glial cells (supportive cells) and pre-mitotic neuronal stem cells.",
-"Furthermore, as critical fellow-scientists have indicated, developmental stage is very important, as the developing embryonic brain is very different from the adult brain.\n",
-"However, after sifting through various publications, the answer to the question is actually remarkably simple: Yes, brain cells migrate.\n",
-"In the adult brain glial cells migrate in the brain (Klämbt, 2009). Glial cells are involved in a myriad of functions, but a notable example of migrating glial cells are the oligodendrocytes that migrate relative long distances to find their target axons onto which they wrap themselves to form the insulating myelin sheath (Tsai and Miller, 2002).\n",
-"Neuronal stem cells migrate over long distances in response to injury (Imitola et al., 2004) and they migrate from specific stem-cell locations (e.g., hippocampus and subventricular zone) to other regions (Clarke, 2003).\n",
-"Post-mitotic, but non-differentiated neurons have been shown to migrate in the adult brain in fish (Scott et al., 2012), and in mammals and non-human primates as well (Sawada et al., 2011).\n",
-"Not surprisingly, glial cells, stem cells and neurons also migrate during embryonic development. Most notably, post-mitotic neurons destined to fulfill peripheral functions have to migrate over relatively long distances from the neural crest to their target locations (Neuroscience, 2nd ed, Neuronal Migration).\n",
-"Question: which kinds of brain cells can move?"
-]
+# memory_list = [
+# "Can brain cells move? By movement I mean long distance migration (preferably within the brain only).",
+# "The question is relatively broad and one should take into account that the brain not only consists of neurons, but also glial cells (supportive cells) and pre-mitotic neuronal stem cells.",
+# "Furthermore, as critical fellow-scientists have indicated, developmental stage is very important, as the developing embryonic brain is very different from the adult brain.\n",
+# "However, after sifting through various publications, the answer to the question is actually remarkably simple: Yes, brain cells migrate.\n",
+# "In the adult brain glial cells migrate in the brain (Klämbt, 2009). Glial cells are involved in a myriad of functions, but a notable example of migrating glial cells are the oligodendrocytes that migrate relative long distances to find their target axons onto which they wrap themselves to form the insulating myelin sheath (Tsai and Miller, 2002).\n",
+# "Neuronal stem cells migrate over long distances in response to injury (Imitola et al., 2004) and they migrate from specific stem-cell locations (e.g., hippocampus and subventricular zone) to other regions (Clarke, 2003).\n",
+# "Post-mitotic, but non-differentiated neurons have been shown to migrate in the adult brain in fish (Scott et al., 2012), and in mammals and non-human primates as well (Sawada et al., 2011).\n",
+# "Not surprisingly, glial cells, stem cells and neurons also migrate during embryonic development. Most notably, post-mitotic neurons destined to fulfill peripheral functions have to migrate over relatively long distances from the neural crest to their target locations (Neuroscience, 2nd ed, Neuronal Migration).\n",
+# "Question: which kinds of brain cells can move?"
+# ]
+
+memory_list = ["Hello", "How are you"]
 
 # template = "[INST] <<SYS>>\nYou're an assistant who answer the question with the multiple turns of history conversations\n<</SYS>>\n\n"
 # memory_list = [
@@ -139,43 +150,26 @@ memory_list = [
 
 start_token = "<s>"
 end_token = "[/INST]"
-memory_list.insert(0, template)
-# memory_list.insert(0, start_token)
-memory_list.append(end_token)
+# memory_list.insert(0, template)
+memory_list.insert(0, start_token)
+# memory_list.append(end_token)
+
+new_prompt = "I"
 
 kv_list = []
+id_list = []
 seq = ""
 
-# for i in range(len(memory_list)):
-#     memory_list[i] = memory_list[i]
-
 for st in memory_list:
-    kv_list.append(generate_kv(st))
+    id, kv = generate_kv(st)
+    id_list.append(id)
+    kv_list.append(kv)
     seq = seq + st
 
 appended_kv = append_kv(kv_list)
 
-
-# print(appended_kv[0][0].size())
-# print(len(appended_kv))
-# print(len(appended_kv[0]))
-# print(seq)
-# count_tokens(seq)
-
-
+prompt_id, _ = generate_kv(new_prompt)
+id_list.append(prompt_id)
 # seq_cache = generate_kv(seq)
 # print(inference_with_kv(seq, seq_cache))
-print(inference_with_kv(seq, appended_kv))
-
-
-
-# start_kv = generate_kv("<s>")
-# template_kv = generate_kv("[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n [/INST]")
-# dummy_kv1 = generate_kv("hello") 
-# dummy_kv2 = generate_kv("how are you")
-# dummy_kv3 = generate_kv("and how old are you")
-
-
-# appended_kv = append_kv([template_kv, start_kv, dummy_kv1, dummy_kv2, dummy_kv3])
-# print(appended_kv[0][0].size())
-# print(inference_with_kv("[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n [/INST] hello ha ha ha how are you and how old are you", appended_kv))
+print(inference_with_kv(id_list, appended_kv))
