@@ -1,6 +1,8 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, DynamicCache
 import pandas as pd    
+import json
+import datetime
 
 jsonObj = pd.read_json(path_or_buf='nq-open-10_total_documents_gold_at_0.jsonl', lines=True)
 global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
@@ -58,7 +60,7 @@ def append_kv(kv_list):
     # torch.save(values, "values.pt")
     return concatenated_past_key_values
 
-def inference_with_kv(id_list, past_key_values, model_name="meta-llama/Llama-2-7b-chat-hf", max_length=4000, num_return_sequences=1):
+def inference_with_kv(id_list, past_key_values, model_name="meta-llama/Llama-2-7b-chat-hf", max_length=2000, num_return_sequences=1):
 
     tokenizer = global_tokenizer
     model = global_model
@@ -90,6 +92,8 @@ def inference_with_kv(id_list, past_key_values, model_name="meta-llama/Llama-2-7
     # print("final",input_ids)
     model.eval()
 
+    max_length = input_ids.size(1) + 400
+
     with torch.no_grad():
 
         outputs = model.generate(
@@ -116,39 +120,84 @@ def count_tokens(input_text):
         print(f"Token ID: {token_id}, Token: '{token}'")
     print(f"Number of tokens including special tokens: {num_tokens}")
 
-# memory_list = ["hello\n", "how are you\n", "what is your name\n"]
-memory_list = ["what is your name\n"]
-# template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
+def check_result(ans_list, response):
+    for ans in ans_list:
+        if ans in response: 
+            print("Response: ", response, "\nTRUE")
+            return True
 
-template = "[INST] <<SYS>>\nYou're an assistant who answer the question with the knowledge provided in the prompt\n<</SYS>>\n\n"
+    print("Response: ", response, "\nFALSE")
+    return False
 
-memory_list = []
+def main():
+    # template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
 
-for i in range(0,10):
-    memory_list.append(jsonObj["ctxs"][0][i]["text"])
+    template = "[INST] <<SYS>>\nYou're an assistant who answer the question with the knowledge provided in the prompt\n<</SYS>>\n\n"
 
-start_token = "<s>"
-end_token = "[/INST]"
-memory_list.insert(0, template)
-memory_list.insert(0, start_token)
-# memory_list.append(end_token)
+    total_num = len(jsonObj)
+    correct_num = 0
+    res_dict = {}
 
-new_prompt = jsonObj["question"][0] + "[/INST]"
+    for i in range(total_num):
 
-kv_list = []
-id_list = []
-seq = ""
+        print("id:", str(i))
+        memory_list = []
 
-for st in memory_list:
-    id, kv = generate_kv(st)
-    id_list.append(id)
-    kv_list.append(kv)
-    seq = seq + st
+        for j in range(0,10):
+            memory_list.append(jsonObj["ctxs"][i][j]["text"])
 
-appended_kv = append_kv(kv_list)
+        start_token = "<s>"
+        end_token = "[/INST]"
+        memory_list.insert(0, template)
+        memory_list.insert(0, start_token)
+        # memory_list.append(end_token)
 
-prompt_id, _ = generate_kv(new_prompt)
-id_list.append(prompt_id)
-# seq_cache = generate_kv(seq)
-# print(inference_with_kv(seq, seq_cache))
-print(inference_with_kv(id_list, appended_kv))
+        new_prompt = "Question: " + jsonObj["question"][i] + "[/INST]"
+
+        kv_list = []
+        id_list = []
+        seq = ""
+
+        for st in memory_list:
+            id, kv = generate_kv(st)
+            id_list.append(id)
+            kv_list.append(kv)
+            seq = seq + st
+
+        appended_kv = append_kv(kv_list)
+
+        prompt_id, _ = generate_kv(new_prompt)
+        id_list.append(prompt_id)
+
+        generated_seq = inference_with_kv(id_list, appended_kv)
+        response = generated_seq[0].split('[/INST]')[1]
+        res_dict["res_"+str(i)] = response
+        print(response)
+
+        if check_result(jsonObj["answers"][i], response):
+            res_dict["score_"+str(i)] = "TRUE"
+            correct_num = correct_num + 1
+            print("TRUE")
+
+        else:
+            res_dict["score_"+str(i)] = "FALSE"
+            print("FALSE")
+        
+        print("progress", correct_num)
+        
+    res_dict["Correct Number"] = str(correct_num)
+    res_dict["Total Number"] =str(total_num)
+    res_dict["Accuracy"] = str(correct_num / total_num)
+    print(correct_num / total_num)
+
+    time_str = current_time.strftime("%Y%m%d-%H%M%S")
+
+    file_name = f"/result/data_{time_str}.json"
+
+    with open(file_name, 'w', encoding='utf-8') as file:
+        json.dump(res_dict, file, ensure_ascii=False, indent=4)
+
+    print(f"Dumped at {file_name}")
+
+if __name__ == "__main__":
+    main()
