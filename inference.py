@@ -190,9 +190,10 @@ def main():
     res_dict["Accuracy"] = str(correct_num / total_num)
     print(correct_num / total_num)
 
+    current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"/result/data_{time_str}.json"
+    file_name = f"result/data_{time_str}.json"
 
     with open(file_name, 'w', encoding='utf-8') as file:
         json.dump(res_dict, file, ensure_ascii=False, indent=4)
