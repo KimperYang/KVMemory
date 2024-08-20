@@ -75,7 +75,7 @@ def load_data(index):
 
     return dataset['train'][:index]['text']
 
-def memory_seg(memory_str, seg_method = 'paragraph'):
+def memory_seg(memory_str, seg_method = 'paragraph', chunk_size = 100):
 
     if seg_method == 'paragraph':
 
@@ -87,27 +87,44 @@ def memory_seg(memory_str, seg_method = 'paragraph'):
                 clean_list.append(mem)
         
         return clean_list
+    
+    if seg_method == 'fixsize':
+
+        words = memory_str.split()
+        memory_list = [' '.join(words[i:i + chunk_size]) for i in range(0, len(words), chunk_size)]
+
+        return memory_list
 
 def main():
 
-    num_data_used = 2
+    num_data_used = 2000
     raw_data = load_data(num_data_used)
 
     res_dict = {}
     loss_list = []
 
+    chunk_method = 'fixsize' # ['fixsize', 'paragraph']
+
     for i in range(len(raw_data)):
 
         print(str(i))
-        memory_list = memory_seg(raw_data[i])
-        
+
+        if(len(raw_data[i])>10000): 
+            print(str(len(raw_data[i])),"skip!")
+            res_dict["Num_Token_"+str(i)] = "skip"
+            res_dict["Len_Mask_"+str(i)] = "skip"
+            res_dict["Loss_"+str(i)] = "skip"
+            continue
+
+        memory_list = memory_seg(raw_data[i], chunk_method)
+
         start_token = "<s>"
         memory_list.insert(0, start_token)
 
         id_list = []
         kv_list = []
 
-        for st in memory_list[:len(memory_list)-1]:
+        for st in memory_list[:len(memory_list)//2]:
             _, kv = generate_kv(st)
             kv_list.append(kv)
 
@@ -159,7 +176,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
     
-    file_name = f"result/openwebtext_{time_str}.json"
+    file_name = f"result/openwebtext_{str(num_data_used)}_{chunk_method}_{time_str}.json"
 
     with open(file_name, 'w', encoding='utf-8') as file:
         json.dump(res_dict, file, ensure_ascii=False, indent=4)
