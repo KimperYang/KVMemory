@@ -19,5 +19,5 @@ dataset = load_dataset("openwebtext")
 print(dataset)
 
 # Access a specific split (e.g., 'train') and view the first few samples
-print(dataset['train'][0])
+print(len(dataset['train'][3]['text']))
 
