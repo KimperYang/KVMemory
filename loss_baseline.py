@@ -75,13 +75,13 @@ def load_data(index):
 
     return dataset['train'][:index]['text']
 
-def memory_seg(memory_str, seg_method = 'paragraph', chunk_size = 25):
+def memory_seg(memory_str, seg_method = 'paragraph', chunk_size = 50):
 
     if seg_method == 'paragraph':
 
         memory_list = memory_str.split('\n')
 
-        if not len(memory_list) < 4:
+        if not len(memory_list) == 1:
 
             clean_list = []
             for mem in memory_list:
@@ -98,7 +98,7 @@ def memory_seg(memory_str, seg_method = 'paragraph', chunk_size = 25):
                 if not mem == "":
                     clean_list.append(mem)
             return clean_list
-    
+
     if seg_method == 'fixsize':
 
         words = memory_str.split()
@@ -114,10 +114,10 @@ def main():
     res_dict = {}
     loss_list = []
 
-    chunk_method = 'fixsize' # ['fixsize', 'paragraph']
+    chunk_method = 'paragraph' # ['fixsize', 'paragraph']
 
-    # for i in range(27,28):
     for i in range(len(raw_data)):
+
         print(str(i))
 
         if(len(raw_data[i].split())>5000): 
@@ -128,9 +128,6 @@ def main():
             continue
 
         memory_list = memory_seg(raw_data[i], chunk_method)
-
-        # print(len(memory_list))
-        # print(memory_list)
 
         start_token = "<s>"
         memory_list.insert(0, start_token)
@@ -160,7 +157,7 @@ def main():
 
         # past_key_values = global_model(global_tokenizer("Hi", return_tensors="pt").input_ids).past_key_values
 
-        outputs = global_model(inputs["input_ids"], labels=inputs["input_ids"], past_key_values=past_key_values)
+        outputs = global_model(inputs["input_ids"], labels=inputs["input_ids"], past_key_values=None)
         logits = outputs.logits
 
         shift_logits = logits[..., :-1, :].contiguous()
@@ -178,7 +175,7 @@ def main():
         final_loss = masked_losses.sum() / mask.sum()
 
         print(f"Final Loss: {final_loss.item()}")
-        
+
         if not str(final_loss.item()) == "nan":
             loss_list.append(final_loss.item())
 
@@ -191,7 +188,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
     
-    file_name = f"result/openwebtext_{str(num_data_used)}_{chunk_method}_{time_str}.json"
+    file_name = f"result/openwebtext_baseline_{str(num_data_used)}_{chunk_method}_{time_str}.json"
 
     with open(file_name, 'w', encoding='utf-8') as file:
         json.dump(res_dict, file, ensure_ascii=False, indent=4)
