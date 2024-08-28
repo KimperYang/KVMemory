@@ -22,18 +22,44 @@
 # print(dataset['train'][28]['text'])
 
 ###########################
-import pandas as pd    
-jsonObj = pd.read_json(path_or_buf='/home/jingbo/KVMemory/data/ifeval/input_data.jsonl', lines=True)
+# import pandas as pd    
+# jsonObj = pd.read_json(path_or_buf='/home/jingbo/KVMemory/data/ifeval/input_data.jsonl', lines=True)
 
-memory_list = []
+# memory_list = []
 
-print(jsonObj["prompt"][0])
+# print(jsonObj["prompt"][0])
 
-memory_list = jsonObj["prompt"][3].split(". ")
+# memory_list = jsonObj["prompt"][3].split(". ")
 
-start_token = "<s>"
-end_token = "[/INST]"
-# memory_list.insert(0, template)
-memory_list.insert(0, start_token)
+# start_token = "<s>"
+# end_token = "[/INST]"
+# # memory_list.insert(0, template)
+# memory_list.insert(0, start_token)
 
-print(memory_list)
+# print(memory_list)
+
+################
+from datasets import load_dataset
+
+dataset = load_dataset("MemGPT/MSC-Self-Instruct")
+
+def reorganize_dialog(data):
+    organized_dialog = []
+    
+    for entry in data:
+        dialog = entry['dialog']
+        
+        # Assume alternating text between PersonA and PersonB
+        for i in range(0, len(dialog) - 1, 2):
+            person_a_text = dialog[i]['text']
+            person_b_text = dialog[i + 1]['text']
+            
+            # Append each exchange as a dictionary entry
+            organized_dialog.append({
+                "User": person_a_text,
+                "Assistant": person_b_text
+            })
+    
+    return organized_dialog
+
+print(len(dataset["train"]["previous_dialogs"]))

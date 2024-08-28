@@ -5,7 +5,7 @@ import torch
 tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
 
 # Example tensor input_ids
-ids = torch.tensor([[   1,   518, 25580, 29962]])
+ids = torch.tensor([[   1,   518, 25580, 29962, 0]])
 
 print(ids.size(1))
 # Convert tensor to list of IDs

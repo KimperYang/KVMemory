@@ -3,8 +3,9 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, DynamicCache
 import pandas as pd    
 import json
 import datetime
+from rouge_score import rouge_scorer
+from datasets import load_dataset
 
-jsonObj = pd.read_json(path_or_buf='data/nq/nq-open-10_0.jsonl', lines=True)
 global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
 global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16, device_map="auto")
 
@@ -33,7 +34,7 @@ def generate_kv(prompt):
 
     input_ids = input_ids[:, 1:]
 
-    print(filtered_past_key_values[0][0].size())
+    # print(filtered_past_key_values[0][0].size())
     # print(filtered_past_key_values.get_seq_length())
 
     return input_ids, filtered_past_key_values
@@ -60,36 +61,11 @@ def append_kv(kv_list):
     # torch.save(values, "values.pt")
     return concatenated_past_key_values
 
-def inference_with_kv(id_list, past_key_values, model_name="meta-llama/Llama-2-7b-chat-hf", max_length=2000, num_return_sequences=1):
+def inference(input_ids, past_key_values, model_name="meta-llama/Llama-2-7b-chat-hf", max_length=2000, num_return_sequences=1):
 
     tokenizer = global_tokenizer
     model = global_model
     
-    # past_key_values = (
-    #     (keys.to(model.device), values.to(model.device))
-    #     for keys, values in past_key_values
-    # )
-
-    # id_list = []
-    # for mem in prompt:
-    #     input_id = tokenizer(prompt, return_tensors="pt").input_ids
-    #     id_list.extend(tokens['input_ids'].squeeze().tolist())
-    # input_ids = torch.tensor([id_list])
-
-
-    # input_ids = input_ids[:, 1:]
-
-    # for token_id in input_ids:
-    #     token = tokenizer.decode([token_id], clean_up_tokenization_spaces=False)
-    #     print(f"Token ID: {token_id}, Token: '{token}'")
-    for i in range(len(id_list)):
-        id_list[i].to(model.device)
-        # print(id_list[i])
-    
-    input_ids = torch.cat(id_list, dim=1)
-    input_ids = input_ids.to(model.device)
-    # inputs = tokenizer(prompt, return_tensors="pt", add_special_tokens=True).to(model.device)
-    # print("final",input_ids)
     model.eval()
 
     max_length = input_ids.size(1) + 400
@@ -120,83 +96,96 @@ def count_tokens(input_text):
         print(f"Token ID: {token_id}, Token: '{token}'")
     print(f"Number of tokens including special tokens: {num_tokens}")
 
-def check_result(ans_list, response):
-    for ans in ans_list:
-        if ans in response: 
-            print("Response: ", response, "\nTRUE")
-            return True
+def reorganize_dialog(data):
+    organized_dialog = []
+    
+    for entry in data:
+        dialog = entry['dialog']
+        
+        # Assume alternating text between PersonA and PersonB
+        for i in range(0, len(dialog) - 1, 2):
+            person_a_text = dialog[i]['text']
+            person_b_text = dialog[i + 1]['text']
+            
+            # Append each exchange as a dictionary entry
+            organized_dialog.append({
+                "Assistant": person_a_text,
+                "User": person_b_text
+            })
+    
+    return organized_dialog
 
-    print("Response: ", response, "\nFALSE")
-    return False
+def calculate_rouge_l_score(candidate, reference):
+    scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
+    scores = scorer.score(reference, candidate)
+    rouge_l_score = scores['rougeL'].fmeasure
+    return rouge_l_score
 
 def main():
+
+    dataset = load_dataset("MemGPT/MSC-Self-Instruct")
+
+    # print(reorganize_dialog(dataset["train"]["previous_dialogs"][0]))
+
+    template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant."
     # template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
+    # template = "[INST] <<SYS>>\nYou're an assistant who answer the question with the knowledge provided in the prompt\n<</SYS>>\n\n"
 
-    template = "[INST] <<SYS>>\nYou're an assistant who answer the question with the knowledge provided in the prompt\n<</SYS>>\n\n"
-
-    total_num = len(jsonObj)
-    correct_num = 0
-    res_dict = {}
+    total_num = len(dataset["train"]["previous_dialogs"])
+    print(total_num)
+    res_list = []
+    score_list = []
 
     for i in range(total_num):
 
         print("id:", str(i))
-        memory_list = []
+        memory_list = reorganize_dialog(dataset["train"]["previous_dialogs"][i])
 
-        for j in range(0,3):
-            memory_list.append(jsonObj["ctxs"][i][j]["text"])
-
+        for j in range(len(memory_list)):
+            memory_list[j] = str(memory_list[j])[1:-1]
+        # print(memory_list[0])
         start_token = "<s>"
         end_token = "[/INST]"
         memory_list.insert(0, template)
         memory_list.insert(0, start_token)
         # memory_list.append(end_token)
 
-        new_prompt = "Question: " + jsonObj["question"][i] + "[/INST]"
+        new_prompt = "Answer the User's question based on above conversations. 'User': '" + dataset["train"]["self_instruct"][i]["B"] + "'[/INST]"
 
-        kv_list = []
-        id_list = []
+        # print(new_prompt)
+
         seq = ""
 
         for st in memory_list:
-            id, kv = generate_kv(st)
-            id_list.append(id)
-            kv_list.append(kv)
             seq = seq + st
 
-        appended_kv = append_kv(kv_list)
+        seq = seq + new_prompt
 
-        prompt_id, _ = generate_kv(new_prompt)
-        id_list.append(prompt_id)
+        input_ids = global_tokenizer(seq, return_tensors="pt").input_ids
+        input_ids = input_ids.to(global_model.device)
 
-        generated_seq = inference_with_kv(id_list, appended_kv)
+        generated_seq = inference(input_ids, None)
         response = generated_seq[0].split('[/INST]')[1]
-        res_dict["res_"+str(i)] = response
-        print(response)
 
-        if check_result(jsonObj["answers"][i], response):
-            res_dict["score_"+str(i)] = "TRUE"
-            correct_num = correct_num + 1
-            print("TRUE")
+        gold_answer = dataset["train"]["self_instruct"][i]["A"]
+        score = calculate_rouge_l_score(response, gold_answer)
 
-        else:
-            res_dict["score_"+str(i)] = "FALSE"
-            print("FALSE")
+        print('score:', str(score))
+        score_list.append(score)
+        res_list.append({"score": str(score),"question": dataset["train"]["self_instruct"][i]["B"], "response": response, "gold_answer": gold_answer})
         
-        print("progress", correct_num)
-        
-    res_dict["Correct Number"] = str(correct_num)
-    res_dict["Total Number"] =str(total_num)
-    res_dict["Accuracy"] = str(correct_num / total_num)
-    print(correct_num / total_num)
 
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/nq/nq_3_at0_{time_str}.json"
+    final_score = sum(score_list) / len(score_list)
 
-    with open(file_name, 'w', encoding='utf-8') as file:
-        json.dump(res_dict, file, ensure_ascii=False, indent=4)
+    file_name = f"result/dialog/dialog_baseline_{final_score}_{time_str}.json"
+
+    with open(file_name, 'w') as f:
+        for entry in res_list:
+            json_line = json.dumps(entry)
+            f.write(json_line + '\n')
 
     print(f"Dumped at {file_name}")
 
