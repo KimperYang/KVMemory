@@ -143,7 +143,7 @@ def main():
         print("id:", str(i))
         memory_list = []
 
-        for j in range(0,10):
+        for j in range(0,3):
             memory_list.append(jsonObj["ctxs"][i][j]["text"])
 
         start_token = "<s>"
@@ -192,7 +192,7 @@ def main():
 
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/nq4_{time_str}.json"
+    file_name = f"result/nq/nq_3_at4_{time_str}.json"
 
     with open(file_name, 'w', encoding='utf-8') as file:
         json.dump(res_dict, file, ensure_ascii=False, indent=4)
