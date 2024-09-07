@@ -9,26 +9,26 @@ from datasets import load_dataset
 global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf")
 global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-hf", torch_dtype=torch.float16, device_map="auto")
 
-def generate_kv_with_id(input_ids):
+def generate_kv_with_id(input_ids, p_id):
     model = global_model
     input_ids = input_ids.to(model.device)
 
     with torch.no_grad():
-        out = model(input_ids)
+        out = model(input_ids, position_ids = p_id)
         past_key_values = out.past_key_values
 
     #filter <s>
-    filtered_past_key_values = ()
+    # filtered_past_key_values = ()
 
-    for past_keys, past_values in past_key_values:
+    # for past_keys, past_values in past_key_values:
 
-        filtered_keys = past_keys[:, :, 1:, :] 
-        filtered_values = past_values[:, :, 1:, :] 
-        filtered_past_key_values = filtered_past_key_values + ((filtered_keys, filtered_values),)
+    #     filtered_keys = past_keys[:, :, 1:, :] 
+    #     filtered_values = past_values[:, :, 1:, :] 
+    #     filtered_past_key_values = filtered_past_key_values + ((filtered_keys, filtered_values),)
 
-    # print(filtered_past_key_values[0][0].size())
+    # print(past_key_values[0][0].size())
 
-    return filtered_past_key_values
+    return past_key_values
 
 def append_kv(kv_list):
 
@@ -48,6 +48,7 @@ def append_kv(kv_list):
         concatenated_values = torch.cat(values_list, dim=2) 
 
         concatenated_past_key_values = concatenated_past_key_values + ((concatenated_keys, concatenated_values),)
+        # print(concatenated_past_key_values[0][0].size())
 
     return concatenated_past_key_values
 
@@ -115,7 +116,7 @@ def main():
 
     # for i in range(27,28):
     for i in range(len(raw_data)):
-        print(i)
+        print("Sample No."+ str(i+1))
         tokenized = global_tokenizer(raw_data[i], return_tensors="pt")
         input_ids = tokenized.input_ids
         attention_mask = tokenized.attention_mask
@@ -130,16 +131,17 @@ def main():
 
         memory_ids = input_ids[:, 1:505] #filter <s> when calculating kv
 
-        num_tokens_per_part = [504, 207, 168, 126, 101, 84, 72, 63, 56, 51]
+        num_tokens_per_part = [504, 252, 168, 126, 101, 84, 72, 63, 56, 51]
 
         for j in range(len(num_tokens_per_part)):
             split_input_ids = torch.split(memory_ids, num_tokens_per_part[j], dim=1)
             # print(j)
 
-            kv_list = [generate_kv_with_id(global_tokenizer("<s>", return_tensors="pt").input_ids)]
+            kv_list = [generate_kv_with_id(global_tokenizer("", return_tensors="pt").input_ids, torch.tensor([[0]]))] #initialize with kv cache for <s>
 
-            for part in split_input_ids:
-                kv_cache = generate_kv_with_id(part)
+            for k in range(len(split_input_ids)):
+                position_id = torch.arange(k * num_tokens_per_part[j] + 1, k * num_tokens_per_part[j] + 1 + split_input_ids[k].size(1)).unsqueeze(0)
+                kv_cache = generate_kv_with_id(split_input_ids[k], position_id)
                 kv_list.append(kv_cache)
 
             past_key_values =  append_kv(kv_list)
@@ -165,7 +167,7 @@ def main():
             masked_losses = losses * mask
             final_loss = masked_losses.sum() / mask.sum()
             
-            print(final_loss.item())
+            print("Num of Mem:", j+1, " ,Loss:", final_loss.item())
 
             res_dict[j+1].append(final_loss.item())
 
