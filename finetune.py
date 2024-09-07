@@ -22,7 +22,7 @@ config = LoraConfig(
 global_model = get_peft_model(global_model, config)
 
 # Load data
-num_data_used = 10000
+num_data_used = 20000
 data = load_data(num_data_used)
 dataset = CustomDataset(global_tokenizer, data, global_model)
 data_loader = DataLoader(dataset, batch_size=8, collate_fn=custom_collate_fn,pin_memory=False)
@@ -30,13 +30,12 @@ data_loader = DataLoader(dataset, batch_size=8, collate_fn=custom_collate_fn,pin
 # Set training arguments
 training_args = TrainingArguments(
     output_dir="/mnt/data/jingbo/kv_dump",
-    per_device_train_batch_size=1,
+    per_device_train_batch_size=2,
     num_train_epochs=1,
     logging_dir="/mnt/data/jingbo/logs",
     logging_steps=10,
     save_steps=100,
     save_total_limit=2,
-    fp16=True,
     gradient_accumulation_steps=4
 )
 
@@ -50,3 +49,5 @@ trainer.train()
 
 global_model.save_pretrained("/mnt/data/jingbo/kv_dump")
 global_tokenizer.save_pretrained("/mnt/data/jingbo/kv_dump")
+
+trainer.save_training_curve("/mnt/data/jingbo/kv_dump")

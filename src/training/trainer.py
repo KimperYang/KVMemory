@@ -1,4 +1,6 @@
 import torch
+import matplotlib.pyplot as plt
+import json
 from transformers import Trainer
 from torch.nn import CrossEntropyLoss
 
@@ -6,6 +8,7 @@ class CustomTrainer(Trainer):
     def __init__(self, *args, data_loader, **kwargs):
         super().__init__(*args, **kwargs)
         self.data_loader = data_loader
+        self.train_loss_history = []
 
     def get_train_dataloader(self):
         return self.data_loader
@@ -49,7 +52,21 @@ class CustomTrainer(Trainer):
             batch_loss += final_loss
 
         batch_loss /= batch_size
-        print("Batch loss:", batch_loss)
-
+        print("Batch loss:", batch_loss.item())
+        self.train_loss_history.append(batch_loss.item())
         torch.cuda.empty_cache()
         return batch_loss
+
+    def save_training_curve(self, output_dir):
+        # Save the loss history to a JSON file
+        with open(f"{output_dir}/train_loss_history.json", "w") as f:
+            json.dump(self.train_loss_history, f)
+
+        # Plot and save the training curve as an image
+        plt.plot(self.train_loss_history, label='Train Loss')
+        plt.xlabel('Steps')
+        plt.ylabel('Loss')
+        plt.title('Training Loss Curve')
+        plt.legend()
+        plt.savefig(f"{output_dir}/train_loss_curve.png")
+        plt.show()
