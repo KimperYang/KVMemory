@@ -5,9 +5,18 @@ import pandas as pd
 import json
 import datetime
 from datasets import load_dataset
+from peft import PeftModel, PeftConfig
 
 global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf")
-global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-hf", torch_dtype=torch.float16, device_map="auto")
+base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-hf", torch_dtype=torch.float16, device_map="auto")
+
+# Load the LoRA adapter configuration
+peft_config_path = "/mnt/data/jingbo/kv_dump_2"  # Path to the directory where LoRA weights are stored
+lora_config = PeftConfig.from_pretrained(peft_config_path)
+
+# Load the base model with the pretrained LoRA adapter
+global_model = PeftModel.from_pretrained(base_model, peft_config_path)
+global_model.to("cuda")
 
 def generate_kv_with_id(input_ids):
     model = global_model
@@ -126,7 +135,7 @@ def main():
             continue
 
         input_ids = input_ids[:, :1000]
-        attention_mask = attention_mask[:, :1000]
+        attention_mask = attention_mask[:, :1000].to(global_model.device)
 
         memory_ids = input_ids[:, 1:505] #filter <s> when calculating kv
 
@@ -143,8 +152,9 @@ def main():
                 kv_list.append(kv_cache)
 
             past_key_values =  append_kv(kv_list)
-            remaining_ids = input_ids[:, 505:]
+            remaining_ids = input_ids[:, 505:].to(global_model.device)
 
+            print(past_key_values[0][0].device, remaining_ids.device, attention_mask.device)
             outputs = global_model(input_ids=remaining_ids, attention_mask=attention_mask, labels=remaining_ids, past_key_values=past_key_values, use_cache=True)
 
             logits = outputs.logits  
@@ -176,7 +186,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
     
-    file_name = f"result/openwebtext_{str(num_data_used)}_{chunk_method}_{time_str}.json"
+    file_name = f"result/openwebtext_{str(num_data_used)}_finetune2_{time_str}.json"
 
     with open(file_name, 'w', encoding='utf-8') as file:
         json.dump(res_dict, file, ensure_ascii=False, indent=4)

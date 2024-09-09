@@ -1,0 +1,9 @@
+
+  0%|                                                                                                                                                    | 0/10000 [00:00<?, ?it/s]We detected that you are passing `past_key_values` as a tuple and this is deprecated and will be removed in v4.43. Please use an appropriate `Cache` class (https://huggingface.co/docs/transformers/v4.41.3/en/internal/generation_utils#transformers.Cache)
+1577 1577
+1094 1094
+1079 1079
+4000 4000
+4000 4000
+3263 3263
+1534 1534

@@ -1,0 +1,494 @@
+
+  0%|                                                                                                                                                           | 0/10000 [00:00<?, ?it/s]We detected that you are passing `past_key_values` as a tuple and this is deprecated and will be removed in v4.43. Please use an appropriate `Cache` class (https://huggingface.co/docs/transformers/v4.41.3/en/internal/generation_utils#transformers.Cache)
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+  0%|                                                                                                                                                | 1/10000 [00:20<58:06:02, 20.92s/it]
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+
+  0%|                                                                                                                                                | 2/10000 [00:41<57:21:52, 20.66s/it]
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+
+  0%|                                                                                                                                                | 3/10000 [01:01<57:14:05, 20.61s/it]
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+
+  0%|                                                                                                                                                | 4/10000 [01:22<57:19:15, 20.64s/it]
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+
+  0%|                                                                                                                                                | 5/10000 [01:43<57:46:47, 20.81s/it]
+{'loss': 2.5335, 'grad_norm': 1.21875, 'learning_rate': 1.0000000000000001e-07, 'epoch': 0.0}
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+
+  0%|                                                                                                                                                | 6/10000 [02:04<57:42:26, 20.79s/it]
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+
+  0%|                                                                                                                                                | 7/10000 [02:25<57:34:27, 20.74s/it]
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+
+  0%|                                                                                                                                                | 8/10000 [02:45<57:32:18, 20.73s/it]
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+
+  0%|▏                                                                                                                                               | 9/10000 [03:06<57:34:51, 20.75s/it]
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+
+  0%|▏                                                                                                                                              | 10/10000 [03:27<57:44:01, 20.80s/it]
+{'loss': 4.6774, 'grad_norm': nan, 'learning_rate': 2.0000000000000002e-07, 'epoch': 0.0}
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+498 torch.Size([1, 498])
+
+  0%|▏                                                                                                                                              | 11/10000 [03:48<57:37:18, 20.77s/it]Traceback (most recent call last):
+  File "/home/jingbo/KVMemory/finetune.py", line 69, in <module>
+    trainer.train()
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 1938, in train
+    return inner_training_loop(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 2236, in _inner_training_loop
+    for step, inputs in enumerate(epoch_iterator):
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 631, in __next__
+    data = self._next_data()
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 675, in _next_data
+    data = self._dataset_fetcher.fetch(index)  # may raise StopIteration
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/utils/data/_utils/fetch.py", line 51, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/utils/data/_utils/fetch.py", line 51, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/jingbo/KVMemory/src/data/dataset.py", line 46, in __getitem__
+    kv_cache = generate_kv_with_id(self.model, split_input_ids[k])
+  File "/home/jingbo/KVMemory/src/utils/cache.py", line 7, in generate_kv_with_id
+    out = model(input_ids)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/peft_model.py", line 1430, in forward
+    return self.base_model(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/tuners/tuners_utils.py", line 179, in forward
+    return self.model.forward(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 1069, in forward
+    outputs = self.model(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 873, in forward
+    layer_outputs = decoder_layer(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 612, in forward
+    hidden_states, self_attn_weights, present_key_value = self.self_attn(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 397, in forward
+    query_states = self.q_proj(hidden_states)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/tuners/lora/layer.py", line 569, in forward
+    result = result + lora_B(lora_A(dropout(x))) * scaling
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/dropout.py", line 59, in forward
+    return F.dropout(input, self.p, self.training, self.inplace)
+KeyboardInterrupt
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/home/jingbo/KVMemory/finetune.py", line 69, in <module>
+[rank0]:     trainer.train()
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 1938, in train
+[rank0]:     return inner_training_loop(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 2236, in _inner_training_loop
+[rank0]:     for step, inputs in enumerate(epoch_iterator):
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 631, in __next__
+[rank0]:     data = self._next_data()
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 675, in _next_data
+[rank0]:     data = self._dataset_fetcher.fetch(index)  # may raise StopIteration
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/utils/data/_utils/fetch.py", line 51, in fetch
+[rank0]:     data = [self.dataset[idx] for idx in possibly_batched_index]
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/utils/data/_utils/fetch.py", line 51, in <listcomp>
+[rank0]:     data = [self.dataset[idx] for idx in possibly_batched_index]
+[rank0]:   File "/home/jingbo/KVMemory/src/data/dataset.py", line 46, in __getitem__
+[rank0]:     kv_cache = generate_kv_with_id(self.model, split_input_ids[k])
+[rank0]:   File "/home/jingbo/KVMemory/src/utils/cache.py", line 7, in generate_kv_with_id
+[rank0]:     out = model(input_ids)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/peft_model.py", line 1430, in forward
+[rank0]:     return self.base_model(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/tuners/tuners_utils.py", line 179, in forward
+[rank0]:     return self.model.forward(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 1069, in forward
+[rank0]:     outputs = self.model(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 873, in forward
+[rank0]:     layer_outputs = decoder_layer(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 612, in forward
+[rank0]:     hidden_states, self_attn_weights, present_key_value = self.self_attn(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 397, in forward
+[rank0]:     query_states = self.q_proj(hidden_states)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/tuners/lora/layer.py", line 569, in forward
+[rank0]:     result = result + lora_B(lora_A(dropout(x))) * scaling
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/dropout.py", line 59, in forward
+[rank0]:     return F.dropout(input, self.p, self.training, self.inplace)
+[rank0]: KeyboardInterrupt

@@ -25,18 +25,21 @@ class CustomDataset(Dataset):
             print("This sample is too short")
             return None
 
-        #Use the first 1000 tokens of each sample to calculat KV and compute loss
-        input_ids = input_ids[:, :1000]
-        attention_mask = attention_mask[:, :1000]
+        #Here defines the max length
+        # input_ids = input_ids[:, :1000]
+        # attention_mask = attention_mask[:, :1000]
+        input_ids = input_ids[:, :1500] 
+        attention_mask = attention_mask[:, :1500]
 
         #Use the first 505/1000 tokens to calculate KV, the first token is <s>
-        memory_ids = input_ids[:, 1:505]
-
+        # memory_ids = input_ids[:, 1:505]
+        memory_ids = input_ids[:, 1:1001]
         #The list of memory KV cache is initiated with the KV cache of <s>
         kv_list = [generate_kv_with_id(self.model, self.tokenizer("", return_tensors="pt").input_ids)]
 
         #Split the 504 memory ids for ten pieces of memory
-        split_input_ids = torch.split(memory_ids, 51, dim=1)
+        # split_input_ids = torch.split(memory_ids, 51, dim=1)
+        split_input_ids = torch.split(memory_ids, 100, dim=1)
         
         for k in range(len(split_input_ids)):
 
@@ -50,7 +53,7 @@ class CustomDataset(Dataset):
         del kv_list
 
         #Use 505 ids for computing loss
-        remaining_ids = input_ids[:, 505:]
+        remaining_ids = input_ids[:, 1001:]
 
         return {
             'input_ids': remaining_ids,
@@ -66,18 +69,23 @@ def custom_collate_fn(batch):
     attention_mask = [item['attention_mask'] for item in batch]
     past_key_values = [item['past_key_values'] for item in batch]
 
-    # padded_input_ids = torch.stack([torch.cat([ids, torch.zeros(max_length - ids.size(1)).unsqueeze(0)], dim = 1) for ids in input_ids])
-    # padded_attention_mask = torch.stack([torch.cat([mask, torch.zeros(max_length - mask.size(1)).unsqueeze(0)], dim = 1) for mask in attention_mask])
+    max_length = max([ids.size(1) for ids in input_ids])
+
+    if max_length > 4000:
+        max_length = 4000
+
+    padded_input_ids = torch.stack([torch.cat([ids, torch.zeros(max_length - ids.size(1)).unsqueeze(0)], dim = 1) for ids in input_ids])
+    padded_attention_mask = torch.stack([torch.cat([mask, torch.zeros(1001 + max_length - mask.size(1)).unsqueeze(0)], dim = 1) for mask in attention_mask])
 
     # No padding is needed here, for the input_ids are at same lengths
-    padded_input_ids = torch.stack(input_ids)
-    padded_attention_mask = torch.stack(attention_mask)
+    # padded_input_ids = torch.stack(input_ids)
+    # padded_attention_mask = torch.stack(attention_mask)
 
     # torch.cuda.empty_cache()
 
     return {
-        'input_ids': padded_input_ids,
-        'attention_mask': padded_attention_mask,
+        'input_ids': padded_input_ids.long(),
+        'attention_mask': padded_attention_mask.long(),
         'past_key_values': past_key_values
     }
 

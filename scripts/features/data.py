@@ -13,24 +13,26 @@
 ########################
 from datasets import load_dataset
 
-dataset = load_dataset("openwebtext")
+# dataset = load_dataset("openwebtext")
 
-# Check the structure of the dataset
-print(dataset)
+# # Check the structure of the dataset
+# print(dataset)
 
-sum = 0
-short = 999999
-long = 0
-# Access a specific split (e.g., 'train') and view the first few samples
-for i in range(2000):
-    length = len(dataset['train'][i]['text'].split())
-    sum = sum + length
-    if length < short:
-        short = length
-    if length > long:
-        long = length
-print(sum/2000, short, long)
+# sum = 0
+# short = 999999
+# long = 0
+# # Access a specific split (e.g., 'train') and view the first few samples
+# for i in range(2000):
+#     length = len(dataset['train'][i]['text'].split())
+#     sum = sum + length
+#     if length < short:
+#         short = length
+#     if length > long:
+#         long = length
+# print(sum/2000, short, long)
 
+data = load_dataset('json', data_files='filtered_strings_900000.json')
+print(len(data['train']['text']))
 ###########################
 # import pandas as pd    
 # jsonObj = pd.read_json(path_or_buf='/home/jingbo/KVMemory/data/ifeval/input_data.jsonl', lines=True)
