@@ -44,8 +44,8 @@ class CustomTrainer(Trainer):
             losses = losses.view(shift_logits.size(0), -1)
 
             mask = attention_msk[0, 1:].clone()
-            # mask = mask[505:]
-            mask = mask[1001:]
+            mask = mask[505:]
+            # mask = mask[1001:]
             # print(len(mask), losses.size())
             masked_losses = losses * mask
             final_loss = masked_losses.sum() / mask.sum()
@@ -53,7 +53,7 @@ class CustomTrainer(Trainer):
             batch_loss += final_loss
 
         batch_loss /= batch_size
-        # print("Batch loss:", batch_loss.item())
+        print("Batch loss:", batch_loss.item())
         self.train_loss_history.append(batch_loss.item())
         torch.cuda.empty_cache()
         return batch_loss

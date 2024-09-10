@@ -1,0 +1,241 @@
+
+  0%|                                                                                                                                                    | 0/10000 [00:00<?, ?it/s]We detected that you are passing `past_key_values` as a tuple and this is deprecated and will be removed in v4.43. Please use an appropriate `Cache` class (https://huggingface.co/docs/transformers/v4.41.3/en/internal/generation_utils#transformers.Cache)
+Batch loss: 2.039252758026123
+Batch loss: 2.007413625717163
+Batch loss: 2.11442494392395
+Batch loss: 1.9760017395019531
+  0%|                                                                                                                                         | 1/10000 [00:19<54:29:25, 19.62s/it]
+Batch loss: 2.141439914703369
+Batch loss: 2.187645673751831
+
+  0%|                                                                                                                                         | 2/10000 [00:38<53:47:55, 19.37s/it]
+Batch loss: 2.028303384780884
+Batch loss: 2.0499818325042725
+Batch loss: 1.933642029762268
+Batch loss: 2.1759989261627197
+
+  0%|                                                                                                                                         | 3/10000 [00:58<53:44:13, 19.35s/it]
+Batch loss: 2.165269136428833
+Batch loss: 2.004058599472046
+Batch loss: 1.9437731504440308
+
+  0%|                                                                                                                                         | 4/10000 [01:17<53:44:56, 19.36s/it]
+Batch loss: 2.209385871887207
+Batch loss: 2.0490970611572266
+
+  0%|                                                                                                                                         | 5/10000 [01:37<54:06:53, 19.49s/it]
+Batch loss: 2.024167776107788
+{'loss': 2.101, 'grad_norm': 0.26171875, 'learning_rate': 1.0000000000000001e-07, 'epoch': 0.0}
+Batch loss: 2.028268575668335
+Batch loss: 2.0673956871032715
+Batch loss: 2.2748560905456543
+
+  0%|                                                                                                                                         | 6/10000 [01:56<54:00:14, 19.45s/it]
+Batch loss: 2.0932064056396484
+Batch loss: 2.059863567352295
+Batch loss: 2.2259817123413086
+
+  0%|                                                                                                                                         | 7/10000 [02:16<53:57:50, 19.44s/it]
+Batch loss: 2.018031597137451
+Batch loss: 2.084752321243286
+Batch loss: 2.0080742835998535
+
+  0%|                                                                                                                                         | 8/10000 [02:35<53:57:24, 19.44s/it]
+Batch loss: 1.9432517290115356
+Batch loss: 1.9484699964523315
+Batch loss: 2.1051008701324463
+
+  0%|                                                                                                                                         | 9/10000 [02:54<53:55:33, 19.43s/it]
+Batch loss: 1.9866764545440674
+Batch loss: 2.0935142040252686
+Batch loss: 2.1577885150909424
+Batch loss: 2.013780355453491
+
+  0%|▏                                                                                                                                       | 10/10000 [03:14<53:52:06, 19.41s/it]
+Batch loss: 2.1560325622558594
+Batch loss: 1.9895944595336914
+Batch loss: 2.1664929389953613
+
+  0%|▏                                                                                                                                       | 11/10000 [03:33<53:55:10, 19.43s/it]
+Batch loss: 2.09503173828125
+Batch loss: 2.082314968109131
+Batch loss: 1.9254475831985474
+
+  0%|▏                                                                                                                                       | 12/10000 [03:53<54:08:11, 19.51s/it]
+Batch loss: 2.3006808757781982
+Batch loss: 2.038349151611328
+Batch loss: 2.261475086212158
+
+  0%|▏                                                                                                                                       | 13/10000 [04:12<54:04:05, 19.49s/it]
+Batch loss: 1.8547942638397217
+Batch loss: 2.3202788829803467
+
+Batch loss: 2.2532286643981934
+
+  0%|▏                                                                                                                                       | 14/10000 [04:32<54:00:36, 19.47s/it]
+Batch loss: 2.239436388015747
+Batch loss: 2.30836820602417
+Batch loss: 1.8125051259994507
+Batch loss: 2.0447614192962646
+
+  0%|▏                                                                                                                                       | 15/10000 [04:51<53:57:30, 19.45s/it]
+Batch loss: 1.9440723657608032
+Batch loss: 2.2089133262634277
+Batch loss: 2.1073546409606934
+
+  0%|▏                                                                                                                                       | 16/10000 [05:11<54:02:40, 19.49s/it]
+Batch loss: 2.15059232711792
+Batch loss: 2.015676736831665
+Batch loss: 2.1146044731140137
+
+  0%|▏                                                                                                                                       | 17/10000 [05:30<53:59:00, 19.47s/it]
+Batch loss: 2.313831090927124
+Batch loss: 2.4966249465942383
+Batch loss: 2.1436173915863037
+
+  0%|▏                                                                                                                                       | 18/10000 [05:49<53:48:32, 19.41s/it]
+Batch loss: 2.3075623512268066
+Batch loss: 1.9066612720489502
+Batch loss: 2.1166515350341797
+
+  0%|▎                                                                                                                                       | 19/10000 [06:09<53:59:59, 19.48s/it]
+Batch loss: 1.9100511074066162
+Batch loss: 2.3484466075897217
+Batch loss: 2.051910638809204
+
+  0%|▎                                                                                                                                       | 20/10000 [06:29<53:45:06, 19.39s/it]
+{'loss': 2.0966, 'grad_norm': 0.25, 'learning_rate': 4.0000000000000003e-07, 'epoch': 0.0}
+Batch loss: 2.019801616668701
+Batch loss: 1.969608187675476
+Batch loss: 2.147825002670288
+
+  0%|▎                                                                                                                                       | 21/10000 [06:48<54:04:32, 19.51s/it]
+Batch loss: 1.9379725456237793
+  0%|▎                                                                                                                                       | 21/10000 [06:48<54:04:32, 19.51s/it]Traceback (most recent call last):
+  File "/home/jingbo/KVMemory/finetune.py", line 69, in <module>
+    trainer.train()
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 1938, in train
+    return inner_training_loop(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 2236, in _inner_training_loop
+    for step, inputs in enumerate(epoch_iterator):
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 631, in __next__
+    data = self._next_data()
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 675, in _next_data
+    data = self._dataset_fetcher.fetch(index)  # may raise StopIteration
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/utils/data/_utils/fetch.py", line 51, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/utils/data/_utils/fetch.py", line 51, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/jingbo/KVMemory/src/data/dataset.py", line 47, in __getitem__
+    kv_cache = generate_kv_with_id(self.model, split_input_ids[k])
+  File "/home/jingbo/KVMemory/src/utils/cache.py", line 7, in generate_kv_with_id
+    out = model(input_ids)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/peft_model.py", line 1430, in forward
+    return self.base_model(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/tuners/tuners_utils.py", line 179, in forward
+    return self.model.forward(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 1069, in forward
+    outputs = self.model(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 873, in forward
+    layer_outputs = decoder_layer(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 612, in forward
+    hidden_states, self_attn_weights, present_key_value = self.self_attn(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 399, in forward
+    value_states = self.v_proj(hidden_states)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/tuners/lora/layer.py", line 557, in forward
+    result = self.base_layer(x, *args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/linear.py", line 116, in forward
+    return F.linear(input, self.weight, self.bias)
+KeyboardInterrupt
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/home/jingbo/KVMemory/finetune.py", line 69, in <module>
+[rank0]:     trainer.train()
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 1938, in train
+[rank0]:     return inner_training_loop(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 2236, in _inner_training_loop
+[rank0]:     for step, inputs in enumerate(epoch_iterator):
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 631, in __next__
+[rank0]:     data = self._next_data()
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 675, in _next_data
+[rank0]:     data = self._dataset_fetcher.fetch(index)  # may raise StopIteration
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/utils/data/_utils/fetch.py", line 51, in fetch
+[rank0]:     data = [self.dataset[idx] for idx in possibly_batched_index]
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/utils/data/_utils/fetch.py", line 51, in <listcomp>
+[rank0]:     data = [self.dataset[idx] for idx in possibly_batched_index]
+[rank0]:   File "/home/jingbo/KVMemory/src/data/dataset.py", line 47, in __getitem__
+[rank0]:     kv_cache = generate_kv_with_id(self.model, split_input_ids[k])
+[rank0]:   File "/home/jingbo/KVMemory/src/utils/cache.py", line 7, in generate_kv_with_id
+[rank0]:     out = model(input_ids)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/peft_model.py", line 1430, in forward
+[rank0]:     return self.base_model(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/tuners/tuners_utils.py", line 179, in forward
+[rank0]:     return self.model.forward(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 1069, in forward
+[rank0]:     outputs = self.model(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 873, in forward
+[rank0]:     layer_outputs = decoder_layer(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 612, in forward
+[rank0]:     hidden_states, self_attn_weights, present_key_value = self.self_attn(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 399, in forward
+[rank0]:     value_states = self.v_proj(hidden_states)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/tuners/lora/layer.py", line 557, in forward
+[rank0]:     result = self.base_layer(x, *args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/linear.py", line 116, in forward
+[rank0]:     return F.linear(input, self.weight, self.bias)
+[rank0]: KeyboardInterrupt

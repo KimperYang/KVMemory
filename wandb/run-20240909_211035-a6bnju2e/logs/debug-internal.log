@@ -1,0 +1,224 @@
+2024-09-09 21:10:35,571 INFO    StreamThr :411506 [internal.py:wandb_internal():85] W&B internal server running at pid: 411506, started at: 2024-09-09 21:10:35.570767
+2024-09-09 21:10:35,573 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status
+2024-09-09 21:10:35,575 INFO    WriterThread:411506 [datastore.py:open_for_write():87] open: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/run-a6bnju2e.wandb
+2024-09-09 21:10:35,575 DEBUG   SenderThread:411506 [sender.py:send():391] send: header
+2024-09-09 21:10:35,692 DEBUG   SenderThread:411506 [sender.py:send():391] send: run
+2024-09-09 21:10:35,953 INFO    SenderThread:411506 [dir_watcher.py:__init__():211] watching files in: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files
+2024-09-09 21:10:35,953 INFO    SenderThread:411506 [sender.py:_start_run_threads():1200] run started: a6bnju2e with start time 1725916235.570805
+2024-09-09 21:10:35,967 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: run_start
+2024-09-09 21:10:36,066 DEBUG   HandlerThread:411506 [system_info.py:__init__():26] System info init
+2024-09-09 21:10:36,067 DEBUG   HandlerThread:411506 [system_info.py:__init__():41] System info init done
+2024-09-09 21:10:36,067 INFO    HandlerThread:411506 [system_monitor.py:start():194] Starting system monitor
+2024-09-09 21:10:36,067 INFO    SystemMonitor:411506 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2024-09-09 21:10:36,067 INFO    HandlerThread:411506 [system_monitor.py:probe():214] Collecting system info
+2024-09-09 21:10:36,067 INFO    SystemMonitor:411506 [interfaces.py:start():188] Started cpu monitoring
+2024-09-09 21:10:36,068 INFO    SystemMonitor:411506 [interfaces.py:start():188] Started disk monitoring
+2024-09-09 21:10:36,068 INFO    SystemMonitor:411506 [interfaces.py:start():188] Started gpu monitoring
+2024-09-09 21:10:36,070 INFO    SystemMonitor:411506 [interfaces.py:start():188] Started memory monitoring
+2024-09-09 21:10:36,075 INFO    SystemMonitor:411506 [interfaces.py:start():188] Started network monitoring
+2024-09-09 21:10:36,151 DEBUG   HandlerThread:411506 [system_info.py:probe():152] Probing system
+2024-09-09 21:10:36,155 DEBUG   HandlerThread:411506 [system_info.py:_probe_git():137] Probing git
+2024-09-09 21:10:36,165 DEBUG   HandlerThread:411506 [system_info.py:_probe_git():145] Probing git done
+2024-09-09 21:10:36,165 DEBUG   HandlerThread:411506 [system_info.py:probe():200] Probing system done
+2024-09-09 21:10:36,165 DEBUG   HandlerThread:411506 [system_monitor.py:probe():223] {'os': 'Linux-5.15.0-102-generic-x86_64-with-glibc2.35', 'python': '3.9.19', 'heartbeatAt': '2024-09-09T21:10:36.151947', 'startedAt': '2024-09-09T21:10:35.561064', 'docker': None, 'cuda': None, 'args': (), 'state': 'running', 'program': '/home/jingbo/KVMemory/finetune.py', 'codePathLocal': 'finetune.py', 'codePath': 'finetune.py', 'git': {'remote': 'https://github.com/KimperYang/KVMemory.git', 'commit': '3d8b9b63003a110165f1a4907005583cafd04f13'}, 'email': 'jingbo@ucsb.edu', 'root': '/home/jingbo/KVMemory', 'host': 'katrina1.cs.ucsb.edu', 'username': 'jingbo', 'executable': '/home/jingbo/anaconda3/envs/unlearning/bin/python', 'cpu_count': 56, 'cpu_count_logical': 112, 'cpu_freq': {'current': 1853.3969285714286, 'min': 1500.0, 'max': 2750.0}, 'cpu_freq_per_core': [{'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 3473.966, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 3451.719, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2384.318, 'min': 1500.0, 'max': 2750.0}, {'current': 3205.372, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 3474.498, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 3474.019, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 3453.045, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 3453.072, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}], 'disk': {'/': {'total': 374.70203018188477, 'used': 337.892578125}}, 'gpu': 'NVIDIA RTX A6000', 'gpu_count': 7, 'gpu_devices': [{'name': 'NVIDIA RTX A6000', 'memory_total': 51527024640}, {'name': 'NVIDIA RTX A6000', 'memory_total': 51527024640}, {'name': 'NVIDIA RTX A6000', 'memory_total': 51527024640}, {'name': 'NVIDIA RTX A6000', 'memory_total': 51527024640}, {'name': 'NVIDIA RTX A6000', 'memory_total': 51527024640}, {'name': 'NVIDIA RTX A6000', 'memory_total': 51527024640}, {'name': 'NVIDIA RTX A6000', 'memory_total': 51527024640}], 'memory': {'total': 503.7216987609863}}
+2024-09-09 21:10:36,165 INFO    HandlerThread:411506 [system_monitor.py:probe():224] Finished collecting system info
+2024-09-09 21:10:36,165 INFO    HandlerThread:411506 [system_monitor.py:probe():227] Publishing system info
+2024-09-09 21:10:36,165 DEBUG   HandlerThread:411506 [system_info.py:_save_conda():209] Saving list of conda packages installed into the current environment
+2024-09-09 21:10:36,955 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_created():271] file/dir created: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/conda-environment.yaml
+2024-09-09 21:10:37,885 DEBUG   HandlerThread:411506 [system_info.py:_save_conda():224] Saving conda packages done
+2024-09-09 21:10:37,887 INFO    HandlerThread:411506 [system_monitor.py:probe():229] Finished publishing system info
+2024-09-09 21:10:37,890 DEBUG   SenderThread:411506 [sender.py:send():391] send: files
+2024-09-09 21:10:37,891 INFO    SenderThread:411506 [sender.py:_save_file():1466] saving file wandb-metadata.json with policy now
+2024-09-09 21:10:37,955 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/conda-environment.yaml
+2024-09-09 21:10:37,955 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_created():271] file/dir created: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/wandb-metadata.json
+2024-09-09 21:10:37,983 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: python_packages
+2024-09-09 21:10:37,984 DEBUG   SenderThread:411506 [sender.py:send_request():418] send_request: python_packages
+2024-09-09 21:10:37,984 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: stop_status
+2024-09-09 21:10:37,985 DEBUG   SenderThread:411506 [sender.py:send_request():418] send_request: stop_status
+2024-09-09 21:10:37,987 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: internal_messages
+2024-09-09 21:10:38,177 DEBUG   SenderThread:411506 [sender.py:send():391] send: telemetry
+2024-09-09 21:10:38,177 DEBUG   SenderThread:411506 [sender.py:send():391] send: config
+2024-09-09 21:10:38,178 DEBUG   SenderThread:411506 [sender.py:send():391] send: telemetry
+2024-09-09 21:10:38,178 DEBUG   SenderThread:411506 [sender.py:send():391] send: metric
+2024-09-09 21:10:38,178 DEBUG   SenderThread:411506 [sender.py:send():391] send: telemetry
+2024-09-09 21:10:38,178 DEBUG   SenderThread:411506 [sender.py:send():391] send: metric
+2024-09-09 21:10:38,178 WARNING SenderThread:411506 [sender.py:send_metric():1417] Seen metric with glob (shouldn't happen)
+2024-09-09 21:10:38,178 DEBUG   SenderThread:411506 [sender.py:send():391] send: telemetry
+2024-09-09 21:10:38,178 DEBUG   SenderThread:411506 [sender.py:send():391] send: telemetry
+2024-09-09 21:10:38,178 DEBUG   SenderThread:411506 [sender.py:send():391] send: config
+2024-09-09 21:10:38,224 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: log_artifact
+2024-09-09 21:10:38,224 DEBUG   SenderThread:411506 [sender.py:send_request():418] send_request: log_artifact
+2024-09-09 21:10:38,242 INFO    wandb-upload_0:411506 [upload_job.py:push():130] Uploaded file /tmp/tmppmgbl4vtwandb/czog8u8j-wandb-metadata.json
+2024-09-09 21:10:38,936 INFO    wandb-upload_0:411506 [upload_job.py:push():88] Uploaded file /tmp/tmpp5stb8kp/model_architecture.txt
+2024-09-09 21:10:38,955 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_created():271] file/dir created: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/requirements.txt
+2024-09-09 21:10:39,492 INFO    SenderThread:411506 [sender.py:send_request_log_artifact():1537] logged artifact model-a6bnju2e - {'id': 'QXJ0aWZhY3Q6MTIwNTY1Mjg3OQ==', 'state': 'PENDING', 'artifactSequence': {'id': 'QXJ0aWZhY3RDb2xsZWN0aW9uOjQzOTUwNjMxOA==', 'latestArtifact': None}}
+2024-09-09 21:10:39,956 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_created():271] file/dir created: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:10:41,493 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:10:41,957 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:10:44,958 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:10:46,986 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:10:47,985 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: internal_messages
+2024-09-09 21:10:48,960 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:10:52,811 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:10:52,984 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: stop_status
+2024-09-09 21:10:52,985 DEBUG   SenderThread:411506 [sender.py:send_request():418] send_request: stop_status
+2024-09-09 21:10:54,962 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:10:57,890 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:10:57,985 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: internal_messages
+2024-09-09 21:10:58,964 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:10:59,964 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:11:02,907 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:11:04,966 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:11:07,985 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: stop_status
+2024-09-09 21:11:07,986 DEBUG   SenderThread:411506 [sender.py:send_request():418] send_request: stop_status
+2024-09-09 21:11:08,027 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: internal_messages
+2024-09-09 21:11:08,112 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:11:08,968 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:11:08,968 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/config.yaml
+2024-09-09 21:11:14,123 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:11:14,970 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:11:17,985 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: internal_messages
+2024-09-09 21:11:18,971 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:11:19,972 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:11:20,115 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:11:22,985 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: stop_status
+2024-09-09 21:11:22,985 DEBUG   SenderThread:411506 [sender.py:send_request():418] send_request: stop_status
+2024-09-09 21:11:24,973 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:11:25,263 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:11:27,986 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: internal_messages
+2024-09-09 21:11:28,975 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:11:30,339 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:11:34,977 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:11:35,412 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:11:36,075 DEBUG   SystemMonitor:411506 [system_monitor.py:_start():172] Starting system metrics aggregation loop
+2024-09-09 21:11:36,079 DEBUG   SenderThread:411506 [sender.py:send():391] send: stats
+2024-09-09 21:11:37,985 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: stop_status
+2024-09-09 21:11:37,986 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: internal_messages
+2024-09-09 21:11:37,986 DEBUG   SenderThread:411506 [sender.py:send_request():418] send_request: stop_status
+2024-09-09 21:11:38,978 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:11:39,979 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:11:40,420 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:11:44,980 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:11:45,687 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:11:47,986 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: internal_messages
+2024-09-09 21:11:50,868 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:11:50,982 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:11:52,985 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: stop_status
+2024-09-09 21:11:52,986 DEBUG   SenderThread:411506 [sender.py:send_request():418] send_request: stop_status
+2024-09-09 21:11:54,984 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:11:55,907 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:11:57,986 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: internal_messages
+2024-09-09 21:12:00,986 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:12:00,996 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:12:01,986 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:12:04,987 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:12:06,082 DEBUG   SenderThread:411506 [sender.py:send():391] send: stats
+2024-09-09 21:12:06,083 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:12:07,985 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: stop_status
+2024-09-09 21:12:07,986 DEBUG   SenderThread:411506 [sender.py:send_request():418] send_request: stop_status
+2024-09-09 21:12:07,988 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: internal_messages
+2024-09-09 21:12:10,990 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:12:11,643 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:12:14,991 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:12:16,792 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:12:16,992 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:12:17,986 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: internal_messages
+2024-09-09 21:12:20,993 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:12:21,003 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: partial_history
+2024-09-09 21:12:21,004 DEBUG   SenderThread:411506 [sender.py:send():391] send: metric
+2024-09-09 21:12:21,005 DEBUG   SenderThread:411506 [sender.py:send():391] send: metric
+2024-09-09 21:12:21,005 DEBUG   SenderThread:411506 [sender.py:send():391] send: metric
+2024-09-09 21:12:21,005 DEBUG   SenderThread:411506 [sender.py:send():391] send: metric
+2024-09-09 21:12:21,005 DEBUG   SenderThread:411506 [sender.py:send():391] send: history
+2024-09-09 21:12:21,005 DEBUG   SenderThread:411506 [sender.py:send_request():418] send_request: summary_record
+2024-09-09 21:12:21,005 INFO    SenderThread:411506 [sender.py:_save_file():1466] saving file wandb-summary.json with policy end
+2024-09-09 21:12:21,993 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:12:21,994 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_created():271] file/dir created: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/wandb-summary.json
+2024-09-09 21:12:22,006 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:12:22,985 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: stop_status
+2024-09-09 21:12:22,986 DEBUG   SenderThread:411506 [sender.py:send_request():418] send_request: stop_status
+2024-09-09 21:12:22,994 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:12:26,995 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:12:27,117 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:12:27,986 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: internal_messages
+2024-09-09 21:12:30,996 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:12:32,303 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:12:36,085 DEBUG   SenderThread:411506 [sender.py:send():391] send: stats
+2024-09-09 21:12:36,999 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:12:37,986 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: stop_status
+2024-09-09 21:12:37,986 DEBUG   SenderThread:411506 [sender.py:send_request():418] send_request: stop_status
+2024-09-09 21:12:37,989 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: internal_messages
+2024-09-09 21:12:38,103 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:12:41,000 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:12:42,001 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:12:44,036 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:12:45,002 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/config.yaml
+2024-09-09 21:12:47,002 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:12:47,986 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: internal_messages
+2024-09-09 21:12:50,031 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:12:51,004 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:12:52,986 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: stop_status
+2024-09-09 21:12:52,986 DEBUG   SenderThread:411506 [sender.py:send_request():418] send_request: stop_status
+2024-09-09 21:12:53,004 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:12:55,114 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:12:57,006 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:12:57,987 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: internal_messages
+2024-09-09 21:13:00,923 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:13:03,008 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:13:04,008 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:13:06,032 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:13:06,086 DEBUG   SenderThread:411506 [sender.py:send():391] send: stats
+2024-09-09 21:13:07,010 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:13:07,986 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: stop_status
+2024-09-09 21:13:07,986 DEBUG   SenderThread:411506 [sender.py:send_request():418] send_request: stop_status
+2024-09-09 21:13:07,988 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: internal_messages
+2024-09-09 21:13:11,078 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:13:13,012 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:13:16,208 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:13:17,013 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:13:17,987 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: internal_messages
+2024-09-09 21:13:21,273 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:13:22,986 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: stop_status
+2024-09-09 21:13:22,987 DEBUG   SenderThread:411506 [sender.py:send_request():418] send_request: stop_status
+2024-09-09 21:13:23,015 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:13:24,016 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:13:26,516 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:13:27,017 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:13:27,987 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: internal_messages
+2024-09-09 21:13:31,584 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:13:33,019 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:13:36,088 DEBUG   SenderThread:411506 [sender.py:send():391] send: stats
+2024-09-09 21:13:36,644 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:13:37,020 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:13:37,986 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: stop_status
+2024-09-09 21:13:37,987 DEBUG   SenderThread:411506 [sender.py:send_request():418] send_request: stop_status
+2024-09-09 21:13:37,989 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: internal_messages
+2024-09-09 21:13:41,758 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:13:43,022 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:13:44,023 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:13:46,877 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:13:47,987 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: internal_messages
+2024-09-09 21:13:49,025 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:13:51,934 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:13:52,986 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: stop_status
+2024-09-09 21:13:52,987 DEBUG   SenderThread:411506 [sender.py:send_request():418] send_request: stop_status
+2024-09-09 21:13:53,026 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:13:56,936 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:13:57,987 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: internal_messages
+2024-09-09 21:13:59,028 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:14:01,969 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:14:03,030 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:14:04,030 INFO    Thread-12 :411506 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240909_211035-a6bnju2e/files/output.log
+2024-09-09 21:14:06,090 DEBUG   SenderThread:411506 [sender.py:send():391] send: stats
+2024-09-09 21:14:07,091 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:14:07,986 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: stop_status
+2024-09-09 21:14:07,987 DEBUG   SenderThread:411506 [sender.py:send_request():418] send_request: stop_status
+2024-09-09 21:14:08,027 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: internal_messages
+2024-09-09 21:14:12,131 INFO    memory    :411506 [interfaces.py:monitor():138] Process proc.memory.rssMB has exited.
+2024-09-09 21:14:12,133 DEBUG   SystemMonitor:411506 [system_monitor.py:_start():179] Finished system metrics aggregation loop
+2024-09-09 21:14:12,134 DEBUG   SystemMonitor:411506 [system_monitor.py:_start():183] Publishing last batch of metrics
+2024-09-09 21:14:12,136 DEBUG   SenderThread:411506 [sender.py:send():391] send: stats
+2024-09-09 21:14:12,137 DEBUG   HandlerThread:411506 [handler.py:handle_request():158] handle_request: status_report
+2024-09-09 21:14:12,802 WARNING StreamThr :411506 [internal.py:is_dead():413] Internal process exiting, parent pid 410919 disappeared
+2024-09-09 21:14:12,803 ERROR   StreamThr :411506 [internal.py:wandb_internal():151] Internal process shutdown.
+2024-09-09 21:14:13,011 INFO    MainThread:411506 [internal.py:handle_exit():75] Internal process exited

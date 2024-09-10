@@ -7,12 +7,13 @@ from torch.utils.data import DataLoader
 from transformers import AutoTokenizer, AutoModelForCausalLM, get_linear_schedule_with_warmup
 from peft import LoraConfig, get_peft_model, TaskType
 from datasets import load_dataset
+from accelerate import Accelerator
 from src.data.dataset import CustomDataset, load_data, custom_collate_fn
 from src.training.trainer import CustomTrainer
 
 # Prepare model and tokenizer
 global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf")
-global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-hf", torch_dtype=torch.bfloat16, use_flash_attention_2=True,)
+global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-hf", torch_dtype=torch.bfloat16, use_flash_attention_2=True)
 global_model.to("cuda")
 
 config = LoraConfig(
@@ -59,12 +60,13 @@ optimizer = AdamW(global_model.parameters(), lr=1e-5)
 # print("Total steps:",total_steps)
 scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=500, num_training_steps=10000)
 
-trainer = CustomTrainer(
+accelerator = Accelerator()
+trainer = accelerator.prepare(CustomTrainer(
     model=global_model,
     args=training_args,
-    data_loader = data_loader,
-    optimizers=(optimizer, scheduler)
-)
+    data_loader = data_loader
+    # optimizers=(optimizer, scheduler)
+))
 
 trainer.train()
 
