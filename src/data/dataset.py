@@ -28,8 +28,8 @@ class CustomDataset(Dataset):
         #Here defines the max length
         # input_ids = input_ids[:, :1000]
         # attention_mask = attention_mask[:, :1000]
-        input_ids = input_ids[:, :1000] 
-        attention_mask = attention_mask[:, :1000]
+        input_ids = input_ids[:, :2048] 
+        attention_mask = attention_mask[:, :2048]
 
         #Use the first 504/1000 tokens to calculate KV, the first token is <s>
         memory_ids = input_ids[:, 1:505]

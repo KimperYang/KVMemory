@@ -53,7 +53,7 @@ class CustomTrainer(Trainer):
             batch_loss += final_loss
 
         batch_loss /= batch_size
-        print("Batch loss:", batch_loss.item())
+        # print("Batch loss:", batch_loss.item())
         self.train_loss_history.append(batch_loss.item())
         torch.cuda.empty_cache()
         return batch_loss
