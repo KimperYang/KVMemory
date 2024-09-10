@@ -33,7 +33,8 @@ def main():
     data = load_dataset('json', data_files='/mnt/data2/jingbo/kvmemory/filtered_strings_900000.json')
     data = data['train']['text']
     print("num of data:", len(data))
-    dataset = CustomDataset(global_tokenizer, data, global_model)
+    
+    dataset = CustomDataset(global_tokenizer, data)
     data_loader = DataLoader(dataset, batch_size=2, collate_fn=custom_collate_fn,pin_memory=False, shuffle=True)
 
     # set the wandb project where this run will be logged

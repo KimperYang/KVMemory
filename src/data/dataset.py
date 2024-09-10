@@ -4,10 +4,9 @@ from datasets import load_dataset
 from src.utils.cache import generate_kv_with_id, append_kv
 
 class CustomDataset(Dataset):
-    def __init__(self, tokenizer, data, model):
+    def __init__(self, tokenizer, data):
         self.tokenizer = tokenizer
         self.data = data
-        self.model = model
 
     def __len__(self):
         return len(self.data)
@@ -26,37 +25,9 @@ class CustomDataset(Dataset):
             return None
 
         #Here defines the max length
-        # input_ids = input_ids[:, :1000]
-        # attention_mask = attention_mask[:, :1000]
         input_ids = input_ids[:, :4096] 
         attention_mask = attention_mask[:, :4096]
 
-        # #Use the first 504/1000 tokens to calculate KV, the first token is <s>
-        # memory_ids = input_ids[:, 1:505]
-        # # memory_ids = input_ids[:, 1:1001]
-
-        # #The list of memory KV cache is initiated with the KV cache of <s>
-        # kv_list = [generate_kv_with_id(self.model, self.tokenizer("", return_tensors="pt").input_ids)]
-
-        # #Split the 504 memory ids for ten pieces of memory
-        # split_input_ids = torch.split(memory_ids, 51, dim=1)
-        # # split_input_ids = torch.split(memory_ids, 100, dim=1)
-        
-        # for k in range(len(split_input_ids)):
-
-        #     kv_cache = generate_kv_with_id(self.model, split_input_ids[k])
-        #     kv_list.append(kv_cache)
-
-        # #Concatenate KV
-        # past_key_values =  append_kv(kv_list)
-
-        # #Release the memory of KV list
-        # del kv_list
-
-        # #Use 505 ids for computing loss
-        # # remaining_ids = input_ids[:, 1001:]
-        # remaining_ids = input_ids[:, 505:]
-        # # print(remaining_ids.size(1))
         return {
             'input_ids': input_ids,
             'attention_mask': attention_mask
@@ -72,9 +43,6 @@ def custom_collate_fn(batch):
 
     max_length = max([ids.size(1) for ids in input_ids])
 
-    # if max_length > 4000:
-    #     max_length = 4000
-
     padded_input_ids = torch.cat([torch.cat([ids, torch.zeros(max_length - ids.size(1), dtype=torch.int64).unsqueeze(0)], dim = 1) for ids in input_ids], dim = 0)
     padded_attention_mask = torch.cat([torch.cat([mask, torch.zeros(max_length - mask.size(1), dtype=torch.int64).unsqueeze(0)], dim = 1) for mask in attention_mask], dim = 0)
 
@@ -89,15 +57,9 @@ def custom_collate_fn(batch):
         'attention_mask': padded_attention_mask
     }
 
-# class CustomDataCollator:
-#     def __call__(self, features):
-#         return custom_collate_fn(features)
-
 def load_data(index):
 
     #Load the last number of index data in openwebtext as training data
     dataset = load_dataset("openwebtext")
-
-    # print(type(dataset['train'][-index:]['text']))
 
     return dataset['train'][-index:]['text']

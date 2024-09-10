@@ -23,7 +23,13 @@ def append_kv(kv_list, d):  #d=0 batch size; d=2 sequence length
 
     return concatenated_past_key_values
 
-def concat_kv(split_kv, num_memory):
+def concat_kv(split_kv, num_memory):  
+    '''
+    This function convert a batched splited memory KV cache into a batched concatenated memory KV cache
+    split_kv: ((batch_size * num_memory, num_heads, seq_len, hidden_dims),(...))
+    
+    final_past_key_values: ((batch_size, num_heads, seq_len * num_memory, hidden_dims),(...))
+    '''
     num_layers = len(split_kv)
     split_batch_size = split_kv[0][0].size(0)
     final_past_key_values = ()
