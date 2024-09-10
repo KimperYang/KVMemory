@@ -44,7 +44,7 @@ def main():
     # Set training arguments
     training_args = TrainingArguments(
         output_dir="/mnt/data/jingbo/kv_dump_4_900000",
-        report_to="wandb",
+        # report_to="wandb",
         per_device_train_batch_size=2,
         # num_train_epochs=2,
         max_steps=10000,
@@ -66,8 +66,9 @@ def main():
     accelerator = Accelerator()
     trainer = accelerator.prepare(CustomTrainer(
         model=global_model,
+        tokenizer=global_tokenizer,
         args=training_args,
-        data_loader = data_loader
+        data_loader = data_loader,
         # optimizers=(optimizer, scheduler)
     ))
 
