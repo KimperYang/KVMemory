@@ -1,0 +1,207 @@
+0
+1
+['text', 'sft']
+torch.Size([10, 77]) torch.Size([10, 77])
+tensor(1.5112, device='cuda:0', grad_fn=<DivBackward0>)
+2
+3
+['text', 'sft']
+torch.Size([14, 45]) torch.Size([14, 45])
+tensor(1.7234, device='cuda:0', grad_fn=<DivBackward0>)
+4
+5
+['text', 'sft']
+torch.Size([12, 38]) torch.Size([12, 38])
+  0%|                                                                | 0/10000 [00:00<?, ?it/s]We detected that you are passing `past_key_values` as a tuple and this is deprecated and will be removed in v4.43. Please use an appropriate `Cache` class (https://huggingface.co/docs/transformers/v4.41.3/en/internal/generation_utils#transformers.Cache)
+tensor(1.3011, device='cuda:0', grad_fn=<DivBackward0>)
+6
+7
+['text', 'sft']
+torch.Size([20, 36]) torch.Size([20, 36])
+tensor(1.4691, device='cuda:0', grad_fn=<DivBackward0>)
+  0%|                                                     | 1/10000 [00:05<15:50:59,  5.71s/it]
+8
+9
+['text', 'sft']
+torch.Size([20, 77]) torch.Size([20, 77])
+tensor(1.7165, device='cuda:0', grad_fn=<DivBackward0>)
+10
+11
+['text', 'sft']
+torch.Size([18, 35]) torch.Size([18, 35])
+tensor(0.9207, device='cuda:0', grad_fn=<DivBackward0>)
+12
+13
+['text', 'sft']
+torch.Size([18, 57]) torch.Size([18, 57])
+
+  0%|                                                     | 2/10000 [00:10<14:57:20,  5.39s/it]
+14
+15
+['text', 'sft']
+torch.Size([10, 31]) torch.Size([10, 31])
+tensor(1.2754, device='cuda:0', grad_fn=<DivBackward0>)
+16
+17
+['text', 'sft']
+torch.Size([10, 43]) torch.Size([10, 43])
+tensor(2.2430, device='cuda:0', grad_fn=<DivBackward0>)
+18
+19
+['text', 'sft']
+torch.Size([12, 62]) torch.Size([12, 62])
+tensor(1.4762, device='cuda:0', grad_fn=<DivBackward0>)
+20
+21
+['text', 'sft']
+torch.Size([18, 31]) torch.Size([18, 31])
+tensor(1.2647, device='cuda:0', grad_fn=<DivBackward0>)
+22
+23
+['text', 'sft']
+
+  0%|                                                     | 3/10000 [00:15<14:37:37,  5.27s/it]
+tensor(1.3773, device='cuda:0', grad_fn=<DivBackward0>)
+24
+25
+['text', 'sft']
+torch.Size([20, 71]) torch.Size([20, 71])
+tensor(1.4550, device='cuda:0', grad_fn=<DivBackward0>)
+26
+27
+['text', 'sft']
+torch.Size([20, 64]) torch.Size([20, 64])
+tensor(1.3232, device='cuda:0', grad_fn=<DivBackward0>)
+28
+29
+['text', 'sft']
+torch.Size([16, 44]) torch.Size([16, 44])
+
+  0%|                                                     | 4/10000 [00:20<13:58:55,  5.04s/it]
+30
+31
+['text', 'sft']
+torch.Size([16, 67]) torch.Size([16, 67])
+tensor(1.5338, device='cuda:0', grad_fn=<DivBackward0>)
+32
+33
+['text', 'sft']
+torch.Size([14, 30]) torch.Size([14, 30])
+tensor(1.7715, device='cuda:0', grad_fn=<DivBackward0>)
+34
+35
+['text', 'sft']
+torch.Size([12, 74]) torch.Size([12, 74])
+tensor(1.3812, device='cuda:0', grad_fn=<DivBackward0>)
+36
+37
+['text', 'sft']
+torch.Size([16, 51]) torch.Size([16, 51])
+tensor(2.2157, device='cuda:0', grad_fn=<DivBackward0>)
+38
+39
+['text', 'sft']
+
+  0%|                                                     | 5/10000 [00:26<14:27:58,  5.21s/it]
+tensor(1.6822, device='cuda:0', grad_fn=<DivBackward0>)
+{'loss': 1.552, 'grad_norm': 0.18739688396453857, 'learning_rate': 1.9990000000000003e-05, 'epoch': 0.0}
+40
+41
+['text', 'sft']
+torch.Size([12, 78]) torch.Size([12, 78])
+tensor(1.6906, device='cuda:0', grad_fn=<DivBackward0>)
+42
+43
+['text', 'sft']
+torch.Size([14, 36]) torch.Size([14, 36])
+tensor(1.9733, device='cuda:0', grad_fn=<DivBackward0>)
+44
+45
+['text', 'sft']
+torch.Size([10, 54]) torch.Size([10, 54])
+tensor(1.1982, device='cuda:0', grad_fn=<DivBackward0>)
+46
+47
+['text', 'sft']
+torch.Size([10, 52]) torch.Size([10, 52])
+
+  0%|                                                     | 6/10000 [00:31<14:32:45,  5.24s/it]
+48
+49
+['text', 'sft']
+torch.Size([14, 68]) torch.Size([14, 68])
+tensor(1.7747, device='cuda:0', grad_fn=<DivBackward0>)
+50
+51
+['text', 'sft']
+torch.Size([14, 32]) torch.Size([14, 32])
+tensor(1.9688, device='cuda:0', grad_fn=<DivBackward0>)
+52
+53
+['text', 'sft']
+torch.Size([20, 59]) torch.Size([20, 59])
+tensor(1.2369, device='cuda:0', grad_fn=<DivBackward0>)
+54
+55
+['text', 'sft']
+  0%|                                                     | 6/10000 [00:31<14:32:45,  5.24s/it]Traceback (most recent call last):
+  File "/home/jingbo/KVMemory/finetune_combine.py", line 94, in <module>
+    main()
+  File "/home/jingbo/KVMemory/finetune_combine.py", line 86, in main
+    trainer.train()
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 1938, in train
+    return inner_training_loop(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 2274, in _inner_training_loop
+    tr_loss_step = self.training_step(model, inputs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 3344, in training_step
+    self.accelerator.backward(loss, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/accelerate/accelerator.py", line 2143, in backward
+    self.deepspeed_engine_wrapped.backward(loss, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/accelerate/utils/deepspeed.py", line 166, in backward
+    self.engine.backward(loss, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/deepspeed/utils/nvtx.py", line 15, in wrapped_fn
+    ret_val = func(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/deepspeed/runtime/engine.py", line 1967, in backward
+    self.optimizer.backward(loss, retain_graph=retain_graph)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/deepspeed/runtime/zero/stage_1_and_2.py", line 2057, in backward
+    self.loss_scaler.backward(loss.float(), retain_graph=retain_graph)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/deepspeed/runtime/fp16/loss_scaler.py", line 63, in backward
+    scaled_loss.backward(retain_graph=retain_graph)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor.py", line 525, in backward
+    torch.autograd.backward(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/autograd/__init__.py", line 267, in backward
+    _engine_run_backward(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/autograd/graph.py", line 744, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+KeyboardInterrupt
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/home/jingbo/KVMemory/finetune_combine.py", line 94, in <module>
+[rank0]:     main()
+[rank0]:   File "/home/jingbo/KVMemory/finetune_combine.py", line 86, in main
+[rank0]:     trainer.train()
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 1938, in train
+[rank0]:     return inner_training_loop(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 2274, in _inner_training_loop
+[rank0]:     tr_loss_step = self.training_step(model, inputs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 3344, in training_step
+[rank0]:     self.accelerator.backward(loss, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/accelerate/accelerator.py", line 2143, in backward
+[rank0]:     self.deepspeed_engine_wrapped.backward(loss, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/accelerate/utils/deepspeed.py", line 166, in backward
+[rank0]:     self.engine.backward(loss, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/deepspeed/utils/nvtx.py", line 15, in wrapped_fn
+[rank0]:     ret_val = func(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/deepspeed/runtime/engine.py", line 1967, in backward
+[rank0]:     self.optimizer.backward(loss, retain_graph=retain_graph)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/deepspeed/runtime/zero/stage_1_and_2.py", line 2057, in backward
+[rank0]:     self.loss_scaler.backward(loss.float(), retain_graph=retain_graph)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/deepspeed/runtime/fp16/loss_scaler.py", line 63, in backward
+[rank0]:     scaled_loss.backward(retain_graph=retain_graph)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor.py", line 525, in backward
+[rank0]:     torch.autograd.backward(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/autograd/__init__.py", line 267, in backward
+[rank0]:     _engine_run_backward(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/autograd/graph.py", line 744, in _engine_run_backward
+[rank0]:     return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+[rank0]: KeyboardInterrupt
+tensor(1.5717, device='cuda:0', grad_fn=<DivBackward0>)

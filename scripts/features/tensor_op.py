@@ -1,21 +1,30 @@
 import torch
 # from src.utils.cache import concat_kv
 # Example input tensor
-batch_input_ids = torch.tensor([[1, 2, 3, 4],
-                                [5, 6, 7, 8]])
 
-# Apply torch.split with split_size of 1 along dim=1 (sequence length dimension)
-splits = torch.split(batch_input_ids, 2, dim=1)
+mum_len = 20
+bsz = 2
+each_mem_len = 4
+memory_position = torch.arange(1, 1 + mum_len).unsqueeze(0)
+memory_positions = torch.cat([memory_position] * bsz)
+memory_position_batch = memory_positions.reshape(-1, each_mem_len)
 
-# Print each split tensor
-for split in splits:
-    print(split)
+print(memory_position_batch)
+batch_input_ids = torch.tensor([[1, 2],[3, 4],
+                                [5, 6],[7, 8]])
+
+# # Apply torch.split with split_size of 1 along dim=1 (sequence length dimension)
+# splits = torch.split(batch_input_ids, 2, dim=1)
+
+# # Print each split tensor
+# for split in splits:
+#     print(split)
 
 # Reshape the tensor
-reshaped_tensor = batch_input_ids.reshape(-1, 2)
+reshaped_tensor = batch_input_ids.view(2,4)
 
 # Print the result
-print(reshaped_tensor)
+# print(reshaped_tensor)
 
 # def concat_kv(split_kv, num_memory):
 #     num_layers = len(split_kv)

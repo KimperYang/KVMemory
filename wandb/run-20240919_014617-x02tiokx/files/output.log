@@ -1,0 +1,33 @@
+
+  0%|                                                                  | 0/2 [00:00<?, ?it/s]We detected that you are passing `past_key_values` as a tuple and this is deprecated and will be removed in v4.43. Please use an appropriate `Cache` class (https://huggingface.co/docs/transformers/v4.41.3/en/internal/generation_utils#transformers.Cache)
+tensor(8.8774, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(9.1418, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(8.8989, device='cuda:0', grad_fn=<DivBackward0>)
+ 50%|█████████████████████████████                             | 1/2 [00:05<00:05,  5.13s/it]
+tensor(8.0345, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(8.5715, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(9.2494, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(8.2707, device='cuda:0', grad_fn=<DivBackward0>)
+
+100%|██████████████████████████████████████████████████████████| 2/2 [01:04<00:00, 32.19s/it]
+Traceback (most recent call last):
+  File "/home/jingbo/KVMemory/finetune_connect.py", line 93, in <module>
+    main()
+  File "/home/jingbo/KVMemory/finetune_connect.py", line 87, in main
+    torch.save(custom_model.trainable_key_caches, dump_dir + "/trainable_key_caches.pth")
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/serialization.py", line 628, in save
+    _save(obj, opened_zipfile, pickle_module, pickle_protocol, _disable_byteorder_record)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/serialization.py", line 840, in _save
+    pickler.dump(obj)
+TypeError: cannot pickle 'torch._C._distributed_c10d.ProcessGroup' object
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/home/jingbo/KVMemory/finetune_connect.py", line 93, in <module>
+[rank0]:     main()
+[rank0]:   File "/home/jingbo/KVMemory/finetune_connect.py", line 87, in main
+[rank0]:     torch.save(custom_model.trainable_key_caches, dump_dir + "/trainable_key_caches.pth")
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/serialization.py", line 628, in save
+[rank0]:     _save(obj, opened_zipfile, pickle_module, pickle_protocol, _disable_byteorder_record)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/serialization.py", line 840, in _save
+[rank0]:     pickler.dump(obj)
+[rank0]: TypeError: cannot pickle 'torch._C._distributed_c10d.ProcessGroup' object
+{'train_runtime': 68.2884, 'train_samples_per_second': 0.469, 'train_steps_per_second': 0.029, 'train_loss': 8.72658634185791, 'epoch': 0.0}

@@ -30,9 +30,20 @@ from datasets import load_dataset
 #     if length > long:
 #         long = length
 # print(sum/2000, short, long)
+from transformers import AutoTokenizer
 
-data = load_dataset('json', data_files='filtered_strings_900000.json')
-print(len(data['train']['text']))
+# Initialize the tokenizer (replace with your model's tokenizer if different)
+tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
+data = load_dataset("nvidia/Daring-Anteater")
+print(len(data['train']['conversations'][131]))
+# q = data['train']['conversations'][132][0]['value']
+# for i in range(10):
+#     concat = ""
+#     conversations = data['train']['conversations'][i]
+#     for con in conversations:
+#         concat = concat + con['value'] + " "
+    # print(tokenizer(concat, return_tensors="pt").input_ids.size(1))
+# print(tokenizer(q, return_tensors="pt").input_ids.size(1))
 ###########################
 # import pandas as pd    
 # jsonObj = pd.read_json(path_or_buf='/home/jingbo/KVMemory/data/ifeval/input_data.jsonl', lines=True)

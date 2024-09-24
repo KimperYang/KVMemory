@@ -1,0 +1,207 @@
+
+  0%|                                                              | 0/10000 [00:00<?, ?it/s]We detected that you are passing `past_key_values` as a tuple and this is deprecated and will be removed in v4.43. Please use an appropriate `Cache` class (https://huggingface.co/docs/transformers/v4.41.3/en/internal/generation_utils#transformers.Cache)
+
+
+
+
+  0%|                                                   | 5/10000 [00:27<15:10:59,  5.47s/it]
+
+
+
+
+
+  0%|                                                  | 10/10000 [00:55<15:36:47,  5.63s/it]
+
+
+
+
+
+  0%|                                                  | 15/10000 [01:24<16:08:27,  5.82s/it]
+
+
+
+
+
+  0%|                                                  | 20/10000 [01:53<16:37:40,  6.00s/it]
+
+
+
+
+  0%|                                                  | 24/10000 [02:14<15:31:46,  5.60s/it]
+
+
+
+
+
+
+  0%|▏                                                 | 30/10000 [02:46<14:37:42,  5.28s/it]
+
+
+
+
+
+  0%|▏                                                 | 35/10000 [03:13<14:44:18,  5.32s/it]
+
+
+
+
+  0%|▏                                                 | 39/10000 [03:34<14:21:07,  5.19s/it]
+
+
+
+
+
+  0%|▏                                                 | 44/10000 [04:00<14:26:20,  5.22s/it]
+
+
+
+
+
+
+  0%|▎                                                 | 50/10000 [04:32<14:45:46,  5.34s/it]
+
+
+
+
+
+  1%|▎                                                 | 55/10000 [04:59<14:31:30,  5.26s/it]
+
+
+
+
+
+  1%|▎                                                 | 60/10000 [05:25<14:18:23,  5.18s/it]
+
+
+
+
+
+  1%|▎                                                 | 65/10000 [05:51<14:25:28,  5.23s/it]
+
+
+
+
+
+  1%|▎                                                 | 70/10000 [06:19<15:12:33,  5.51s/it]
+
+
+
+
+
+  1%|▍                                                 | 75/10000 [06:45<14:41:12,  5.33s/it]
+
+
+
+
+
+  1%|▍                                                 | 80/10000 [07:10<14:22:07,  5.21s/it]
+
+
+
+
+
+  1%|▍                                                 | 85/10000 [07:37<14:23:19,  5.22s/it]
+
+
+
+
+
+  1%|▍                                                 | 90/10000 [08:04<15:05:16,  5.48s/it]
+
+
+
+
+
+  1%|▍                                                 | 95/10000 [08:29<14:19:58,  5.21s/it]
+
+
+
+
+
+  1%|▍                                                | 100/10000 [08:56<14:38:41,  5.33s/it]
+
+
+
+
+
+  1%|▌                                                | 105/10000 [09:29<16:24:56,  5.97s/it]
+
+
+
+
+
+  1%|▌                                                | 110/10000 [09:57<15:13:53,  5.54s/it]
+
+
+
+
+
+  1%|▌                                                | 115/10000 [10:22<14:16:33,  5.20s/it]
+
+
+
+
+
+  1%|▌                                                | 120/10000 [10:49<14:39:36,  5.34s/it]
+
+
+  1%|▌                                                | 122/10000 [10:59<14:23:07,  5.24s/it]Traceback (most recent call last):
+  File "/home/jingbo/KVMemory/finetune_combine.py", line 94, in <module>
+    main()
+  File "/home/jingbo/KVMemory/finetune_combine.py", line 86, in main
+    trainer.train()
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 1938, in train
+    return inner_training_loop(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 2274, in _inner_training_loop
+    tr_loss_step = self.training_step(model, inputs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 3344, in training_step
+    self.accelerator.backward(loss, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/accelerate/accelerator.py", line 2143, in backward
+    self.deepspeed_engine_wrapped.backward(loss, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/accelerate/utils/deepspeed.py", line 166, in backward
+    self.engine.backward(loss, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/deepspeed/utils/nvtx.py", line 15, in wrapped_fn
+    ret_val = func(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/deepspeed/runtime/engine.py", line 1967, in backward
+    self.optimizer.backward(loss, retain_graph=retain_graph)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/deepspeed/runtime/zero/stage_1_and_2.py", line 2057, in backward
+    self.loss_scaler.backward(loss.float(), retain_graph=retain_graph)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/deepspeed/runtime/fp16/loss_scaler.py", line 63, in backward
+    scaled_loss.backward(retain_graph=retain_graph)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor.py", line 525, in backward
+    torch.autograd.backward(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/autograd/__init__.py", line 267, in backward
+    _engine_run_backward(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/autograd/graph.py", line 744, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+KeyboardInterrupt
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/home/jingbo/KVMemory/finetune_combine.py", line 94, in <module>
+[rank0]:     main()
+[rank0]:   File "/home/jingbo/KVMemory/finetune_combine.py", line 86, in main
+[rank0]:     trainer.train()
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 1938, in train
+[rank0]:     return inner_training_loop(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 2274, in _inner_training_loop
+[rank0]:     tr_loss_step = self.training_step(model, inputs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 3344, in training_step
+[rank0]:     self.accelerator.backward(loss, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/accelerate/accelerator.py", line 2143, in backward
+[rank0]:     self.deepspeed_engine_wrapped.backward(loss, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/accelerate/utils/deepspeed.py", line 166, in backward
+[rank0]:     self.engine.backward(loss, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/deepspeed/utils/nvtx.py", line 15, in wrapped_fn
+[rank0]:     ret_val = func(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/deepspeed/runtime/engine.py", line 1967, in backward
+[rank0]:     self.optimizer.backward(loss, retain_graph=retain_graph)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/deepspeed/runtime/zero/stage_1_and_2.py", line 2057, in backward
+[rank0]:     self.loss_scaler.backward(loss.float(), retain_graph=retain_graph)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/deepspeed/runtime/fp16/loss_scaler.py", line 63, in backward
+[rank0]:     scaled_loss.backward(retain_graph=retain_graph)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor.py", line 525, in backward
+[rank0]:     torch.autograd.backward(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/autograd/__init__.py", line 267, in backward
+[rank0]:     _engine_run_backward(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/autograd/graph.py", line 744, in _engine_run_backward
+[rank0]:     return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+[rank0]: KeyboardInterrupt

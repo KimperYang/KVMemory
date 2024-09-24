@@ -8,9 +8,9 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, get_linear_schedul
 from peft import LoraConfig, get_peft_model, TaskType
 from datasets import load_dataset
 from accelerate import Accelerator
-from src.data.dataset import CustomDataset, load_data, custom_collate_fn
-from src.training.trainer import CustomTrainer
-
+from src.data.dataset import CustomDataset, custom_collate_fn
+from src.training.trainer import CustomTrainer, CustomTrainerNormal, CustomTrainerCheat
+# import transformers.models.llama.modeling_llama
 def main():
     # Prepare model and tokenizer
     global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf")
@@ -33,19 +33,19 @@ def main():
     data = load_dataset('json', data_files='/mnt/data2/jingbo/kvmemory/filtered_strings_900000.json')
     data = data['train']['text']
     print("num of data:", len(data))
-    
+
     dataset = CustomDataset(global_tokenizer, data)
     data_loader = DataLoader(dataset, batch_size=2, collate_fn=custom_collate_fn,pin_memory=False, shuffle=True)
 
     # set the wandb project where this run will be logged
     os.environ["WANDB_PROJECT"]="kvmemory"
-    os.environ["WANDB_LOG_MODEL"]="true"
+    # os.environ["WANDB_LOG_MODEL"]="true"
     os.environ["WANDB_WATCH"]="false"
 
     # Set training arguments
     training_args = TrainingArguments(
-        output_dir="/mnt/data/jingbo/kv_dump_4_900000",
-        # report_to="wandb",
+        output_dir="/mnt/data/jingbo/kv_dump_cheat",
+        report_to="wandb",
         per_device_train_batch_size=2,
         # num_train_epochs=2,
         max_steps=10000,
@@ -65,7 +65,15 @@ def main():
     scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=500, num_training_steps=10000)
 
     accelerator = Accelerator()
-    trainer = accelerator.prepare(CustomTrainer(
+    # trainer = accelerator.prepare(CustomTrainer(
+    #     model=global_model,
+    #     tokenizer=global_tokenizer,
+    #     args=training_args,
+    #     data_loader = data_loader,
+    #     # optimizers=(optimizer, scheduler)
+    # ))
+
+    trainer = accelerator.prepare(CustomTrainerCheat(
         model=global_model,
         tokenizer=global_tokenizer,
         args=training_args,
@@ -75,10 +83,10 @@ def main():
 
     trainer.train()
 
-    global_model.save_pretrained("/mnt/data/jingbo/kv_dump_4_900000")
-    global_tokenizer.save_pretrained("/mnt/data/jingbo/kv_dump_4_900000")
+    global_model.save_pretrained("/mnt/data/jingbo/kv_dump_cheat")
+    global_tokenizer.save_pretrained("/mnt/data/jingbo/kv_dump_cheat")
 
-    trainer.save_training_curve("/mnt/data/jingbo/kv_dump_4_900000")
+    trainer.save_training_curve("/mnt/data/jingbo/kv_dump_cheat")
 
 if __name__ == "__main__":
     main()

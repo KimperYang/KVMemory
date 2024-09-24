@@ -1,0 +1,29 @@
+
+  0%|                                                                  | 0/2 [00:00<?, ?it/s]We detected that you are passing `past_key_values` as a tuple and this is deprecated and will be removed in v4.43. Please use an appropriate `Cache` class (https://huggingface.co/docs/transformers/v4.41.3/en/internal/generation_utils#transformers.Cache)
+tensor(9.6537, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(10.0477, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(9.7329, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(8.9981, device='cuda:0', grad_fn=<DivBackward0>)
+ 50%|█████████████████████████████                             | 1/2 [00:05<00:05,  5.12s/it]
+tensor(9.6875, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(10.1967, device='cuda:0', grad_fn=<DivBackward0>)
+
+100%|██████████████████████████████████████████████████████████| 2/2 [00:09<00:00,  4.97s/it]
+100%|██████████████████████████████████████████████████████████| 2/2 [00:47<00:00, 23.64s/it]
+Traceback (most recent call last):
+  File "/home/jingbo/KVMemory/finetune_connect.py", line 93, in <module>
+    main()
+  File "/home/jingbo/KVMemory/finetune_connect.py", line 83, in main
+    custom_model.save_pretrained(dump_dir)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1709, in __getattr__
+    raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+AttributeError: 'CustomLlamaModel' object has no attribute 'save_pretrained'
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/home/jingbo/KVMemory/finetune_connect.py", line 93, in <module>
+[rank0]:     main()
+[rank0]:   File "/home/jingbo/KVMemory/finetune_connect.py", line 83, in main
+[rank0]:     custom_model.save_pretrained(dump_dir)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1709, in __getattr__
+[rank0]:     raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+[rank0]: AttributeError: 'CustomLlamaModel' object has no attribute 'save_pretrained'
+{'train_runtime': 51.3626, 'train_samples_per_second': 0.623, 'train_steps_per_second': 0.039, 'train_loss': 9.671775817871094, 'epoch': 0.0}

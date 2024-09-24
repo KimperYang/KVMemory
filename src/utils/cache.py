@@ -9,6 +9,26 @@ def generate_kv_with_id(model, input_ids):
 
     return past_key_values
 
+def generate_kv_with_connect(model, input_ids):
+
+    input_ids = input_ids.to(model.device)
+
+    with torch.no_grad():
+        out = model(input_ids)
+        past_key_values = out.past_key_values
+
+    return past_key_values
+
+def generate_kv_with_position(model, input_ids, position_ids):
+    input_ids = input_ids.to(model.device)
+    position_ids = position_ids.to(model.device)
+
+    with torch.no_grad():
+        out = model(input_ids = input_ids, position_ids = position_ids)
+        past_key_values = out.past_key_values
+
+    return past_key_values
+
 def append_kv(kv_list, d):  #d=0 batch size; d=2 sequence length
     num_layers = len(kv_list[0])
     concatenated_past_key_values = ()

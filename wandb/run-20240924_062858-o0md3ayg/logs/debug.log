@@ -1,0 +1,20 @@
+2024-09-24 06:28:58,237 INFO    MainThread:151151 [wandb_setup.py:_flush():77] Current SDK version is 0.17.9
+2024-09-24 06:28:58,237 INFO    MainThread:151151 [wandb_setup.py:_flush():77] Configure stats pid to 151151
+2024-09-24 06:28:58,237 INFO    MainThread:151151 [wandb_setup.py:_flush():77] Loading settings from /home/jingbo/.config/wandb/settings
+2024-09-24 06:28:58,238 INFO    MainThread:151151 [wandb_setup.py:_flush():77] Loading settings from /home/jingbo/KVMemory/wandb/settings
+2024-09-24 06:28:58,238 INFO    MainThread:151151 [wandb_setup.py:_flush():77] Loading settings from environment variables: {}
+2024-09-24 06:28:58,238 INFO    MainThread:151151 [wandb_setup.py:_flush():77] Applying setup settings: {'_disable_service': False}
+2024-09-24 06:28:58,238 INFO    MainThread:151151 [wandb_setup.py:_flush():77] Inferring run settings from compute environment: {'program_relpath': 'finetune_combine.py', 'program_abspath': '/home/jingbo/KVMemory/finetune_combine.py', 'program': '/home/jingbo/KVMemory/finetune_combine.py'}
+2024-09-24 06:28:58,238 INFO    MainThread:151151 [wandb_setup.py:_flush():77] Applying login settings: {}
+2024-09-24 06:28:58,238 INFO    MainThread:151151 [wandb_init.py:_log_setup():524] Logging user logs to /home/jingbo/KVMemory/wandb/run-20240924_062858-o0md3ayg/logs/debug.log
+2024-09-24 06:28:58,238 INFO    MainThread:151151 [wandb_init.py:_log_setup():525] Logging internal logs to /home/jingbo/KVMemory/wandb/run-20240924_062858-o0md3ayg/logs/debug-internal.log
+2024-09-24 06:28:58,238 INFO    MainThread:151151 [wandb_init.py:init():608] calling init triggers
+2024-09-24 06:28:58,238 INFO    MainThread:151151 [wandb_init.py:init():615] wandb.init called with sweep_config: {}
+config: {}
+2024-09-24 06:28:58,238 INFO    MainThread:151151 [wandb_init.py:init():658] starting backend
+2024-09-24 06:28:58,238 INFO    MainThread:151151 [wandb_init.py:init():662] setting up manager
+2024-09-24 06:28:58,240 INFO    MainThread:151151 [backend.py:_multiprocessing_setup():105] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2024-09-24 06:28:58,241 INFO    MainThread:151151 [wandb_init.py:init():670] backend started and connected
+2024-09-24 06:28:58,245 INFO    MainThread:151151 [wandb_init.py:init():768] updated telemetry
+2024-09-24 06:28:58,373 INFO    MainThread:151151 [wandb_init.py:init():801] communicating run to backend with 90.0 second timeout
+2024-09-24 06:28:58,617 INFO    MainThread:151151 [wandb_init.py:init():852] starting run threads in backend

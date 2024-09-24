@@ -1,0 +1,141 @@
+['text', 'text']
+torch.Size([10, 77]) torch.Size([10, 77])
+tensor(2.6457, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+torch.Size([14, 45]) torch.Size([14, 45])
+tensor(2.2493, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+torch.Size([12, 38]) torch.Size([12, 38])
+tensor(2.0422, device='cuda:0', grad_fn=<DivBackward0>)
+  0%|                                                                | 0/10000 [00:00<?, ?it/s]We detected that you are passing `past_key_values` as a tuple and this is deprecated and will be removed in v4.43. Please use an appropriate `Cache` class (https://huggingface.co/docs/transformers/v4.41.3/en/internal/generation_utils#transformers.Cache)
+['text', 'text']
+torch.Size([20, 36]) torch.Size([20, 36])
+tensor(2.0739, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+torch.Size([20, 77]) torch.Size([20, 77])
+  0%|                                                     | 1/10000 [00:04<12:53:54,  4.64s/it]
+tensor(2.1673, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+torch.Size([18, 35]) torch.Size([18, 35])
+tensor(1.1525, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+
+  0%|                                                     | 2/10000 [00:08<11:40:01,  4.20s/it]
+tensor(2.1381, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+torch.Size([10, 31]) torch.Size([10, 31])
+tensor(1.9526, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+torch.Size([10, 43]) torch.Size([10, 43])
+tensor(2.2920, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+torch.Size([12, 62]) torch.Size([12, 62])
+
+  0%|                                                     | 3/10000 [00:13<12:24:23,  4.47s/it]
+['text', 'text']
+torch.Size([18, 31]) torch.Size([18, 31])
+tensor(1.4559, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+torch.Size([18, 42]) torch.Size([18, 42])
+tensor(2.2903, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+torch.Size([20, 71]) torch.Size([20, 71])
+tensor(2.3119, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+torch.Size([20, 64]) torch.Size([20, 64])
+tensor(2.0505, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+
+  0%|                                                     | 4/10000 [00:16<11:30:00,  4.14s/it]
+tensor(2.3664, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+torch.Size([16, 67]) torch.Size([16, 67])
+tensor(2.2062, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+torch.Size([14, 30]) torch.Size([14, 30])
+tensor(2.2323, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+torch.Size([12, 74]) torch.Size([12, 74])
+
+  0%|                                                     | 5/10000 [00:21<11:40:03,  4.20s/it]
+['text', 'text']
+torch.Size([16, 51]) torch.Size([16, 51])
+tensor(2.3628, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+torch.Size([14, 39]) torch.Size([14, 39])
+tensor(2.4389, device='cuda:0', grad_fn=<DivBackward0>)
+{'loss': 2.1455, 'grad_norm': 0.2206643968820572, 'learning_rate': 1.9990000000000003e-05, 'epoch': 0.0}
+['text', 'text']
+torch.Size([12, 78]) torch.Size([12, 78])
+tensor(2.1246, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+torch.Size([14, 36]) torch.Size([14, 36])
+tensor(2.7508, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+torch.Size([10, 54]) torch.Size([10, 54])
+tensor(2.0202, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+
+  0%|                                                     | 6/10000 [00:25<11:53:17,  4.28s/it]
+tensor(1.9834, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+torch.Size([14, 68]) torch.Size([14, 68])
+tensor(2.2327, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+torch.Size([14, 32]) torch.Size([14, 32])
+tensor(2.4908, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+torch.Size([20, 59]) torch.Size([20, 59])
+tensor(1.9473, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+  0%|                                                     | 7/10000 [00:29<11:28:27,  4.13s/it]Traceback (most recent call last):
+  File "/home/jingbo/KVMemory/finetune_combine.py", line 94, in <module>
+    main()
+  File "/home/jingbo/KVMemory/finetune_combine.py", line 86, in main
+    trainer.train()
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 1938, in train
+    return inner_training_loop(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 2274, in _inner_training_loop
+    tr_loss_step = self.training_step(model, inputs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 3313, in training_step
+    loss = self.compute_loss(model, inputs)
+  File "/home/jingbo/KVMemory/src/training/trainer.py", line 326, in compute_loss
+    print(batch_loss)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor.py", line 464, in __repr__
+    return torch._tensor_str._str(self, tensor_contents=tensor_contents)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor_str.py", line 697, in _str
+    return _str_intern(self, tensor_contents=tensor_contents)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor_str.py", line 617, in _str_intern
+    tensor_str = _tensor_str(self, indent)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor_str.py", line 349, in _tensor_str
+    formatter = _Formatter(get_summarized_data(self) if summarize else self)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor_str.py", line 137, in __init__
+    nonzero_finite_vals = torch.masked_select(
+KeyboardInterrupt
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/home/jingbo/KVMemory/finetune_combine.py", line 94, in <module>
+[rank0]:     main()
+[rank0]:   File "/home/jingbo/KVMemory/finetune_combine.py", line 86, in main
+[rank0]:     trainer.train()
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 1938, in train
+[rank0]:     return inner_training_loop(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 2274, in _inner_training_loop
+[rank0]:     tr_loss_step = self.training_step(model, inputs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 3313, in training_step
+[rank0]:     loss = self.compute_loss(model, inputs)
+[rank0]:   File "/home/jingbo/KVMemory/src/training/trainer.py", line 326, in compute_loss
+[rank0]:     print(batch_loss)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor.py", line 464, in __repr__
+[rank0]:     return torch._tensor_str._str(self, tensor_contents=tensor_contents)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor_str.py", line 697, in _str
+[rank0]:     return _str_intern(self, tensor_contents=tensor_contents)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor_str.py", line 617, in _str_intern
+[rank0]:     tensor_str = _tensor_str(self, indent)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor_str.py", line 349, in _tensor_str
+[rank0]:     formatter = _Formatter(get_summarized_data(self) if summarize else self)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor_str.py", line 137, in __init__
+[rank0]:     nonzero_finite_vals = torch.masked_select(
+[rank0]: KeyboardInterrupt
+tensor(2.2272, device='cuda:0', grad_fn=<DivBackward0>)
+['text', 'text']
+torch.Size([16, 35]) torch.Size([16, 35])

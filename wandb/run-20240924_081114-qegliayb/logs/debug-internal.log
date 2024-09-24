@@ -1,0 +1,160 @@
+2024-09-24 08:11:14,315 INFO    StreamThr :218979 [internal.py:wandb_internal():85] W&B internal server running at pid: 218979, started at: 2024-09-24 08:11:14.314380
+2024-09-24 08:11:14,316 DEBUG   HandlerThread:218979 [handler.py:handle_request():158] handle_request: status
+2024-09-24 08:11:14,318 INFO    WriterThread:218979 [datastore.py:open_for_write():87] open: /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/run-qegliayb.wandb
+2024-09-24 08:11:14,319 DEBUG   SenderThread:218979 [sender.py:send():391] send: header
+2024-09-24 08:11:14,510 DEBUG   SenderThread:218979 [sender.py:send():391] send: run
+2024-09-24 08:11:14,711 INFO    SenderThread:218979 [dir_watcher.py:__init__():211] watching files in: /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/files
+2024-09-24 08:11:14,711 INFO    SenderThread:218979 [sender.py:_start_run_threads():1200] run started: qegliayb with start time 1727165474.314476
+2024-09-24 08:11:14,721 DEBUG   HandlerThread:218979 [handler.py:handle_request():158] handle_request: run_start
+2024-09-24 08:11:14,844 DEBUG   HandlerThread:218979 [system_info.py:__init__():26] System info init
+2024-09-24 08:11:14,844 DEBUG   HandlerThread:218979 [system_info.py:__init__():41] System info init done
+2024-09-24 08:11:14,844 INFO    HandlerThread:218979 [system_monitor.py:start():194] Starting system monitor
+2024-09-24 08:11:14,844 INFO    SystemMonitor:218979 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2024-09-24 08:11:14,844 INFO    HandlerThread:218979 [system_monitor.py:probe():214] Collecting system info
+2024-09-24 08:11:14,845 INFO    SystemMonitor:218979 [interfaces.py:start():188] Started cpu monitoring
+2024-09-24 08:11:14,845 INFO    SystemMonitor:218979 [interfaces.py:start():188] Started disk monitoring
+2024-09-24 08:11:14,846 INFO    SystemMonitor:218979 [interfaces.py:start():188] Started gpu monitoring
+2024-09-24 08:11:14,846 INFO    SystemMonitor:218979 [interfaces.py:start():188] Started memory monitoring
+2024-09-24 08:11:14,850 INFO    SystemMonitor:218979 [interfaces.py:start():188] Started network monitoring
+2024-09-24 08:11:14,950 DEBUG   HandlerThread:218979 [system_info.py:probe():152] Probing system
+2024-09-24 08:11:14,957 DEBUG   HandlerThread:218979 [system_info.py:_probe_git():137] Probing git
+2024-09-24 08:11:14,971 DEBUG   HandlerThread:218979 [system_info.py:_probe_git():145] Probing git done
+2024-09-24 08:11:14,971 DEBUG   HandlerThread:218979 [system_info.py:probe():200] Probing system done
+2024-09-24 08:11:14,971 DEBUG   HandlerThread:218979 [system_monitor.py:probe():223] {'os': 'Linux-5.15.0-102-generic-x86_64-with-glibc2.35', 'python': '3.9.19', 'heartbeatAt': '2024-09-24T08:11:14.950953', 'startedAt': '2024-09-24T08:11:14.307965', 'docker': None, 'cuda': None, 'args': (), 'state': 'running', 'program': '/home/jingbo/KVMemory/finetune_combine.py', 'codePathLocal': 'finetune_combine.py', 'codePath': 'finetune_combine.py', 'git': {'remote': 'https://github.com/KimperYang/KVMemory.git', 'commit': '3086aee5387b7d6269d384fe914bc6ed67f18a88'}, 'email': 'jingbo@ucsb.edu', 'root': '/home/jingbo/KVMemory', 'host': 'katrina1.cs.ucsb.edu', 'username': 'jingbo', 'executable': '/home/jingbo/anaconda3/envs/unlearning/bin/python', 'cpu_count': 56, 'cpu_count_logical': 112, 'cpu_freq': {'current': 2295.5063928571426, 'min': 1500.0, 'max': 2750.0}, 'cpu_freq_per_core': [{'current': 3350.412, 'min': 1500.0, 'max': 2750.0}, {'current': 2778.753, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 3351.555, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 3351.746, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 3053.446, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 3349.421, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 3384.68, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 3387.156, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}, {'current': 1500.0, 'min': 1500.0, 'max': 2750.0}, {'current': 2750.0, 'min': 1500.0, 'max': 2750.0}], 'disk': {'/': {'total': 374.70203018188477, 'used': 351.22049713134766}}, 'gpu': 'NVIDIA RTX A6000', 'gpu_count': 7, 'gpu_devices': [{'name': 'NVIDIA RTX A6000', 'memory_total': 51527024640}, {'name': 'NVIDIA RTX A6000', 'memory_total': 51527024640}, {'name': 'NVIDIA RTX A6000', 'memory_total': 51527024640}, {'name': 'NVIDIA RTX A6000', 'memory_total': 51527024640}, {'name': 'NVIDIA RTX A6000', 'memory_total': 51527024640}, {'name': 'NVIDIA RTX A6000', 'memory_total': 51527024640}, {'name': 'NVIDIA RTX A6000', 'memory_total': 51527024640}], 'memory': {'total': 503.7216987609863}}
+2024-09-24 08:11:14,972 INFO    HandlerThread:218979 [system_monitor.py:probe():224] Finished collecting system info
+2024-09-24 08:11:14,972 INFO    HandlerThread:218979 [system_monitor.py:probe():227] Publishing system info
+2024-09-24 08:11:14,972 DEBUG   HandlerThread:218979 [system_info.py:_save_conda():209] Saving list of conda packages installed into the current environment
+2024-09-24 08:11:15,712 INFO    Thread-12 :218979 [dir_watcher.py:_on_file_created():271] file/dir created: /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/files/conda-environment.yaml
+2024-09-24 08:11:16,712 INFO    Thread-12 :218979 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/files/conda-environment.yaml
+2024-09-24 08:11:16,743 DEBUG   HandlerThread:218979 [system_info.py:_save_conda():224] Saving conda packages done
+2024-09-24 08:11:16,744 INFO    HandlerThread:218979 [system_monitor.py:probe():229] Finished publishing system info
+2024-09-24 08:11:16,747 DEBUG   SenderThread:218979 [sender.py:send():391] send: files
+2024-09-24 08:11:16,747 INFO    SenderThread:218979 [sender.py:_save_file():1466] saving file wandb-metadata.json with policy now
+2024-09-24 08:11:16,857 DEBUG   HandlerThread:218979 [handler.py:handle_request():158] handle_request: python_packages
+2024-09-24 08:11:16,858 DEBUG   SenderThread:218979 [sender.py:send_request():418] send_request: python_packages
+2024-09-24 08:11:16,859 DEBUG   SenderThread:218979 [sender.py:send():391] send: telemetry
+2024-09-24 08:11:16,860 DEBUG   HandlerThread:218979 [handler.py:handle_request():158] handle_request: internal_messages
+2024-09-24 08:11:16,860 DEBUG   HandlerThread:218979 [handler.py:handle_request():158] handle_request: stop_status
+2024-09-24 08:11:16,860 DEBUG   SenderThread:218979 [sender.py:send_request():418] send_request: stop_status
+2024-09-24 08:11:16,951 DEBUG   SenderThread:218979 [sender.py:send():391] send: config
+2024-09-24 08:11:16,952 DEBUG   SenderThread:218979 [sender.py:send():391] send: telemetry
+2024-09-24 08:11:16,953 DEBUG   SenderThread:218979 [sender.py:send():391] send: metric
+2024-09-24 08:11:16,953 DEBUG   SenderThread:218979 [sender.py:send():391] send: telemetry
+2024-09-24 08:11:16,953 DEBUG   SenderThread:218979 [sender.py:send():391] send: metric
+2024-09-24 08:11:16,953 WARNING SenderThread:218979 [sender.py:send_metric():1417] Seen metric with glob (shouldn't happen)
+2024-09-24 08:11:16,953 DEBUG   SenderThread:218979 [sender.py:send():391] send: telemetry
+2024-09-24 08:11:16,953 DEBUG   SenderThread:218979 [sender.py:send():391] send: telemetry
+2024-09-24 08:11:16,953 DEBUG   SenderThread:218979 [sender.py:send():391] send: config
+2024-09-24 08:11:17,108 INFO    wandb-upload_0:218979 [upload_job.py:push():130] Uploaded file /tmp/tmp0vims00gwandb/c940q8p4-wandb-metadata.json
+2024-09-24 08:11:17,161 DEBUG   HandlerThread:218979 [handler.py:handle_request():158] handle_request: log_artifact
+2024-09-24 08:11:17,162 DEBUG   SenderThread:218979 [sender.py:send_request():418] send_request: log_artifact
+2024-09-24 08:11:17,712 INFO    Thread-12 :218979 [dir_watcher.py:_on_file_created():271] file/dir created: /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/files/wandb-metadata.json
+2024-09-24 08:11:17,713 INFO    Thread-12 :218979 [dir_watcher.py:_on_file_created():271] file/dir created: /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/files/requirements.txt
+2024-09-24 08:11:17,927 INFO    wandb-upload_0:218979 [upload_job.py:push():88] Uploaded file /tmp/tmpy85ve79z/model_architecture.txt
+2024-09-24 08:11:18,601 INFO    SenderThread:218979 [sender.py:send_request_log_artifact():1537] logged artifact model-qegliayb - {'id': 'QXJ0aWZhY3Q6MTI0NTUyMTI1Ng==', 'state': 'PENDING', 'artifactSequence': {'id': 'QXJ0aWZhY3RDb2xsZWN0aW9uOjQ2MTI3ODkzMg==', 'latestArtifact': None}}
+2024-09-24 08:11:18,602 DEBUG   SenderThread:218979 [sender.py:send():391] send: exit
+2024-09-24 08:11:18,602 INFO    SenderThread:218979 [sender.py:send_exit():598] handling exit code: 1
+2024-09-24 08:11:18,602 INFO    SenderThread:218979 [sender.py:send_exit():600] handling runtime: 3
+2024-09-24 08:11:18,603 INFO    SenderThread:218979 [sender.py:_save_file():1466] saving file wandb-summary.json with policy end
+2024-09-24 08:11:18,603 INFO    SenderThread:218979 [sender.py:send_exit():606] send defer
+2024-09-24 08:11:18,604 DEBUG   HandlerThread:218979 [handler.py:handle_request():158] handle_request: defer
+2024-09-24 08:11:18,605 INFO    HandlerThread:218979 [handler.py:handle_request_defer():184] handle defer: 0
+2024-09-24 08:11:18,605 DEBUG   SenderThread:218979 [sender.py:send_request():418] send_request: defer
+2024-09-24 08:11:18,605 INFO    SenderThread:218979 [sender.py:send_request_defer():622] handle sender defer: 0
+2024-09-24 08:11:18,605 INFO    SenderThread:218979 [sender.py:transition_state():626] send defer: 1
+2024-09-24 08:11:18,605 DEBUG   HandlerThread:218979 [handler.py:handle_request():158] handle_request: defer
+2024-09-24 08:11:18,605 INFO    HandlerThread:218979 [handler.py:handle_request_defer():184] handle defer: 1
+2024-09-24 08:11:18,605 DEBUG   SenderThread:218979 [sender.py:send_request():418] send_request: defer
+2024-09-24 08:11:18,605 INFO    SenderThread:218979 [sender.py:send_request_defer():622] handle sender defer: 1
+2024-09-24 08:11:18,605 INFO    SenderThread:218979 [sender.py:transition_state():626] send defer: 2
+2024-09-24 08:11:18,605 DEBUG   HandlerThread:218979 [handler.py:handle_request():158] handle_request: defer
+2024-09-24 08:11:18,606 INFO    HandlerThread:218979 [handler.py:handle_request_defer():184] handle defer: 2
+2024-09-24 08:11:18,606 INFO    HandlerThread:218979 [system_monitor.py:finish():203] Stopping system monitor
+2024-09-24 08:11:18,606 DEBUG   SystemMonitor:218979 [system_monitor.py:_start():172] Starting system metrics aggregation loop
+2024-09-24 08:11:18,607 DEBUG   SystemMonitor:218979 [system_monitor.py:_start():179] Finished system metrics aggregation loop
+2024-09-24 08:11:18,607 DEBUG   SystemMonitor:218979 [system_monitor.py:_start():183] Publishing last batch of metrics
+2024-09-24 08:11:18,609 INFO    HandlerThread:218979 [interfaces.py:finish():200] Joined cpu monitor
+2024-09-24 08:11:18,609 INFO    HandlerThread:218979 [interfaces.py:finish():200] Joined disk monitor
+2024-09-24 08:11:18,712 INFO    Thread-12 :218979 [dir_watcher.py:_on_file_created():271] file/dir created: /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/files/wandb-summary.json
+2024-09-24 08:11:18,713 INFO    Thread-12 :218979 [dir_watcher.py:_on_file_created():271] file/dir created: /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/files/output.log
+2024-09-24 08:11:19,764 INFO    HandlerThread:218979 [interfaces.py:finish():200] Joined gpu monitor
+2024-09-24 08:11:19,764 INFO    HandlerThread:218979 [interfaces.py:finish():200] Joined memory monitor
+2024-09-24 08:11:19,764 INFO    HandlerThread:218979 [interfaces.py:finish():200] Joined network monitor
+2024-09-24 08:11:19,765 DEBUG   HandlerThread:218979 [handler.py:handle_request():158] handle_request: poll_exit
+2024-09-24 08:11:19,765 DEBUG   HandlerThread:218979 [handler.py:handle_request():158] handle_request: status_report
+2024-09-24 08:11:19,765 DEBUG   SenderThread:218979 [sender.py:send_request():418] send_request: defer
+2024-09-24 08:11:19,766 INFO    SenderThread:218979 [sender.py:send_request_defer():622] handle sender defer: 2
+2024-09-24 08:11:19,766 INFO    SenderThread:218979 [sender.py:transition_state():626] send defer: 3
+2024-09-24 08:11:19,766 DEBUG   SenderThread:218979 [sender.py:send():391] send: stats
+2024-09-24 08:11:19,766 DEBUG   HandlerThread:218979 [handler.py:handle_request():158] handle_request: defer
+2024-09-24 08:11:19,766 DEBUG   SenderThread:218979 [sender.py:send_request():418] send_request: poll_exit
+2024-09-24 08:11:19,767 INFO    HandlerThread:218979 [handler.py:handle_request_defer():184] handle defer: 3
+2024-09-24 08:11:19,767 DEBUG   SenderThread:218979 [sender.py:send_request():418] send_request: defer
+2024-09-24 08:11:19,767 INFO    SenderThread:218979 [sender.py:send_request_defer():622] handle sender defer: 3
+2024-09-24 08:11:19,767 INFO    SenderThread:218979 [sender.py:transition_state():626] send defer: 4
+2024-09-24 08:11:19,767 DEBUG   HandlerThread:218979 [handler.py:handle_request():158] handle_request: defer
+2024-09-24 08:11:19,767 INFO    HandlerThread:218979 [handler.py:handle_request_defer():184] handle defer: 4
+2024-09-24 08:11:19,767 DEBUG   SenderThread:218979 [sender.py:send_request():418] send_request: defer
+2024-09-24 08:11:19,768 INFO    SenderThread:218979 [sender.py:send_request_defer():622] handle sender defer: 4
+2024-09-24 08:11:19,768 INFO    SenderThread:218979 [sender.py:transition_state():626] send defer: 5
+2024-09-24 08:11:19,768 DEBUG   HandlerThread:218979 [handler.py:handle_request():158] handle_request: defer
+2024-09-24 08:11:19,768 INFO    HandlerThread:218979 [handler.py:handle_request_defer():184] handle defer: 5
+2024-09-24 08:11:19,768 DEBUG   SenderThread:218979 [sender.py:send():391] send: summary
+2024-09-24 08:11:19,768 INFO    SenderThread:218979 [sender.py:_save_file():1466] saving file wandb-summary.json with policy end
+2024-09-24 08:11:19,768 DEBUG   SenderThread:218979 [sender.py:send_request():418] send_request: defer
+2024-09-24 08:11:19,768 INFO    SenderThread:218979 [sender.py:send_request_defer():622] handle sender defer: 5
+2024-09-24 08:11:19,769 INFO    SenderThread:218979 [sender.py:transition_state():626] send defer: 6
+2024-09-24 08:11:19,769 DEBUG   HandlerThread:218979 [handler.py:handle_request():158] handle_request: defer
+2024-09-24 08:11:19,769 INFO    HandlerThread:218979 [handler.py:handle_request_defer():184] handle defer: 6
+2024-09-24 08:11:19,769 DEBUG   SenderThread:218979 [sender.py:send_request():418] send_request: defer
+2024-09-24 08:11:19,769 INFO    SenderThread:218979 [sender.py:send_request_defer():622] handle sender defer: 6
+2024-09-24 08:11:19,774 DEBUG   HandlerThread:218979 [handler.py:handle_request():158] handle_request: status_report
+2024-09-24 08:11:19,899 INFO    SenderThread:218979 [sender.py:transition_state():626] send defer: 7
+2024-09-24 08:11:19,899 DEBUG   HandlerThread:218979 [handler.py:handle_request():158] handle_request: defer
+2024-09-24 08:11:19,899 INFO    HandlerThread:218979 [handler.py:handle_request_defer():184] handle defer: 7
+2024-09-24 08:11:19,900 DEBUG   SenderThread:218979 [sender.py:send_request():418] send_request: defer
+2024-09-24 08:11:19,900 INFO    SenderThread:218979 [sender.py:send_request_defer():622] handle sender defer: 7
+2024-09-24 08:11:20,126 DEBUG   HandlerThread:218979 [handler.py:handle_request():158] handle_request: poll_exit
+2024-09-24 08:11:20,713 INFO    Thread-12 :218979 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/files/wandb-summary.json
+2024-09-24 08:11:20,714 INFO    Thread-12 :218979 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/files/config.yaml
+2024-09-24 08:11:20,714 INFO    Thread-12 :218979 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/files/output.log
+2024-09-24 08:11:22,616 INFO    SenderThread:218979 [sender.py:transition_state():626] send defer: 8
+2024-09-24 08:11:22,617 DEBUG   SenderThread:218979 [sender.py:send_request():418] send_request: poll_exit
+2024-09-24 08:11:22,617 DEBUG   HandlerThread:218979 [handler.py:handle_request():158] handle_request: defer
+2024-09-24 08:11:22,617 INFO    HandlerThread:218979 [handler.py:handle_request_defer():184] handle defer: 8
+2024-09-24 08:11:22,618 DEBUG   SenderThread:218979 [sender.py:send_request():418] send_request: defer
+2024-09-24 08:11:22,618 INFO    SenderThread:218979 [sender.py:send_request_defer():622] handle sender defer: 8
+2024-09-24 08:11:22,618 INFO    SenderThread:218979 [job_builder.py:build():443] Attempting to build job artifact
+2024-09-24 08:11:22,620 INFO    SenderThread:218979 [job_builder.py:_get_source_type():572] is repo sourced job
+2024-09-24 08:11:22,624 INFO    SenderThread:218979 [job_builder.py:build():548] adding wandb-job metadata file
+2024-09-24 08:11:22,628 INFO    SenderThread:218979 [sender.py:transition_state():626] send defer: 9
+2024-09-24 08:11:22,629 DEBUG   HandlerThread:218979 [handler.py:handle_request():158] handle_request: defer
+2024-09-24 08:11:22,629 INFO    HandlerThread:218979 [handler.py:handle_request_defer():184] handle defer: 9
+2024-09-24 08:11:22,630 DEBUG   SenderThread:218979 [sender.py:send():391] send: artifact
+2024-09-24 08:11:22,714 INFO    Thread-12 :218979 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/files/output.log
+2024-09-24 08:11:23,096 INFO    wandb-upload_0:218979 [upload_job.py:push():85] Skipped uploading /home/jingbo/.local/share/wandb/artifacts/staging/tmpwa0g0cbi
+2024-09-24 08:11:23,127 DEBUG   HandlerThread:218979 [handler.py:handle_request():158] handle_request: poll_exit
+2024-09-24 08:11:23,225 INFO    wandb-upload_1:218979 [upload_job.py:push():88] Uploaded file /tmp/tmpcg55o561/wandb-job.json
+2024-09-24 08:11:23,331 WARNING StreamThr :218979 [internal.py:is_dead():413] Internal process exiting, parent pid 217462 disappeared
+2024-09-24 08:11:23,331 ERROR   StreamThr :218979 [internal.py:wandb_internal():151] Internal process shutdown.
+2024-09-24 08:11:23,990 INFO    SenderThread:218979 [sender.py:send_artifact():1549] sent artifact job-https___github.com_KimperYang_KVMemory.git_finetune_combine.py - {'id': 'QXJ0aWZhY3Q6MTI0NTUyMTM4Mg==', 'state': 'PENDING', 'artifactSequence': {'id': 'QXJ0aWZhY3RDb2xsZWN0aW9uOjQ2MTI3Mzg1MA==', 'latestArtifact': {'id': 'QXJ0aWZhY3Q6MTI0NTUwNDQxNg==', 'versionIndex': 0}}}
+2024-09-24 08:11:23,990 INFO    SenderThread:218979 [sender.py:finish():1631] shutting down sender
+2024-09-24 08:11:23,990 INFO    SenderThread:218979 [dir_watcher.py:finish():358] shutting down directory watcher
+2024-09-24 08:11:24,128 INFO    HandlerThread:218979 [handler.py:finish():884] shutting down handler
+2024-09-24 08:11:24,128 INFO    WriterThread:218979 [datastore.py:close():296] close: /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/run-qegliayb.wandb
+2024-09-24 08:11:24,715 INFO    SenderThread:218979 [dir_watcher.py:finish():388] scan: /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/files
+2024-09-24 08:11:24,716 INFO    SenderThread:218979 [dir_watcher.py:finish():402] scan save: /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/files/conda-environment.yaml conda-environment.yaml
+2024-09-24 08:11:24,716 INFO    SenderThread:218979 [dir_watcher.py:finish():402] scan save: /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/files/output.log output.log
+2024-09-24 08:11:24,719 INFO    SenderThread:218979 [dir_watcher.py:finish():402] scan save: /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/files/wandb-metadata.json wandb-metadata.json
+2024-09-24 08:11:24,719 INFO    SenderThread:218979 [dir_watcher.py:finish():402] scan save: /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/files/requirements.txt requirements.txt
+2024-09-24 08:11:24,719 INFO    SenderThread:218979 [dir_watcher.py:finish():402] scan save: /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/files/wandb-summary.json wandb-summary.json
+2024-09-24 08:11:24,719 INFO    SenderThread:218979 [dir_watcher.py:finish():402] scan save: /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/files/config.yaml config.yaml
+2024-09-24 08:11:24,720 INFO    SenderThread:218979 [file_pusher.py:finish():169] shutting down file pusher
+2024-09-24 08:11:24,720 INFO    SenderThread:218979 [file_pusher.py:join():175] waiting for file pusher
+2024-09-24 08:11:24,980 INFO    wandb-upload_0:218979 [upload_job.py:push():130] Uploaded file /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/files/conda-environment.yaml
+2024-09-24 08:11:25,012 INFO    wandb-upload_2:218979 [upload_job.py:push():130] Uploaded file /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/files/requirements.txt
+2024-09-24 08:11:25,013 INFO    wandb-upload_1:218979 [upload_job.py:push():130] Uploaded file /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/files/output.log
+2024-09-24 08:11:25,019 INFO    wandb-upload_3:218979 [upload_job.py:push():130] Uploaded file /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/files/wandb-summary.json
+2024-09-24 08:11:25,031 INFO    wandb-upload_4:218979 [upload_job.py:push():130] Uploaded file /home/jingbo/KVMemory/wandb/run-20240924_081114-qegliayb/files/config.yaml
+2024-09-24 08:11:25,721 INFO    SenderThread:218979 [file_stream.py:finish():601] file stream finish called
+2024-09-24 08:11:25,793 INFO    SenderThread:218979 [file_stream.py:finish():605] file stream finish is done

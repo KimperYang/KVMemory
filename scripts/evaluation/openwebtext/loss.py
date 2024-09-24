@@ -4,14 +4,15 @@ from torch.nn import CrossEntropyLoss
 import pandas as pd    
 import json
 import datetime
+import random
 from datasets import load_dataset
 from peft import PeftModel, PeftConfig
 
 global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf")
-base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-hf", torch_dtype=torch.float16, device_map="auto")
+base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-hf", torch_dtype=torch.bfloat16, device_map="auto", use_flash_attention_2=True)
 
 # Load the LoRA adapter configuration
-peft_config_path = "/mnt/data/jingbo/kv_dump_2"  # Path to the directory where LoRA weights are stored
+peft_config_path = "/mnt/data/jingbo/kv_dump_5_900000"  # Path to the directory where LoRA weights are stored
 lora_config = PeftConfig.from_pretrained(peft_config_path)
 
 # Load the base model with the pretrained LoRA adapter
@@ -145,6 +146,10 @@ def main():
             split_input_ids = torch.split(memory_ids, num_tokens_per_part[j], dim=1)
             # print(j)
 
+            split_input_ids = list(split_input_ids)
+            random.shuffle(split_input_ids)
+            split_input_ids = tuple(split_input_ids)
+
             kv_list = [generate_kv_with_id(global_tokenizer("", return_tensors="pt").input_ids)] #initialize with kv cache for <s>
 
             for part in split_input_ids:
@@ -186,7 +191,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
     
-    file_name = f"result/openwebtext_{str(num_data_used)}_finetune2_{time_str}.json"
+    file_name = f"result/openwebtext_{str(num_data_used)}_finetune10kShuffle_{time_str}.json"
 
     with open(file_name, 'w', encoding='utf-8') as file:
         json.dump(res_dict, file, ensure_ascii=False, indent=4)

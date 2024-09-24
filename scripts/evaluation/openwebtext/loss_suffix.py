@@ -5,9 +5,16 @@ import pandas as pd
 import json
 import datetime
 from datasets import load_dataset
+from peft import PeftModel, PeftConfig
 
 global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf")
-global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-hf", torch_dtype=torch.float16, device_map="auto")
+base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-hf", torch_dtype=torch.float16, device_map="auto")
+
+peft_config_path = "/mnt/data/jingbo/kv_dump_normal"  # Path to the directory where LoRA weights are stored
+lora_config = PeftConfig.from_pretrained(peft_config_path)
+
+global_model = PeftModel.from_pretrained(base_model, peft_config_path)
+# global_model.to("cuda")
 
 def generate_kv_with_id(input_ids, p_id):
     model = global_model

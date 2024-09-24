@@ -1,0 +1,183 @@
+
+  0%|                                                                   | 0/100000 [00:00<?, ?it/s]We detected that you are passing `past_key_values` as a tuple and this is deprecated and will be removed in v4.43. Please use an appropriate `Cache` class (https://huggingface.co/docs/transformers/v4.41.3/en/internal/generation_utils#transformers.Cache)
+tensor(2.0538, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.4695, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.0155, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.0987, device='cuda:0', grad_fn=<DivBackward0>)
+  0%|                                                       | 1/100000 [00:05<144:48:48,  5.21s/it]
+tensor(2.1206, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.8646, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                       | 2/100000 [00:10<139:31:03,  5.02s/it]
+tensor(1.5601, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.9454, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.2470, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                       | 3/100000 [00:14<130:18:14,  4.69s/it]
+tensor(2.1894, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.9612, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.6692, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                       | 4/100000 [00:19<139:47:04,  5.03s/it]
+tensor(2.3746, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.1169, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.0729, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                       | 5/100000 [00:25<138:25:41,  4.98s/it]
+tensor(2.0873, device='cuda:0', grad_fn=<DivBackward0>)
+{'loss': 1.9848, 'grad_norm': 0.2359539121389389, 'learning_rate': 1.9999000000000003e-05, 'epoch': 0.0}
+tensor(2.2041, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.7236, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.0595, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                       | 6/100000 [00:29<135:50:54,  4.89s/it]
+tensor(1.9405, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.7713, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                       | 7/100000 [00:34<134:49:37,  4.85s/it]
+tensor(1.7606, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.3147, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.1619, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                       | 8/100000 [00:38<131:28:05,  4.73s/it]
+tensor(1.8787, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.1770, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.8193, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                       | 9/100000 [00:43<133:42:37,  4.81s/it]
+tensor(2.0621, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.7018, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.0583, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.6980, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.1728, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                      | 10/100000 [00:48<134:59:15,  4.86s/it]
+tensor(2.0265, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.7872, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.3579, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                      | 11/100000 [00:53<133:51:38,  4.82s/it]
+tensor(2.0816, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.0080, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                      | 12/100000 [00:58<135:42:05,  4.89s/it]
+tensor(2.4875, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.9468, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.7888, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                      | 13/100000 [01:03<137:40:32,  4.96s/it]
+tensor(2.2169, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.0384, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.8003, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                      | 14/100000 [01:07<132:03:22,  4.75s/it]
+tensor(2.0664, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.7128, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.8572, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                      | 15/100000 [01:12<130:29:14,  4.70s/it]
+tensor(2.0022, device='cuda:0', grad_fn=<DivBackward0>)
+{'loss': 2.0462, 'grad_norm': 0.36154717206954956, 'learning_rate': 1.9997000000000002e-05, 'epoch': 0.0}
+tensor(1.7566, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.3378, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                      | 16/100000 [01:18<138:38:52,  4.99s/it]
+tensor(2.0936, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.2367, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.8197, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.2389, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                      | 17/100000 [01:23<143:48:45,  5.18s/it]
+tensor(1.7909, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.1126, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                      | 18/100000 [01:28<139:46:17,  5.03s/it]
+tensor(1.7875, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.2416, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.2595, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.2093, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                      | 19/100000 [01:33<140:09:37,  5.05s/it]
+tensor(1.5678, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.0155, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.0787, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.3005, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                      | 20/100000 [01:38<142:47:12,  5.14s/it]
+tensor(1.7676, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.3215, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                      | 21/100000 [01:44<144:24:28,  5.20s/it]
+tensor(1.6597, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.8700, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.3586, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.1380, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                      | 22/100000 [01:49<144:17:44,  5.20s/it]
+tensor(1.8785, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.1798, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                      | 23/100000 [01:54<142:57:56,  5.15s/it]
+tensor(2.2397, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.0381, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.2876, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.9033, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                      | 24/100000 [01:59<137:51:08,  4.96s/it]
+tensor(1.7313, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.3466, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                      | 25/100000 [02:04<141:08:30,  5.08s/it]
+tensor(2.1946, device='cuda:0', grad_fn=<DivBackward0>)
+{'loss': 2.0329, 'grad_norm': 0.36823493242263794, 'learning_rate': 1.9995e-05, 'epoch': 0.0}
+tensor(1.4348, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.2474, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.9093, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                      | 26/100000 [02:09<145:15:50,  5.23s/it]
+tensor(2.1671, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.2520, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                      | 27/100000 [02:14<140:55:29,  5.07s/it]
+tensor(1.8804, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.8844, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.0167, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.9676, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                      | 28/100000 [02:19<141:37:38,  5.10s/it]
+tensor(1.9061, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.8263, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                      | 29/100000 [02:23<132:42:35,  4.78s/it]
+tensor(2.0211, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.8141, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.8553, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                      | 30/100000 [02:28<129:56:53,  4.68s/it]
+tensor(2.4972, device='cuda:0', grad_fn=<DivBackward0>)
+{'loss': 1.9513, 'grad_norm': 0.40849897265434265, 'learning_rate': 1.9994000000000002e-05, 'epoch': 0.0}
+tensor(2.0770, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(1.4881, device='cuda:0', grad_fn=<DivBackward0>)
+tensor(2.2261, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                                                      | 31/100000 [02:33<138:18:16,  4.98s/it]
+  0%|                                                      | 31/100000 [02:33<138:18:16,  4.98s/it]Traceback (most recent call last):
+  File "/home/jingbo/KVMemory/finetune_connect.py", line 93, in <module>
+    main()
+  File "/home/jingbo/KVMemory/finetune_connect.py", line 81, in main
+    trainer.train()
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 1938, in train
+    return inner_training_loop(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 2276, in _inner_training_loop
+    if (
+KeyboardInterrupt
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/home/jingbo/KVMemory/finetune_connect.py", line 93, in <module>
+[rank0]:     main()
+[rank0]:   File "/home/jingbo/KVMemory/finetune_connect.py", line 81, in main
+[rank0]:     trainer.train()
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 1938, in train
+[rank0]:     return inner_training_loop(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 2276, in _inner_training_loop
+[rank0]:     if (
+[rank0]: KeyboardInterrupt
