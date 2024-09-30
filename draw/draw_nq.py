@@ -1,18 +1,18 @@
 import matplotlib.pyplot as plt
 
 # Sample data for plotting
-loss = {
-        "1": 1.8297557709654961,
-        "2": 2.0815369892278,
-        "3": 2.0788785890637045,
-        "4": 2.0396675860394025,
-        "5": 2.021290003316488,
-        "6": 2.0193761908551475,
-        "7": 2.028433900434308,
-        "8": 2.040873513599772,
-        "9": 2.056359146009692,
-        "10": 2.0697534081866285
-    }
+# loss = {
+#         "1": 1.8297557709654961,
+#         "2": 2.0815369892278,
+#         "3": 2.0788785890637045,
+#         "4": 2.0396675860394025,
+#         "5": 2.021290003316488,
+#         "6": 2.0193761908551475,
+#         "7": 2.028433900434308,
+#         "8": 2.040873513599772,
+#         "9": 2.056359146009692,
+#         "10": 2.0697534081866285
+#     }
 
 # loss2 = {
 #         "1": 1.8298580955245538,
@@ -28,17 +28,18 @@ loss = {
 #     }
 
 loss3 = {
-        "1": 1.8243271416748414,
-        "2": 1.8285643948546932,
-        "3": 1.8335045022730103,
-        "4": 1.8383430682992685,
-        "5": 1.8438561746177677,
-        "6": 1.8486796359804845,
-        "7": 1.8545910325403252,
-        "8": 1.8601401515152611,
-        "9": 1.865784920560579,
-        "10": 1.8724461120912088
-    }
+        "1": 1.9066307102404385,
+        "2": 1.9088274213437089,
+        "3": 1.9120724506456843,
+        "4": 1.9154816194067519,
+        "5": 1.918934540668811,
+        "6": 1.9215957291271843,
+        "7": 1.9248291780677682,
+        "8": 1.9280335223320835,
+        "9": 1.93110067622658,
+        "10": 1.9346309569097326
+    
+}
 # accuracy_claude_13_100k = [100, 95, 93, 94]
 # accuracy_gpt = [100, 92, 90, 91]
 
@@ -46,11 +47,11 @@ loss3 = {
 plt.figure(figsize=(6, 4))
 
 # Plot each line with different styles and markers
-plt.plot(loss.keys(), loss.values(), label='Original Model', marker='o', linestyle='-', color='cornflowerblue', linewidth=2)
+# plt.plot(loss.keys(), loss.values(), label='Original Model', marker='o', linestyle='-', color='cornflowerblue', linewidth=2)
 # plt.plot(loss2.keys(), loss2.values(), label='With position info', marker='o', linestyle='-', color='tan', linewidth=2)
-plt.plot(loss3.keys(), loss3.values(), label='Finetuned Model', marker='o', linestyle='-', color='slategray', linewidth=2)
-plt.axhline(y=2.0528990041590975, color='red', linestyle='--', linewidth=2, label='Baseline')
-plt.axhline(y=1.813626458174075, color='green', linestyle='--', linewidth=2, label='UpperBound')
+plt.plot(loss3.keys(), loss3.values(), label='Finetuned KVMemory Model', marker='o', linestyle='-', color='slategray', linewidth=2)
+plt.axhline(y=2.0452591440400587, color='red', linestyle='--', linewidth=2, label='Llama2-7b-chat')
+plt.axhline(y=1.8297557709654961, color='green', linestyle='--', linewidth=2, label='Llama2-7b-base')
 # Customizing the plot
 plt.title('Average Next Token Loss on 2000 Data Samples')
 plt.xlabel('Num of Memorys')
@@ -62,7 +63,7 @@ plt.legend(loc='upper right')
 
 # Display the plot
 plt.tight_layout()
-plt.savefig('finetune.png')
+plt.savefig('finetune_cheatcombine.png')
 
 # import matplotlib.pyplot as plt
 

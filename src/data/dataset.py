@@ -98,7 +98,7 @@ class CustomDatasetCombine(Dataset):
                 if i==0:
                     t = conversation[i]["value"] + " [/INST] "
                 else:
-                    t = " </s><s>[INST] " + conversation[i]["value"]  + " [/INST] " 
+                    t = "<s> [INST] " + conversation[i]["value"]  + " [/INST] " 
                 
                 tokenized = self.tokenizer(t, return_tensors="pt")
 
@@ -118,11 +118,18 @@ class CustomDatasetCombine(Dataset):
 
                 input_ids = tokenized.input_ids[:, 1:]
                 attention_msk = tokenized.attention_mask[:, 1:]
-                if len(mask) + input_ids.size(1) > self.max_length: 
-                    input_ids = input_ids[:, :self.max_length - len(mask)]
-                    attention_msk = attention_msk[:, :self.max_length - len(mask)]
+                if len(mask) + input_ids.size(1) > self.max_length - 1: 
+                    input_ids = input_ids[:, :self.max_length - 1 - len(mask)]
+                    attention_msk = attention_msk[:, :self.max_length - 1 - len(mask)]
+
+                # add </s>
+                input_ids = torch.cat([input_ids, torch.tensor([[2]]).to(input_ids.device)], dim = 1)
+                attention_msk = torch.cat([attention_msk, torch.tensor([[1]]).to(attention_msk.device)], dim = 1)
 
                 mask.extend([1] * input_ids.size(1))
+
+                # print(input_ids.size(1),attention_msk.size(1))
+
                 input_ids_list.append(input_ids)
                 attention_mask_list.append(attention_msk)
 
@@ -177,7 +184,6 @@ class CustomDatasetCombine(Dataset):
         return input_ids, attention_mask
 
     def __getitem__(self, idx):
-        print(idx)
         if idx % 2 == 0:
             # Take a single sample from dataset1
             sample = self.dataset1[idx // 2]
@@ -215,6 +221,8 @@ def custom_collate_combine(batch):
     loss_masks = [item['loss_mask'] for item in batch]
 
     max_length = max([ids.size(1) for ids in input_ids])
+
+    # print(attention_mask[0].size(1), attention_mask[1].size(1))
 
     padded_input_ids = torch.cat([torch.cat([ids, torch.zeros(max_length - ids.size(1), dtype=torch.int64).unsqueeze(0)], dim = 1) for ids in input_ids], dim = 0)
     padded_attention_mask = torch.cat([torch.cat([mask, torch.zeros(max_length - mask.size(1), dtype=torch.int64).unsqueeze(0)], dim = 1) for mask in attention_mask], dim = 0)

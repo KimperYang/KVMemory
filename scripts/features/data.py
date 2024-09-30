@@ -12,6 +12,11 @@
 
 ########################
 from datasets import load_dataset
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM, DynamicCache
+import pandas as pd    
+import json
+import datetime
 
 # dataset = load_dataset("openwebtext")
 
@@ -34,8 +39,9 @@ from transformers import AutoTokenizer
 
 # Initialize the tokenizer (replace with your model's tokenizer if different)
 tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
-data = load_dataset("nvidia/Daring-Anteater")
-print(len(data['train']['conversations'][131]))
+jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_9.jsonl', lines=True)
+for j in range(10):
+    print(len(tokenizer(jsonObj["ctxs"][1][j]["text"]).input_ids))
 # q = data['train']['conversations'][132][0]['value']
 # for i in range(10):
 #     concat = ""

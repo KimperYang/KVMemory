@@ -3,9 +3,15 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, DynamicCache
 import pandas as pd    
 import json
 import datetime
-
+from peft import PeftModel, PeftConfig
 global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
-global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16, device_map="auto")
+base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16, device_map="auto")
+
+peft_config_path = "/mnt/data/jingbo/kv_dump_combine"  # Path to the directory where LoRA weights are stored
+lora_config = PeftConfig.from_pretrained(peft_config_path)
+
+global_model = PeftModel.from_pretrained(base_model, peft_config_path)
+global_model.to("cuda")
 
 def generate_kv(prompt):
 
@@ -96,7 +102,7 @@ def count_tokens(input_text):
 
 def main():
 
-    jsonObj = pd.read_json(path_or_buf='/home/jingbo/KVMemory/data/ifeval/input_data.jsonl', lines=True)
+    jsonObj = pd.read_json(path_or_buf='/home/jingbo/KVMemory/data/raw/ifeval/input_data.jsonl', lines=True)
 
     template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
 
@@ -131,7 +137,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/ifeval_baseline_{time_str}.jsonl"
+    file_name = f"result/ifeval_combinemodel_{time_str}.jsonl"
 
     with open(file_name, 'w') as f:
         for entry in res_list:

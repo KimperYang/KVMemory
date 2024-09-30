@@ -6,8 +6,8 @@ import datetime
 from rouge_score import rouge_scorer
 from datasets import load_dataset
 
-global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
-global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16, device_map="auto")
+global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.1-8B-Instruct")
+global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.1-8B-Instruct", torch_dtype=torch.float16, device_map="auto")
 
 def generate_kv(prompt):
 
@@ -68,7 +68,7 @@ def inference(input_ids, past_key_values, model_name="meta-llama/Llama-2-7b-chat
     
     model.eval()
 
-    max_length = input_ids.size(1) + 400
+    max_length = input_ids.size(1) + 100
 
     with torch.no_grad():
 
@@ -115,6 +115,13 @@ def reorganize_dialog(data):
     
     return organized_dialog
 
+def reorganize_summary(sum1, sum2):
+
+    concatenated_asst = "You: " + " ".join(sum1)
+    concatenated_user = "User: " + " ".join(sum2)
+
+    return concatenated_asst + " " + concatenated_user
+
 def calculate_rouge_l_score(candidate, reference):
     scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
     scores = scorer.score(reference, candidate)
@@ -127,40 +134,32 @@ def main():
 
     # print(reorganize_dialog(dataset["train"]["previous_dialogs"][0]))
 
-    template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant."
     # template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
     # template = "[INST] <<SYS>>\nYou're an assistant who answer the question with the knowledge provided in the prompt\n<</SYS>>\n\n"
 
-    total_num = len(dataset["train"]["previous_dialogs"])
+    data = dataset["train"]["summary_speaker_1"]
+    total_num = len(data)
     print(total_num)
     res_list = []
     score_list = []
 
     for i in range(total_num):
-
+        memory_list = []
         print("id:", str(i))
-        memory_list = reorganize_dialog(dataset["train"]["previous_dialogs"][i])
+        # memory_list.append(template)
 
-        for j in range(len(memory_list)):
-            memory_list[j] = str(memory_list[j])[1:-1]
-        # print(memory_list[0])
-        start_token = "<s>"
-        end_token = "[/INST]"
-        memory_list.insert(0, template)
-        memory_list.insert(0, start_token)
-        # memory_list.append(end_token)
+        for j in range(len(dataset["train"]["summary_speaker_1"][i])):
+            # print(j)
+            memory = reorganize_summary(dataset["train"]["summary_speaker_1"][i][j], dataset["train"]["summary_speaker_2"][i][j])
+            memory_list.append(memory)
 
-        new_prompt = "Answer the User's question based on above conversations. 'User': '" + dataset["train"]["self_instruct"][i]["B"] + "'[/INST]"
-
+        memory = " ".join(memory_list)
+        template = f"[INST] Your task is to answer a question from the user about your prior conversations. The following is a summary of all your prior conversations: {memory} Answer from the perspective of the persona provided (do not say that you are an AI assistant). If you do not have enough information to answer the question, reply 'NO ANSWER'. Either reply with the answer, or reply 'NO ANSWER', do not say anything else. "
+        # print(memory_list)
         # print(new_prompt)
 
-        seq = ""
-
-        for st in memory_list:
-            seq = seq + st
-
-        seq = seq + new_prompt
-
+        seq = template + dataset["train"]["self_instruct"][i]["B"] + "'[/INST]"
+        # print(seq)
         input_ids = global_tokenizer(seq, return_tensors="pt").input_ids
         input_ids = input_ids.to(global_model.device)
 
@@ -170,6 +169,7 @@ def main():
         gold_answer = dataset["train"]["self_instruct"][i]["A"]
         score = calculate_rouge_l_score(response, gold_answer)
 
+        print('answer', response)
         print('score:', str(score))
         score_list.append(score)
         res_list.append({"score": str(score),"question": dataset["train"]["self_instruct"][i]["B"], "response": response, "gold_answer": gold_answer})
@@ -180,7 +180,7 @@ def main():
 
     final_score = sum(score_list) / len(score_list)
 
-    file_name = f"result/dialog/dialog_baseline_{final_score}_{time_str}.json"
+    file_name = f"result/dialog/dialog_baseline_longer_{final_score}_{time_str}.json"
 
     with open(file_name, 'w') as f:
         for entry in res_list:

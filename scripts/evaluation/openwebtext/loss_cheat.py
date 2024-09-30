@@ -7,10 +7,10 @@ import datetime
 from datasets import load_dataset
 from peft import PeftModel, PeftConfig
 
-global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf")
-base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-hf", torch_dtype=torch.float16, device_map="auto", use_flash_attention_2=True)
+global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
+base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16, device_map="auto", use_flash_attention_2=True)
 
-peft_config_path = "/mnt/data/jingbo/kv_dump_cheat"  # Path to the directory where LoRA weights are stored
+peft_config_path = "/mnt/data/jingbo/kv_dump_combine"  # Path to the directory where LoRA weights are stored
 lora_config = PeftConfig.from_pretrained(peft_config_path)
 
 global_model = PeftModel.from_pretrained(base_model, peft_config_path)

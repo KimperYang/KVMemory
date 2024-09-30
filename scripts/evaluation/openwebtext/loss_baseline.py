@@ -7,35 +7,15 @@ import datetime
 from datasets import load_dataset
 from peft import PeftModel, PeftConfig
 
-global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf")
-base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-hf", torch_dtype=torch.float16, device_map="auto")
+# def generate_kv_with_id(input_ids, p_id):
+    # model = global_model
+    # input_ids = input_ids.to(model.device)
 
-peft_config_path = "/mnt/data/jingbo/kv_dump_normal"  # Path to the directory where LoRA weights are stored
-lora_config = PeftConfig.from_pretrained(peft_config_path)
+    # with torch.no_grad():
+    #     out = model(input_ids, position_ids = p_id)
+    #     past_key_values = out.past_key_values
 
-global_model = PeftModel.from_pretrained(base_model, peft_config_path)
-# global_model.to("cuda")
-
-def generate_kv_with_id(input_ids, p_id):
-    model = global_model
-    input_ids = input_ids.to(model.device)
-
-    with torch.no_grad():
-        out = model(input_ids, position_ids = p_id)
-        past_key_values = out.past_key_values
-
-    #filter <s>
-    # filtered_past_key_values = ()
-
-    # for past_keys, past_values in past_key_values:
-
-    #     filtered_keys = past_keys[:, :, 1:, :] 
-    #     filtered_values = past_values[:, :, 1:, :] 
-    #     filtered_past_key_values = filtered_past_key_values + ((filtered_keys, filtered_values),)
-
-    # print(past_key_values[0][0].size())
-
-    return past_key_values
+    # return past_key_values
 
 def append_kv(kv_list):
 
@@ -111,6 +91,15 @@ def memory_seg(memory_str, seg_method = 'paragraph', chunk_size = 25):
 
 def main():
 
+    global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
+    global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16, device_map="auto", use_flash_attention_2=True)
+
+    # peft_config_path = "/mnt/data/jingbo/kv_dump_normal"  # Path to the directory where LoRA weights are stored
+    # lora_config = PeftConfig.from_pretrained(peft_config_path)
+
+    # global_model = PeftModel.from_pretrained(base_model, peft_config_path)
+    global_model.to("cuda")
+
     num_data_used = 5000
     raw_data = load_data(num_data_used)
 
@@ -134,7 +123,8 @@ def main():
         if num_tokens < 1000:
             continue
 
-        input_ids = input_ids[:, :1000]
+        input_ids = input_ids[:, :1000].to(global_model.device)
+
         attention_mask = attention_mask[:,:1000]
         attention_mask[:, :505] = 0
 
@@ -153,7 +143,7 @@ def main():
         losses = losses.view(shift_logits.size(0), -1)
 
         # print(attention_mask)
-        mask = attention_mask[0, 1:].clone()
+        mask = attention_mask[0, 1:].clone().to(global_model.device)
         # print(mask.size())
 
         masked_losses = losses * mask

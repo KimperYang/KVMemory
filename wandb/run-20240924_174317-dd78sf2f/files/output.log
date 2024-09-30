@@ -224,3 +224,234 @@ loss2:  tensor(0.6263, device='cuda:0', grad_fn=<DivBackward0>)
 
 loss2:  tensor(0.6531, device='cuda:0', grad_fn=<DivBackward0>)
 loss2:  tensor(0.6531, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.6801, device='cuda:0', grad_fn=<DivBackward0>)
+
+loss2:  tensor(0.6779, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(1.0387, device='cuda:0', grad_fn=<DivBackward0>)
+
+loss2:  tensor(0.8805, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.8805, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.6000, device='cuda:0', grad_fn=<DivBackward0>)
+
+loss2:  tensor(0.6486, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.6486, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.7877, device='cuda:0', grad_fn=<DivBackward0>)
+
+loss2:  tensor(0.5948, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.5948, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(1.1888, device='cuda:0', grad_fn=<DivBackward0>)
+
+241s2:  tensor(1.1888, device='cuda:0', grad_fn=<DivBackward0>)
+245s2:  tensor(1.1888, device='cuda:0', grad_fn=<DivBackward0>)
+245s2:  tensor(1.1888, device='cuda:0', grad_fn=<DivBackward0>)
+
+249s2:  tensor(1.1888, device='cuda:0', grad_fn=<DivBackward0>)
+252s2:  tensor(1.1888, device='cuda:0', grad_fn=<DivBackward0>)
+252s2:  tensor(1.1888, device='cuda:0', grad_fn=<DivBackward0>)
+
+loss2:  tensor(0.4951, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.4951, device='cuda:0', grad_fn=<DivBackward0>)
+262s2:  tensor(0.4951, device='cuda:0', grad_fn=<DivBackward0>)
+
+loss2:  tensor(0.6491, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.6491, device='cuda:0', grad_fn=<DivBackward0>)
+270s2:  tensor(0.6491, device='cuda:0', grad_fn=<DivBackward0>)
+
+loss2:  tensor(0.6912, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.6912, device='cuda:0', grad_fn=<DivBackward0>)
+278s2:  tensor(0.6912, device='cuda:0', grad_fn=<DivBackward0>)
+
+281s2:  tensor(0.6912, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.6898, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.6898, device='cuda:0', grad_fn=<DivBackward0>)
+
+288s2:  tensor(0.6898, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.9329, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.9329, device='cuda:0', grad_fn=<DivBackward0>)
+
+296s2:  tensor(0.9329, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.7059, device='cuda:0', grad_fn=<DivBackward0>)
+302s2:  tensor(0.7059, device='cuda:0', grad_fn=<DivBackward0>)
+
+loss2:  tensor(0.7771, device='cuda:0', grad_fn=<DivBackward0>)
+308s2:  tensor(0.7771, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.3555, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                              | 39/10000 [03:52<16:07:56,  5.83s/it]
+316s2:  tensor(0.3555, device='cuda:0', grad_fn=<DivBackward0>)
+316s2:  tensor(0.3555, device='cuda:0', grad_fn=<DivBackward0>)
+
+321s2:  tensor(0.3555, device='cuda:0', grad_fn=<DivBackward0>)
+321s2:  tensor(0.3555, device='cuda:0', grad_fn=<DivBackward0>)
+326s2:  tensor(0.3555, device='cuda:0', grad_fn=<DivBackward0>)
+
+loss2:  tensor(0.3880, device='cuda:0', grad_fn=<DivBackward0>)
+332s2:  tensor(0.3880, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.7879, device='cuda:0', grad_fn=<DivBackward0>)
+
+338s2:  tensor(0.7879, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.7879, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.6010, device='cuda:0', grad_fn=<DivBackward0>)
+
+346s2:  tensor(0.6010, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.7511, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.7511, device='cuda:0', grad_fn=<DivBackward0>)
+
+354s2:  tensor(0.7511, device='cuda:0', grad_fn=<DivBackward0>)
+354s2:  tensor(0.7511, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.7222, device='cuda:0', grad_fn=<DivBackward0>)
+
+loss2:  tensor(0.6744, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.6744, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.3640, device='cuda:0', grad_fn=<DivBackward0>)
+
+370s2:  tensor(0.3640, device='cuda:0', grad_fn=<DivBackward0>)
+370s2:  tensor(0.3640, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.6402, device='cuda:0', grad_fn=<DivBackward0>)
+
+378s2:  tensor(0.6402, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.6402, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.8184, device='cuda:0', grad_fn=<DivBackward0>)
+
+386s2:  tensor(0.8184, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.8184, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.7118, device='cuda:0', grad_fn=<DivBackward0>)
+
+394s2:  tensor(0.7118, device='cuda:0', grad_fn=<DivBackward0>)
+394s2:  tensor(0.7118, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.7038, device='cuda:0', grad_fn=<DivBackward0>)
+
+loss2:  tensor(0.4126, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.4126, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.6283, device='cuda:0', grad_fn=<DivBackward0>)
+
+410s2:  tensor(0.6283, device='cuda:0', grad_fn=<DivBackward0>)
+410s2:  tensor(0.6283, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.3644, device='cuda:0', grad_fn=<DivBackward0>)
+
+  1%|▏                             | 52/10000 [05:10<16:43:31,  6.05s/it]
+420s2:  tensor(0.3644, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.6020, device='cuda:0', grad_fn=<DivBackward0>)
+
+  1%|▏                             | 53/10000 [05:16<16:47:17,  6.08s/it]
+  1%|▏                             | 53/10000 [05:16<16:47:17,  6.08s/it]Traceback (most recent call last):
+  File "/home/jingbo/KVMemory/finetune_combine.py", line 94, in <module>
+    main()
+  File "/home/jingbo/KVMemory/finetune_combine.py", line 86, in main
+    trainer.train()
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 1938, in train
+    return inner_training_loop(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 2274, in _inner_training_loop
+    tr_loss_step = self.training_step(model, inputs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 3313, in training_step
+    loss = self.compute_loss(model, inputs)
+  File "/home/jingbo/KVMemory/src/training/trainer.py", line 297, in compute_loss
+    split_past_key_values = generate_kv_with_position(self.model, split_input_ids, position_ids = memory_position_batch)
+  File "/home/jingbo/KVMemory/src/utils/cache.py", line 27, in generate_kv_with_position
+    out = model(input_ids = input_ids, position_ids = position_ids)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/peft_model.py", line 1430, in forward
+    return self.base_model(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/tuners/tuners_utils.py", line 179, in forward
+    return self.model.forward(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 1076, in forward
+    outputs = self.model(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 880, in forward
+    layer_outputs = decoder_layer(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 619, in forward
+    hidden_states, self_attn_weights, present_key_value = self.self_attn(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 397, in forward
+    query_states = self.q_proj(hidden_states)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/tuners/lora/layer.py", line 569, in forward
+    result = result + lora_B(lora_A(dropout(x))) * scaling
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/linear.py", line 116, in forward
+    return F.linear(input, self.weight, self.bias)
+KeyboardInterrupt
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/home/jingbo/KVMemory/finetune_combine.py", line 94, in <module>
+[rank0]:     main()
+[rank0]:   File "/home/jingbo/KVMemory/finetune_combine.py", line 86, in main
+[rank0]:     trainer.train()
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 1938, in train
+[rank0]:     return inner_training_loop(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 2274, in _inner_training_loop
+[rank0]:     tr_loss_step = self.training_step(model, inputs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 3313, in training_step
+[rank0]:     loss = self.compute_loss(model, inputs)
+[rank0]:   File "/home/jingbo/KVMemory/src/training/trainer.py", line 297, in compute_loss
+[rank0]:     split_past_key_values = generate_kv_with_position(self.model, split_input_ids, position_ids = memory_position_batch)
+[rank0]:   File "/home/jingbo/KVMemory/src/utils/cache.py", line 27, in generate_kv_with_position
+[rank0]:     out = model(input_ids = input_ids, position_ids = position_ids)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/peft_model.py", line 1430, in forward
+[rank0]:     return self.base_model(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/tuners/tuners_utils.py", line 179, in forward
+[rank0]:     return self.model.forward(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 1076, in forward
+[rank0]:     outputs = self.model(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 880, in forward
+[rank0]:     layer_outputs = decoder_layer(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 619, in forward
+[rank0]:     hidden_states, self_attn_weights, present_key_value = self.self_attn(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 397, in forward
+[rank0]:     query_states = self.q_proj(hidden_states)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/tuners/lora/layer.py", line 569, in forward
+[rank0]:     result = result + lora_B(lora_A(dropout(x))) * scaling
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/linear.py", line 116, in forward
+[rank0]:     return F.linear(input, self.weight, self.bias)
+[rank0]: KeyboardInterrupt
+loss2:  tensor(0.6020, device='cuda:0', grad_fn=<DivBackward0>)

@@ -348,10 +348,7 @@ class CustomTrainerCombine(Trainer):
             valid_positions = mask.sum()
 
             batch_loss2 = masked_losses_sum / valid_positions
-            print("loss2: ",batch_loss2)
-            if batch_loss2.item() == 0:
-                batch_loss2.fill_(0.7)
-                print("warning")
+            # print("loss2: ",batch_loss2)
 
         final_loss = (batch_loss1 + batch_loss2) / 2
         

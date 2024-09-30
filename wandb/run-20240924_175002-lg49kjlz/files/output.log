@@ -1,0 +1,738 @@
+
+  0%|                                          | 0/10000 [00:00<?, ?it/s]We detected that you are passing `past_key_values` as a tuple and this is deprecated and will be removed in v4.43. Please use an appropriate `Cache` class (https://huggingface.co/docs/transformers/v4.41.3/en/internal/generation_utils#transformers.Cache)
+0
+1
+loss2:  tensor(0.7782, device='cuda:0', grad_fn=<DivBackward0>)
+2
+3
+loss2:  tensor(0.1628, device='cuda:0', grad_fn=<DivBackward0>)
+4
+5
+loss2:  tensor(0.4135, device='cuda:0', grad_fn=<DivBackward0>)
+6
+7
+  0%|                               | 1/10000 [00:06<17:43:17,  6.38s/it]
+loss2:  tensor(0.7684, device='cuda:0', grad_fn=<DivBackward0>)
+8
+9
+loss2:  tensor(0.6680, device='cuda:0', grad_fn=<DivBackward0>)
+10
+11
+loss2:  tensor(0.7561, device='cuda:0', grad_fn=<DivBackward0>)
+12
+13
+loss2:  tensor(0.8609, device='cuda:0', grad_fn=<DivBackward0>)
+14
+15
+
+  0%|                               | 2/10000 [00:11<16:09:00,  5.82s/it]
+16
+17
+loss2:  tensor(0.6089, device='cuda:0', grad_fn=<DivBackward0>)
+18
+19
+loss2:  tensor(0.7212, device='cuda:0', grad_fn=<DivBackward0>)
+20
+21
+loss2:  tensor(0.7178, device='cuda:0', grad_fn=<DivBackward0>)
+22
+
+  0%|                               | 3/10000 [00:17<16:27:51,  5.93s/it]
+loss2:  tensor(0.3127, device='cuda:0', grad_fn=<DivBackward0>)
+24
+25
+loss2:  tensor(0.6947, device='cuda:0', grad_fn=<DivBackward0>)
+26
+27
+loss2:  tensor(0.7110, device='cuda:0', grad_fn=<DivBackward0>)
+28
+29
+loss2:  tensor(0.8090, device='cuda:0', grad_fn=<DivBackward0>)
+30
+
+  0%|                               | 4/10000 [00:23<16:33:31,  5.96s/it]
+loss2:  tensor(0.6977, device='cuda:0', grad_fn=<DivBackward0>)
+32
+33
+loss2:  tensor(1.1683, device='cuda:0', grad_fn=<DivBackward0>)
+34
+35
+loss2:  tensor(0.8068, device='cuda:0', grad_fn=<DivBackward0>)
+36
+37
+loss2:  tensor(0.7170, device='cuda:0', grad_fn=<DivBackward0>)
+38
+39
+
+  0%|                               | 5/10000 [00:30<16:42:40,  6.02s/it]
+{'loss': 1.4306, 'grad_norm': 0.2256215512752533, 'learning_rate': 1.9990000000000003e-05, 'epoch': 0.0}
+40
+41
+loss2:  tensor(0.7315, device='cuda:0', grad_fn=<DivBackward0>)
+42
+43
+loss2:  tensor(0.7421, device='cuda:0', grad_fn=<DivBackward0>)
+44
+45
+loss2:  tensor(0.8159, device='cuda:0', grad_fn=<DivBackward0>)
+46
+
+  0%|                               | 6/10000 [00:36<17:02:47,  6.14s/it]
+loss2:  tensor(0.7071, device='cuda:0', grad_fn=<DivBackward0>)
+48
+49
+loss2:  tensor(0.6910, device='cuda:0', grad_fn=<DivBackward0>)
+50
+51
+loss2:  tensor(1.0365, device='cuda:0', grad_fn=<DivBackward0>)
+52
+53
+loss2:  tensor(0.8216, device='cuda:0', grad_fn=<DivBackward0>)
+54
+55
+
+loss2:  tensor(0.7631, device='cuda:0', grad_fn=<DivBackward0>)
+56
+57
+loss2:  tensor(0.8393, device='cuda:0', grad_fn=<DivBackward0>)
+58
+59
+loss2:  tensor(0.7339, device='cuda:0', grad_fn=<DivBackward0>)
+60
+61
+loss2:  tensor(0.6186, device='cuda:0', grad_fn=<DivBackward0>)
+62
+
+  0%|                               | 8/10000 [00:47<16:11:51,  5.84s/it]
+loss2:  tensor(0.6825, device='cuda:0', grad_fn=<DivBackward0>)
+64
+65
+loss2:  tensor(1.2758, device='cuda:0', grad_fn=<DivBackward0>)
+66
+67
+loss2:  tensor(0.6792, device='cuda:0', grad_fn=<DivBackward0>)
+68
+69
+loss2:  tensor(1.1288, device='cuda:0', grad_fn=<DivBackward0>)
+70
+71
+loss2:  tensor(0.9483, device='cuda:0', grad_fn=<DivBackward0>)
+
+75ss2:  tensor(1.1288, device='cuda:0', grad_fn=<DivBackward0>)
+73
+loss2:  tensor(0.4704, device='cuda:0', grad_fn=<DivBackward0>)
+74
+75ss2:  tensor(1.1288, device='cuda:0', grad_fn=<DivBackward0>)
+loss2:  tensor(0.6139, device='cuda:0', grad_fn=<DivBackward0>)
+76
+77
+
+loss2:  tensor(0.5743, device='cuda:0', grad_fn=<DivBackward0>)
+78
+79
+loss2:  tensor(0.7199, device='cuda:0', grad_fn=<DivBackward0>)
+{'loss': 1.483, 'grad_norm': 0.260821670293808, 'learning_rate': 1.9980000000000002e-05, 'epoch': 0.0}
+80
+81
+loss2:  tensor(0.5055, device='cuda:0', grad_fn=<DivBackward0>)
+82
+83
+loss2:  tensor(0.7440, device='cuda:0', grad_fn=<DivBackward0>)
+84
+85
+loss2:  tensor(0.7247, device='cuda:0', grad_fn=<DivBackward0>)
+86
+87
+
+  0%|                              | 11/10000 [01:05<16:35:27,  5.98s/it]
+88
+89
+loss2:  tensor(12.7440, device='cuda:0', grad_fn=<DivBackward0>)
+90
+91
+loss2:  tensor(0.4200, device='cuda:0', grad_fn=<DivBackward0>)
+92
+93
+
+  0%|                              | 12/10000 [01:10<16:06:25,  5.81s/it]
+94
+95
+loss2:  tensor(0.9992, device='cuda:0', grad_fn=<DivBackward0>)
+96
+97
+loss2:  tensor(0.5693, device='cuda:0', grad_fn=<DivBackward0>)
+98
+99
+loss2:  tensor(0.6882, device='cuda:0', grad_fn=<DivBackward0>)
+100
+101
+
+  0%|                              | 13/10000 [01:16<15:54:24,  5.73s/it]
+102
+103
+loss2:  tensor(1.1003, device='cuda:0', grad_fn=<DivBackward0>)
+104
+105
+loss2:  tensor(0.7864, device='cuda:0', grad_fn=<DivBackward0>)
+106
+107
+loss2:  tensor(1.1229, device='cuda:0', grad_fn=<DivBackward0>)
+108
+109
+
+  0%|                              | 14/10000 [01:22<16:18:28,  5.88s/it]
+110
+111
+loss2:  tensor(1.3776, device='cuda:0', grad_fn=<DivBackward0>)
+112
+113
+loss2:  tensor(0.6499, device='cuda:0', grad_fn=<DivBackward0>)
+114
+115
+loss2:  tensor(0.7047, device='cuda:0', grad_fn=<DivBackward0>)
+116
+117
+
+  0%|                              | 15/10000 [01:28<16:24:54,  5.92s/it]
+118
+119
+loss2:  tensor(1.1541, device='cuda:0', grad_fn=<DivBackward0>)
+{'loss': 1.7659, 'grad_norm': 0.2414878010749817, 'learning_rate': 1.9970000000000004e-05, 'epoch': 0.0}
+120
+121
+loss2:  tensor(0.7218, device='cuda:0', grad_fn=<DivBackward0>)
+122
+123
+loss2:  tensor(0.7255, device='cuda:0', grad_fn=<DivBackward0>)
+124
+125
+loss2:  tensor(0.8489, device='cuda:0', grad_fn=<DivBackward0>)
+126
+
+  0%|                              | 16/10000 [01:34<16:02:09,  5.78s/it]
+loss2:  tensor(0.7633, device='cuda:0', grad_fn=<DivBackward0>)
+128
+129
+loss2:  tensor(0.9580, device='cuda:0', grad_fn=<DivBackward0>)
+130
+131
+loss2:  tensor(0.8832, device='cuda:0', grad_fn=<DivBackward0>)
+132
+133
+loss2:  tensor(0.5288, device='cuda:0', grad_fn=<DivBackward0>)
+134
+
+  0%|                              | 17/10000 [01:40<16:12:52,  5.85s/it]
+loss2:  tensor(0.6189, device='cuda:0', grad_fn=<DivBackward0>)
+136
+137
+loss2:  tensor(0.7439, device='cuda:0', grad_fn=<DivBackward0>)
+138
+139
+loss2:  tensor(0.6031, device='cuda:0', grad_fn=<DivBackward0>)
+140
+141
+loss2:  tensor(0.7870, device='cuda:0', grad_fn=<DivBackward0>)
+142
+
+  0%|                              | 18/10000 [01:46<16:27:42,  5.94s/it]
+loss2:  tensor(0.6706, device='cuda:0', grad_fn=<DivBackward0>)
+144
+145
+loss2:  tensor(0.5542, device='cuda:0', grad_fn=<DivBackward0>)
+146
+147
+loss2:  tensor(0.5682, device='cuda:0', grad_fn=<DivBackward0>)
+148
+149
+loss2:  tensor(0.7826, device='cuda:0', grad_fn=<DivBackward0>)
+150
+
+  0%|                              | 19/10000 [01:52<16:38:11,  6.00s/it]
+loss2:  tensor(0.9054, device='cuda:0', grad_fn=<DivBackward0>)
+152
+153
+loss2:  tensor(0.6938, device='cuda:0', grad_fn=<DivBackward0>)
+154
+155
+loss2:  tensor(0.6274, device='cuda:0', grad_fn=<DivBackward0>)
+156
+157
+
+  0%|                              | 20/10000 [01:58<16:37:34,  6.00s/it]
+158
+159
+loss2:  tensor(1.0081, device='cuda:0', grad_fn=<DivBackward0>)
+{'loss': 1.4602, 'grad_norm': 0.2704031765460968, 'learning_rate': 1.9960000000000002e-05, 'epoch': 0.0}
+160
+161
+loss2:  tensor(0.7743, device='cuda:0', grad_fn=<DivBackward0>)
+162
+163
+loss2:  tensor(0.7596, device='cuda:0', grad_fn=<DivBackward0>)
+164
+165
+
+  0%|                              | 21/10000 [02:04<16:44:17,  6.04s/it]
+166
+167
+loss2:  tensor(0.7915, device='cuda:0', grad_fn=<DivBackward0>)
+168
+169
+loss2:  tensor(0.3811, device='cuda:0', grad_fn=<DivBackward0>)
+170
+171
+loss2:  tensor(0.9320, device='cuda:0', grad_fn=<DivBackward0>)
+172
+173
+
+  0%|                              | 22/10000 [02:10<16:53:01,  6.09s/it]
+174
+175
+loss2:  tensor(0.7959, device='cuda:0', grad_fn=<DivBackward0>)
+176
+177
+loss2:  tensor(0.9670, device='cuda:0', grad_fn=<DivBackward0>)
+178
+179
+loss2:  tensor(0.7278, device='cuda:0', grad_fn=<DivBackward0>)
+180
+181
+loss2:  tensor(0.6725, device='cuda:0', grad_fn=<DivBackward0>)
+182
+
+  0%|                              | 23/10000 [02:16<16:35:31,  5.99s/it]
+loss2:  tensor(0.5797, device='cuda:0', grad_fn=<DivBackward0>)
+184
+185
+loss2:  tensor(0.9235, device='cuda:0', grad_fn=<DivBackward0>)
+186
+187
+loss2:  tensor(0.5348, device='cuda:0', grad_fn=<DivBackward0>)
+188
+189
+
+  0%|                              | 24/10000 [02:22<16:37:48,  6.00s/it]
+190
+191
+loss2:  tensor(0.8270, device='cuda:0', grad_fn=<DivBackward0>)
+192
+193
+loss2:  tensor(0.7610, device='cuda:0', grad_fn=<DivBackward0>)
+194
+195
+loss2:  tensor(0.6753, device='cuda:0', grad_fn=<DivBackward0>)
+196
+197
+loss2:  tensor(1.1201, device='cuda:0', grad_fn=<DivBackward0>)
+198
+
+  0%|                              | 25/10000 [02:28<16:21:37,  5.90s/it]
+loss2:  tensor(0.8687, device='cuda:0', grad_fn=<DivBackward0>)
+{'loss': 1.4663, 'grad_norm': 0.2702772617340088, 'learning_rate': 1.9950000000000004e-05, 'epoch': 0.0}
+200
+201
+loss2:  tensor(0.2051, device='cuda:0', grad_fn=<DivBackward0>)
+202
+203
+loss2:  tensor(0.8827, device='cuda:0', grad_fn=<DivBackward0>)
+204
+205
+loss2:  tensor(0.4782, device='cuda:0', grad_fn=<DivBackward0>)
+206
+
+  0%|                              | 26/10000 [02:34<16:41:19,  6.02s/it]
+loss2:  tensor(0.7053, device='cuda:0', grad_fn=<DivBackward0>)
+208
+209
+loss2:  tensor(0.6690, device='cuda:0', grad_fn=<DivBackward0>)
+210
+211
+loss2:  tensor(0.7672, device='cuda:0', grad_fn=<DivBackward0>)
+212
+213
+loss2:  tensor(0.6420, device='cuda:0', grad_fn=<DivBackward0>)
+214
+
+  0%|                              | 27/10000 [02:40<16:37:35,  6.00s/it]
+loss2:  tensor(0.5530, device='cuda:0', grad_fn=<DivBackward0>)
+216
+217
+loss2:  tensor(0.8200, device='cuda:0', grad_fn=<DivBackward0>)
+218
+219
+loss2:  tensor(0.7985, device='cuda:0', grad_fn=<DivBackward0>)
+220
+221
+loss2:  tensor(0.4909, device='cuda:0', grad_fn=<DivBackward0>)
+
+  0%|                              | 28/10000 [02:46<16:39:05,  6.01s/it]
+223
+loss2:  tensor(0.5420, device='cuda:0', grad_fn=<DivBackward0>)
+224
+225
+loss2:  tensor(0.5153, device='cuda:0', grad_fn=<DivBackward0>)
+226
+227
+loss2:  tensor(0.8113, device='cuda:0', grad_fn=<DivBackward0>)
+228
+229
+loss2:  tensor(0.6846, device='cuda:0', grad_fn=<DivBackward0>)
+230
+
+  0%|                              | 29/10000 [02:52<16:39:58,  6.02s/it]
+loss2:  tensor(0.6490, device='cuda:0', grad_fn=<DivBackward0>)
+232
+233
+loss2:  tensor(0.7135, device='cuda:0', grad_fn=<DivBackward0>)
+234
+235
+loss2:  tensor(0.5432, device='cuda:0', grad_fn=<DivBackward0>)
+236
+237
+
+  0%|                              | 30/10000 [02:58<16:47:35,  6.06s/it]
+238
+239
+loss2:  tensor(0.6293, device='cuda:0', grad_fn=<DivBackward0>)
+{'loss': 1.3645, 'grad_norm': 0.24109512567520142, 'learning_rate': 1.9940000000000002e-05, 'epoch': 0.0}
+240
+241
+loss2:  tensor(0.5948, device='cuda:0', grad_fn=<DivBackward0>)
+242
+243
+loss2:  tensor(0.7698, device='cuda:0', grad_fn=<DivBackward0>)
+244
+245
+
+  0%|                              | 31/10000 [03:04<16:22:37,  5.91s/it]
+246
+247
+loss2:  tensor(0.8637, device='cuda:0', grad_fn=<DivBackward0>)
+248
+249
+loss2:  tensor(0.6135, device='cuda:0', grad_fn=<DivBackward0>)
+250
+251
+loss2:  tensor(0.4895, device='cuda:0', grad_fn=<DivBackward0>)
+252
+253
+loss2:  tensor(0.3528, device='cuda:0', grad_fn=<DivBackward0>)
+254
+
+  0%|                              | 32/10000 [03:10<16:39:57,  6.02s/it]
+loss2:  tensor(0.7890, device='cuda:0', grad_fn=<DivBackward0>)
+256
+257
+loss2:  tensor(0.9001, device='cuda:0', grad_fn=<DivBackward0>)
+258
+259
+loss2:  tensor(0.8377, device='cuda:0', grad_fn=<DivBackward0>)
+260
+261
+loss2:  tensor(0.7272, device='cuda:0', grad_fn=<DivBackward0>)
+262
+
+  0%|                              | 33/10000 [03:16<16:26:00,  5.94s/it]
+loss2:  tensor(0.6076, device='cuda:0', grad_fn=<DivBackward0>)
+264
+265
+loss2:  tensor(0.5528, device='cuda:0', grad_fn=<DivBackward0>)
+266
+267
+loss2:  tensor(0.7775, device='cuda:0', grad_fn=<DivBackward0>)
+268
+269
+loss2:  tensor(0.8045, device='cuda:0', grad_fn=<DivBackward0>)
+270
+
+  0%|                              | 34/10000 [03:22<16:36:35,  6.00s/it]
+loss2:  tensor(0.5777, device='cuda:0', grad_fn=<DivBackward0>)
+272
+273
+loss2:  tensor(0.8039, device='cuda:0', grad_fn=<DivBackward0>)
+274
+275
+loss2:  tensor(0.9120, device='cuda:0', grad_fn=<DivBackward0>)
+276
+277
+loss2:  tensor(0.9307, device='cuda:0', grad_fn=<DivBackward0>)
+278
+
+  0%|                              | 35/10000 [03:28<16:25:54,  5.94s/it]
+loss2:  tensor(1.0720, device='cuda:0', grad_fn=<DivBackward0>)
+{'loss': 1.3968, 'grad_norm': 0.3619414269924164, 'learning_rate': 1.9930000000000004e-05, 'epoch': 0.0}
+280
+281
+loss2:  tensor(0.7645, device='cuda:0', grad_fn=<DivBackward0>)
+282
+283
+loss2:  tensor(0.9156, device='cuda:0', grad_fn=<DivBackward0>)
+284
+285
+loss2:  tensor(0.5663, device='cuda:0', grad_fn=<DivBackward0>)
+286
+
+  0%|                              | 36/10000 [03:34<16:35:37,  6.00s/it]
+loss2:  tensor(0.7731, device='cuda:0', grad_fn=<DivBackward0>)
+288
+289
+loss2:  tensor(0.7874, device='cuda:0', grad_fn=<DivBackward0>)
+290
+291
+loss2:  tensor(0.3419, device='cuda:0', grad_fn=<DivBackward0>)
+292
+293
+loss2:  tensor(0.6912, device='cuda:0', grad_fn=<DivBackward0>)
+294
+
+  0%|                              | 37/10000 [03:40<16:42:54,  6.04s/it]
+loss2:  tensor(0.7240, device='cuda:0', grad_fn=<DivBackward0>)
+296
+297
+loss2:  tensor(0.6840, device='cuda:0', grad_fn=<DivBackward0>)
+298
+299
+loss2:  tensor(0.8002, device='cuda:0', grad_fn=<DivBackward0>)
+300
+301
+loss2:  tensor(0.6648, device='cuda:0', grad_fn=<DivBackward0>)
+302
+
+  0%|                              | 38/10000 [03:46<16:33:52,  5.99s/it]
+loss2:  tensor(0.7514, device='cuda:0', grad_fn=<DivBackward0>)
+304
+305
+loss2:  tensor(0.4612, device='cuda:0', grad_fn=<DivBackward0>)
+306
+307
+loss2:  tensor(0.5880, device='cuda:0', grad_fn=<DivBackward0>)
+308
+309
+loss2:  tensor(0.3474, device='cuda:0', grad_fn=<DivBackward0>)
+310
+
+  0%|                              | 39/10000 [03:52<16:39:48,  6.02s/it]
+loss2:  tensor(0.4533, device='cuda:0', grad_fn=<DivBackward0>)
+312
+313
+loss2:  tensor(0.7206, device='cuda:0', grad_fn=<DivBackward0>)
+314
+315
+loss2:  tensor(0.6430, device='cuda:0', grad_fn=<DivBackward0>)
+316
+317
+loss2:  tensor(0.8418, device='cuda:0', grad_fn=<DivBackward0>)
+318
+
+  0%|                              | 40/10000 [03:58<16:50:37,  6.09s/it]
+loss2:  tensor(0.8421, device='cuda:0', grad_fn=<DivBackward0>)
+{'loss': 1.3713, 'grad_norm': 0.25076615810394287, 'learning_rate': 1.9920000000000002e-05, 'epoch': 0.0}
+320
+321
+loss2:  tensor(0.2762, device='cuda:0', grad_fn=<DivBackward0>)
+322
+323
+loss2:  tensor(0.6274, device='cuda:0', grad_fn=<DivBackward0>)
+324
+325
+
+  0%|                              | 41/10000 [04:04<16:47:47,  6.07s/it]
+326
+327
+loss2:  tensor(0.6651, device='cuda:0', grad_fn=<DivBackward0>)
+328
+329
+loss2:  tensor(0.5271, device='cuda:0', grad_fn=<DivBackward0>)
+330
+331
+loss2:  tensor(0.6406, device='cuda:0', grad_fn=<DivBackward0>)
+332
+333
+loss2:  tensor(0.7548, device='cuda:0', grad_fn=<DivBackward0>)
+334
+335
+
+  0%|▏                             | 42/10000 [04:09<15:31:06,  5.61s/it]
+336
+337
+loss2:  tensor(0.7059, device='cuda:0', grad_fn=<DivBackward0>)
+338
+339
+loss2:  tensor(0.8489, device='cuda:0', grad_fn=<DivBackward0>)
+340
+341
+loss2:  tensor(0.7875, device='cuda:0', grad_fn=<DivBackward0>)
+342
+343
+
+  0%|▏                             | 43/10000 [04:15<15:52:38,  5.74s/it]
+344
+345
+loss2:  tensor(1.2321, device='cuda:0', grad_fn=<DivBackward0>)
+346
+347
+loss2:  tensor(0.6354, device='cuda:0', grad_fn=<DivBackward0>)
+348
+349
+loss2:  tensor(0.8519, device='cuda:0', grad_fn=<DivBackward0>)
+350
+351
+
+  0%|▏                             | 44/10000 [04:21<16:13:59,  5.87s/it]
+352
+353
+loss2:  tensor(0.8734, device='cuda:0', grad_fn=<DivBackward0>)
+354
+355
+loss2:  tensor(0.5773, device='cuda:0', grad_fn=<DivBackward0>)
+356
+357
+loss2:  tensor(0.6017, device='cuda:0', grad_fn=<DivBackward0>)
+358
+359
+
+  0%|▏                             | 45/10000 [04:27<16:27:10,  5.95s/it]
+{'loss': 1.3622, 'grad_norm': 0.4030103385448456, 'learning_rate': 1.9910000000000004e-05, 'epoch': 0.0}
+360
+361
+loss2:  tensor(0.7023, device='cuda:0', grad_fn=<DivBackward0>)
+362
+363
+loss2:  tensor(0.6900, device='cuda:0', grad_fn=<DivBackward0>)
+364
+365
+loss2:  tensor(0.3732, device='cuda:0', grad_fn=<DivBackward0>)
+366
+367
+
+  0%|▏                             | 46/10000 [04:33<16:34:08,  5.99s/it]
+368
+369
+loss2:  tensor(0.7685, device='cuda:0', grad_fn=<DivBackward0>)
+370
+371
+loss2:  tensor(0.9474, device='cuda:0', grad_fn=<DivBackward0>)
+372
+373
+loss2:  tensor(0.4612, device='cuda:0', grad_fn=<DivBackward0>)
+374
+375
+  0%|▏                             | 47/10000 [04:39<16:45:48,  6.06s/it]Traceback (most recent call last):
+  File "/home/jingbo/KVMemory/finetune_combine.py", line 94, in <module>
+    main()
+  File "/home/jingbo/KVMemory/finetune_combine.py", line 86, in main
+    trainer.train()
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 1938, in train
+    return inner_training_loop(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 2274, in _inner_training_loop
+    tr_loss_step = self.training_step(model, inputs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 3313, in training_step
+    loss = self.compute_loss(model, inputs)
+  File "/home/jingbo/KVMemory/src/training/trainer.py", line 305, in compute_loss
+    outputs = self.model(input_ids=remaining_ids_batch, attention_mask=attention_mask, labels = remaining_ids_batch, past_key_values=past_key_values_batch, use_cache=True)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/peft_model.py", line 1430, in forward
+    return self.base_model(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/tuners/tuners_utils.py", line 179, in forward
+    return self.model.forward(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 1076, in forward
+    outputs = self.model(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 880, in forward
+    layer_outputs = decoder_layer(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 619, in forward
+    hidden_states, self_attn_weights, present_key_value = self.self_attn(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 399, in forward
+    value_states = self.v_proj(hidden_states)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/tuners/lora/layer.py", line 557, in forward
+    result = self.base_layer(x, *args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/linear.py", line 116, in forward
+    return F.linear(input, self.weight, self.bias)
+KeyboardInterrupt
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/home/jingbo/KVMemory/finetune_combine.py", line 94, in <module>
+[rank0]:     main()
+[rank0]:   File "/home/jingbo/KVMemory/finetune_combine.py", line 86, in main
+[rank0]:     trainer.train()
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 1938, in train
+[rank0]:     return inner_training_loop(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 2274, in _inner_training_loop
+[rank0]:     tr_loss_step = self.training_step(model, inputs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 3313, in training_step
+[rank0]:     loss = self.compute_loss(model, inputs)
+[rank0]:   File "/home/jingbo/KVMemory/src/training/trainer.py", line 305, in compute_loss
+[rank0]:     outputs = self.model(input_ids=remaining_ids_batch, attention_mask=attention_mask, labels = remaining_ids_batch, past_key_values=past_key_values_batch, use_cache=True)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/peft_model.py", line 1430, in forward
+[rank0]:     return self.base_model(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/tuners/tuners_utils.py", line 179, in forward
+[rank0]:     return self.model.forward(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 1076, in forward
+[rank0]:     outputs = self.model(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 880, in forward
+[rank0]:     layer_outputs = decoder_layer(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 619, in forward
+[rank0]:     hidden_states, self_attn_weights, present_key_value = self.self_attn(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 399, in forward
+[rank0]:     value_states = self.v_proj(hidden_states)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/tuners/lora/layer.py", line 557, in forward
+[rank0]:     result = self.base_layer(x, *args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/linear.py", line 116, in forward
+[rank0]:     return F.linear(input, self.weight, self.bias)
+[rank0]: KeyboardInterrupt
+376
+377

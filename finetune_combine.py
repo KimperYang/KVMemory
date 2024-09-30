@@ -6,7 +6,7 @@ from transformers import TrainingArguments
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer, AutoModelForCausalLM, get_linear_schedule_with_warmup
 from peft import LoraConfig, get_peft_model, TaskType
-from datasets import load_dataset
+from datasets import load_dataset, load_from_disk
 from accelerate import Accelerator
 from src.data.dataset import CustomDatasetCombine, custom_collate_combine
 from src.training.trainer import CustomTrainerCombine
@@ -18,7 +18,7 @@ def main():
     # global_model.to("cuda")
 
     config = LoraConfig(
-        r=8,
+        r= 16,
         lora_alpha=32,
         target_modules=["q_proj", "v_proj"],
         lora_dropout=0.05,
@@ -33,24 +33,28 @@ def main():
     data1 = load_dataset('json', data_files='/mnt/data2/jingbo/kvmemory/filtered_strings_900000.json')
     data1 = data1['train']['text']
 
-    data2 = load_dataset("nvidia/Daring-Anteater")
-    data2 = data2['train']['conversations'][8161:]
+    # data2 = load_dataset("nvidia/Daring-Anteater")
+    # data2 = data2['train']['conversations']
+    # data2 = load_dataset('json', data_files='/mnt/data2/jingbo/kvmemory/filtered_strings_sft.json')
+    data2 = load_from_disk("/mnt/data2/jingbo/kvmemory/filtered_strings_sft_new")
+    data2 = data2['conversations']
+
 
     dataset = CustomDatasetCombine(global_tokenizer, data1, data2)
     data_loader = DataLoader(dataset, batch_size=2, collate_fn=custom_collate_combine,pin_memory=False)
 
     # set the wandb project where this run will be logged
-    # os.environ["WANDB_PROJECT"]="kvmemory"
+    os.environ["WANDB_PROJECT"]="kvmemory"
     # os.environ["WANDB_LOG_MODEL"]="true"
-    # os.environ["WANDB_WATCH"]="false"
+    os.environ["WANDB_WATCH"]="false"
 
     # Set training arguments
     training_args = TrainingArguments(
-        output_dir="/mnt/data/jingbo/kv_dump_combine",
-        # report_to="wandb",
+        output_dir="/mnt/data/jingbo/kv_dump_combine_new",
+        report_to="wandb",
         per_device_train_batch_size=2,
         # num_train_epochs=2,
-        max_steps=10000,
+        max_steps=30000,
         logging_dir="/mnt/data/jingbo/logs",
         logging_steps=5,
         save_steps=100,
@@ -60,11 +64,11 @@ def main():
         learning_rate=2e-5
     )
 
-    optimizer = AdamW(global_model.parameters(), lr=1e-5)
+    # optimizer = AdamW(global_model.parameters(), lr=1e-5)
 
     # total_steps = len(data_loader) * training_args.num_train_epochs
     # print("Total steps:",total_steps)
-    scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=500, num_training_steps=10000)
+    # scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=500, num_training_steps=10000)
 
     accelerator = Accelerator()
     # trainer = accelerator.prepare(CustomTrainer(
@@ -85,10 +89,8 @@ def main():
 
     trainer.train()
 
-    global_model.save_pretrained("/mnt/data/jingbo/kv_dump_combine")
-    global_tokenizer.save_pretrained("/mnt/data/jingbo/kv_dump_combine")
-
-    trainer.save_training_curve("/mnt/data/jingbo/kv_dump_combine")
+    global_model.save_pretrained("/mnt/data/jingbo/kv_dump_combine_new")
+    global_tokenizer.save_pretrained("/mnt/data/jingbo/kv_dump_combine_new")
 
 if __name__ == "__main__":
     main()

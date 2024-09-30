@@ -1,0 +1,1077 @@
+
+  0%|                                                              | 0/10000 [00:00<?, ?it/s]We detected that you are passing `past_key_values` as a tuple and this is deprecated and will be removed in v4.43. Please use an appropriate `Cache` class (https://huggingface.co/docs/transformers/v4.41.3/en/internal/generation_utils#transformers.Cache)
+0
+1
+loss2:  tensor(0.3133, device='cuda:0', grad_fn=<DivBackward0>)
+2
+3
+loss2:  tensor(0.4125, device='cuda:0', grad_fn=<DivBackward0>)
+4
+5
+loss2:  tensor(0.6692, device='cuda:0', grad_fn=<DivBackward0>)
+6
+7
+  0%|                                                   | 1/10000 [00:06<17:20:54,  6.25s/it]
+loss2:  tensor(0.7824, device='cuda:0', grad_fn=<DivBackward0>)
+8
+9
+loss2:  tensor(0.7092, device='cuda:0', grad_fn=<DivBackward0>)
+10
+11
+loss2:  tensor(0.8947, device='cuda:0', grad_fn=<DivBackward0>)
+12
+13
+loss2:  tensor(0.9095, device='cuda:0', grad_fn=<DivBackward0>)
+14
+
+  0%|                                                   | 2/10000 [00:12<16:55:55,  6.10s/it]
+loss2:  tensor(0.8007, device='cuda:0', grad_fn=<DivBackward0>)
+16
+17
+loss2:  tensor(0.8232, device='cuda:0', grad_fn=<DivBackward0>)
+18
+19
+loss2:  tensor(0.6957, device='cuda:0', grad_fn=<DivBackward0>)
+20
+21
+
+  0%|                                                   | 3/10000 [00:18<16:55:40,  6.10s/it]
+22
+23
+loss2:  tensor(0.5878, device='cuda:0', grad_fn=<DivBackward0>)
+24
+25
+loss2:  tensor(0.8971, device='cuda:0', grad_fn=<DivBackward0>)
+26
+27
+loss2:  tensor(0.8767, device='cuda:0', grad_fn=<DivBackward0>)
+28
+29
+loss2:  tensor(0.7785, device='cuda:0', grad_fn=<DivBackward0>)
+30
+31
+
+loss2:  tensor(0.6739, device='cuda:0', grad_fn=<DivBackward0>)
+32
+33
+loss2:  tensor(1.0522, device='cuda:0', grad_fn=<DivBackward0>)
+34
+35
+loss2:  tensor(0.8103, device='cuda:0', grad_fn=<DivBackward0>)
+36
+37
+loss2:  tensor(1.1941, device='cuda:0', grad_fn=<DivBackward0>)
+38
+39
+
+loss2:  tensor(0.6652, device='cuda:0', grad_fn=<DivBackward0>)
+{'loss': 1.4481, 'grad_norm': 0.21083612740039825, 'learning_rate': 1.9990000000000003e-05, 'epoch': 0.0}
+40
+41
+loss2:  tensor(0.2775, device='cuda:0', grad_fn=<DivBackward0>)
+42
+43
+loss2:  tensor(0.6772, device='cuda:0', grad_fn=<DivBackward0>)
+44
+45
+loss2:  tensor(1.8444, device='cuda:0', grad_fn=<DivBackward0>)
+46
+47
+
+  0%|                                                   | 6/10000 [00:35<16:14:03,  5.85s/it]
+48
+49
+loss2:  tensor(0.8076, device='cuda:0', grad_fn=<DivBackward0>)
+50
+51
+loss2:  tensor(0.7199, device='cuda:0', grad_fn=<DivBackward0>)
+52
+53
+loss2:  tensor(0.5596, device='cuda:0', grad_fn=<DivBackward0>)
+54
+55
+loss2:  tensor(1.0002, device='cuda:0', grad_fn=<DivBackward0>)
+56
+
+  0%|                                                   | 7/10000 [00:41<15:52:28,  5.72s/it]
+loss2:  tensor(0.7826, device='cuda:0', grad_fn=<DivBackward0>)
+58
+59
+loss2:  tensor(0.8405, device='cuda:0', grad_fn=<DivBackward0>)
+60
+61
+loss2:  tensor(1.3138, device='cuda:0', grad_fn=<DivBackward0>)
+62
+63
+loss2:  tensor(0.7382, device='cuda:0', grad_fn=<DivBackward0>)
+64
+
+  0%|                                                   | 8/10000 [00:46<15:53:38,  5.73s/it]
+loss2:  tensor(0.3971, device='cuda:0', grad_fn=<DivBackward0>)
+66
+67
+loss2:  tensor(1.1457, device='cuda:0', grad_fn=<DivBackward0>)
+68
+69
+loss2:  tensor(0.6931, device='cuda:0', grad_fn=<DivBackward0>)
+70
+71
+loss2:  tensor(0.2892, device='cuda:0', grad_fn=<DivBackward0>)
+72
+
+  0%|                                                   | 9/10000 [00:52<16:04:15,  5.79s/it]
+loss2:  tensor(0.4739, device='cuda:0', grad_fn=<DivBackward0>)
+74
+75
+loss2:  tensor(0.6818, device='cuda:0', grad_fn=<DivBackward0>)
+76
+77
+loss2:  tensor(0.7160, device='cuda:0', grad_fn=<DivBackward0>)
+78
+79
+loss2:  tensor(0.7500, device='cuda:0', grad_fn=<DivBackward0>)
+{'loss': 1.4879, 'grad_norm': 0.24127747118473053, 'learning_rate': 1.9980000000000002e-05, 'epoch': 0.0}
+80
+
+  0%|                                                  | 10/10000 [00:59<16:25:56,  5.92s/it]
+loss2:  tensor(0.4460, device='cuda:0', grad_fn=<DivBackward0>)
+82
+83
+loss2:  tensor(0.6338, device='cuda:0', grad_fn=<DivBackward0>)
+84
+85
+loss2:  tensor(0.6759, device='cuda:0', grad_fn=<DivBackward0>)
+86
+87
+loss2:  tensor(0.6499, device='cuda:0', grad_fn=<DivBackward0>)
+88
+
+  0%|                                                  | 11/10000 [01:05<16:35:36,  5.98s/it]
+loss2:  tensor(0.6081, device='cuda:0', grad_fn=<DivBackward0>)
+90
+91
+loss2:  tensor(0.6908, device='cuda:0', grad_fn=<DivBackward0>)
+92
+93
+
+  0%|                                                  | 12/10000 [01:11<16:44:05,  6.03s/it]
+94
+95
+loss2:  tensor(0.7769, device='cuda:0', grad_fn=<DivBackward0>)
+96
+97
+loss2:  tensor(0.6592, device='cuda:0', grad_fn=<DivBackward0>)
+98
+99
+loss2:  tensor(0.8727, device='cuda:0', grad_fn=<DivBackward0>)
+100
+101
+loss2:  tensor(0.6554, device='cuda:0', grad_fn=<DivBackward0>)
+102
+103
+
+  0%|                                                  | 13/10000 [01:17<16:45:45,  6.04s/it]
+104
+105
+loss2:  tensor(0.7981, device='cuda:0', grad_fn=<DivBackward0>)
+106
+107
+loss2:  tensor(0.8497, device='cuda:0', grad_fn=<DivBackward0>)
+108
+109
+loss2:  tensor(0.6122, device='cuda:0', grad_fn=<DivBackward0>)
+110
+111
+
+  0%|                                                  | 14/10000 [01:23<16:54:08,  6.09s/it]
+112
+113
+loss2:  tensor(0.5034, device='cuda:0', grad_fn=<DivBackward0>)
+114
+115
+loss2:  tensor(0.8841, device='cuda:0', grad_fn=<DivBackward0>)
+116
+117
+loss2:  tensor(0.7798, device='cuda:0', grad_fn=<DivBackward0>)
+118
+119
+
+  0%|                                                  | 15/10000 [01:29<16:50:33,  6.07s/it]
+{'loss': 1.4157, 'grad_norm': 0.23365506529808044, 'learning_rate': 1.9970000000000004e-05, 'epoch': 0.0}
+120
+121
+loss2:  tensor(0.7373, device='cuda:0', grad_fn=<DivBackward0>)
+122
+123
+loss2:  tensor(0.9077, device='cuda:0', grad_fn=<DivBackward0>)
+124
+125
+loss2:  tensor(0.7707, device='cuda:0', grad_fn=<DivBackward0>)
+126
+127
+
+  0%|                                                  | 16/10000 [01:35<16:37:37,  6.00s/it]
+128
+129
+loss2:  tensor(0.6795, device='cuda:0', grad_fn=<DivBackward0>)
+130
+131
+loss2:  tensor(0.7752, device='cuda:0', grad_fn=<DivBackward0>)
+132
+133
+loss2:  tensor(1.4025, device='cuda:0', grad_fn=<DivBackward0>)
+134
+
+  0%|                                                  | 17/10000 [01:40<16:10:37,  5.83s/it]
+loss2:  tensor(0.7121, device='cuda:0', grad_fn=<DivBackward0>)
+136
+137
+loss2:  tensor(0.9164, device='cuda:0', grad_fn=<DivBackward0>)
+138
+139
+loss2:  tensor(0.5990, device='cuda:0', grad_fn=<DivBackward0>)
+140
+141
+loss2:  tensor(0.6198, device='cuda:0', grad_fn=<DivBackward0>)
+142
+
+  0%|                                                  | 18/10000 [01:46<16:19:34,  5.89s/it]
+loss2:  tensor(0.6638, device='cuda:0', grad_fn=<DivBackward0>)
+144
+145
+loss2:  tensor(1.0542, device='cuda:0', grad_fn=<DivBackward0>)
+146
+147
+loss2:  tensor(0.6897, device='cuda:0', grad_fn=<DivBackward0>)
+148
+149
+loss2:  tensor(0.7287, device='cuda:0', grad_fn=<DivBackward0>)
+150
+
+  0%|                                                  | 19/10000 [01:52<16:11:22,  5.84s/it]
+loss2:  tensor(0.5149, device='cuda:0', grad_fn=<DivBackward0>)
+152
+153
+loss2:  tensor(0.7514, device='cuda:0', grad_fn=<DivBackward0>)
+154
+155
+loss2:  tensor(0.8032, device='cuda:0', grad_fn=<DivBackward0>)
+156
+157
+loss2:  tensor(0.8611, device='cuda:0', grad_fn=<DivBackward0>)
+158
+
+  0%|                                                  | 20/10000 [01:58<16:25:24,  5.92s/it]
+loss2:  tensor(0.5282, device='cuda:0', grad_fn=<DivBackward0>)
+{'loss': 1.4772, 'grad_norm': 0.278095543384552, 'learning_rate': 1.9960000000000002e-05, 'epoch': 0.0}
+160
+161
+loss2:  tensor(0.6342, device='cuda:0', grad_fn=<DivBackward0>)
+162
+163
+loss2:  tensor(0.7043, device='cuda:0', grad_fn=<DivBackward0>)
+164
+165
+loss2:  tensor(0.8357, device='cuda:0', grad_fn=<DivBackward0>)
+166
+
+  0%|                                                  | 21/10000 [02:04<16:25:55,  5.93s/it]
+loss2:  tensor(0.5509, device='cuda:0', grad_fn=<DivBackward0>)
+168
+169
+loss2:  tensor(0.7197, device='cuda:0', grad_fn=<DivBackward0>)
+170
+171
+loss2:  tensor(0.6908, device='cuda:0', grad_fn=<DivBackward0>)
+172
+173
+loss2:  tensor(0.6474, device='cuda:0', grad_fn=<DivBackward0>)
+174
+
+  0%|                                                  | 22/10000 [02:10<16:22:10,  5.91s/it]
+loss2:  tensor(0.6472, device='cuda:0', grad_fn=<DivBackward0>)
+176
+177
+loss2:  tensor(0.4639, device='cuda:0', grad_fn=<DivBackward0>)
+178
+179
+loss2:  tensor(0.7428, device='cuda:0', grad_fn=<DivBackward0>)
+180
+181
+loss2:  tensor(0.9882, device='cuda:0', grad_fn=<DivBackward0>)
+182
+183
+
+loss2:  tensor(0.6023, device='cuda:0', grad_fn=<DivBackward0>)
+184
+185
+loss2:  tensor(0.6648, device='cuda:0', grad_fn=<DivBackward0>)
+186
+187
+loss2:  tensor(0.5170, device='cuda:0', grad_fn=<DivBackward0>)
+188
+189
+loss2:  tensor(0.6507, device='cuda:0', grad_fn=<DivBackward0>)
+190
+
+  0%|                                                  | 24/10000 [02:22<16:26:06,  5.93s/it]
+loss2:  tensor(0.7060, device='cuda:0', grad_fn=<DivBackward0>)
+192
+193
+loss2:  tensor(0.6331, device='cuda:0', grad_fn=<DivBackward0>)
+194
+195
+loss2:  tensor(0.8906, device='cuda:0', grad_fn=<DivBackward0>)
+196
+197
+loss2:  tensor(0.6891, device='cuda:0', grad_fn=<DivBackward0>)
+198
+
+  0%|▏                                                 | 25/10000 [02:28<16:38:03,  6.00s/it]
+loss2:  tensor(0.7717, device='cuda:0', grad_fn=<DivBackward0>)
+{'loss': 1.4337, 'grad_norm': 0.2509797513484955, 'learning_rate': 1.9950000000000004e-05, 'epoch': 0.0}
+200
+201
+loss2:  tensor(0.6059, device='cuda:0', grad_fn=<DivBackward0>)
+202
+203
+loss2:  tensor(0.7077, device='cuda:0', grad_fn=<DivBackward0>)
+204
+205
+loss2:  tensor(0.9422, device='cuda:0', grad_fn=<DivBackward0>)
+206
+
+  0%|▏                                                 | 26/10000 [02:34<16:49:20,  6.07s/it]
+loss2:  tensor(0.7109, device='cuda:0', grad_fn=<DivBackward0>)
+208
+209
+loss2:  tensor(0.7451, device='cuda:0', grad_fn=<DivBackward0>)
+210
+211
+loss2:  tensor(0.6438, device='cuda:0', grad_fn=<DivBackward0>)
+212
+213
+loss2:  tensor(0.6065, device='cuda:0', grad_fn=<DivBackward0>)
+214
+
+  0%|▏                                                 | 27/10000 [02:40<16:52:59,  6.09s/it]
+loss2:  tensor(0.6984, device='cuda:0', grad_fn=<DivBackward0>)
+216
+217
+loss2:  tensor(0.6258, device='cuda:0', grad_fn=<DivBackward0>)
+218
+219
+loss2:  tensor(0.8206, device='cuda:0', grad_fn=<DivBackward0>)
+220
+221
+loss2:  tensor(0.6955, device='cuda:0', grad_fn=<DivBackward0>)
+222
+
+  0%|▏                                                 | 28/10000 [02:46<16:23:52,  5.92s/it]
+loss2:  tensor(0.7357, device='cuda:0', grad_fn=<DivBackward0>)
+224
+225
+loss2:  tensor(0.8061, device='cuda:0', grad_fn=<DivBackward0>)
+226
+227
+loss2:  tensor(1.1137, device='cuda:0', grad_fn=<DivBackward0>)
+228
+229
+loss2:  tensor(0.8304, device='cuda:0', grad_fn=<DivBackward0>)
+230
+231
+
+  0%|▏                                                 | 29/10000 [02:52<16:11:06,  5.84s/it]
+232
+233
+loss2:  tensor(0.7069, device='cuda:0', grad_fn=<DivBackward0>)
+234
+235
+loss2:  tensor(0.6994, device='cuda:0', grad_fn=<DivBackward0>)
+236
+237
+loss2:  tensor(0.6180, device='cuda:0', grad_fn=<DivBackward0>)
+238
+239
+
+  0%|▏                                                 | 30/10000 [02:58<16:29:21,  5.95s/it]
+{'loss': 1.4049, 'grad_norm': 0.21041016280651093, 'learning_rate': 1.9940000000000002e-05, 'epoch': 0.0}
+240
+241
+loss2:  tensor(0.2836, device='cuda:0', grad_fn=<DivBackward0>)
+242
+243
+loss2:  tensor(0.7777, device='cuda:0', grad_fn=<DivBackward0>)
+244
+245
+loss2:  tensor(0.7239, device='cuda:0', grad_fn=<DivBackward0>)
+246
+
+  0%|▏                                                 | 31/10000 [03:04<16:38:33,  6.01s/it]
+loss2:  tensor(0.7333, device='cuda:0', grad_fn=<DivBackward0>)
+248
+249
+loss2:  tensor(0.5347, device='cuda:0', grad_fn=<DivBackward0>)
+250
+251
+loss2:  tensor(0.5489, device='cuda:0', grad_fn=<DivBackward0>)
+252
+253
+loss2:  tensor(0.5922, device='cuda:0', grad_fn=<DivBackward0>)
+254
+
+  0%|▏                                                 | 32/10000 [03:10<16:46:19,  6.06s/it]
+loss2:  tensor(0.6882, device='cuda:0', grad_fn=<DivBackward0>)
+256
+257
+loss2:  tensor(0.6446, device='cuda:0', grad_fn=<DivBackward0>)
+258
+259
+loss2:  tensor(0.6480, device='cuda:0', grad_fn=<DivBackward0>)
+260
+261
+loss2:  tensor(0.3711, device='cuda:0', grad_fn=<DivBackward0>)
+262
+263
+
+  0%|▏                                                 | 33/10000 [03:16<16:19:40,  5.90s/it]
+264
+265
+loss2:  tensor(0.6168, device='cuda:0', grad_fn=<DivBackward0>)
+266
+267
+loss2:  tensor(0.5701, device='cuda:0', grad_fn=<DivBackward0>)
+268
+269
+loss2:  tensor(0.8218, device='cuda:0', grad_fn=<DivBackward0>)
+270
+271
+
+  0%|▏                                                 | 34/10000 [03:22<16:31:45,  5.97s/it]
+272
+273
+loss2:  tensor(0.6471, device='cuda:0', grad_fn=<DivBackward0>)
+274
+275
+loss2:  tensor(0.6269, device='cuda:0', grad_fn=<DivBackward0>)
+276
+277
+loss2:  tensor(0.5890, device='cuda:0', grad_fn=<DivBackward0>)
+278
+
+  0%|▏                                                 | 35/10000 [03:28<16:46:45,  6.06s/it]
+loss2:  tensor(0.5368, device='cuda:0', grad_fn=<DivBackward0>)
+{'loss': 1.3373, 'grad_norm': 0.2599905729293823, 'learning_rate': 1.9930000000000004e-05, 'epoch': 0.0}
+280
+281
+loss2:  tensor(0.7439, device='cuda:0', grad_fn=<DivBackward0>)
+282
+283
+loss2:  tensor(0.4422, device='cuda:0', grad_fn=<DivBackward0>)
+284
+285
+loss2:  tensor(0.6175, device='cuda:0', grad_fn=<DivBackward0>)
+286
+
+  0%|▏                                                 | 36/10000 [03:34<16:50:01,  6.08s/it]
+loss2:  tensor(0.7310, device='cuda:0', grad_fn=<DivBackward0>)
+288
+289
+loss2:  tensor(1.6825, device='cuda:0', grad_fn=<DivBackward0>)
+290
+291
+loss2:  tensor(0.6226, device='cuda:0', grad_fn=<DivBackward0>)
+292
+293
+loss2:  tensor(0.7562, device='cuda:0', grad_fn=<DivBackward0>)
+294
+
+  0%|▏                                                 | 37/10000 [03:40<16:53:22,  6.10s/it]
+loss2:  tensor(0.5516, device='cuda:0', grad_fn=<DivBackward0>)
+296
+297
+loss2:  tensor(0.6516, device='cuda:0', grad_fn=<DivBackward0>)
+298
+299
+loss2:  tensor(0.7533, device='cuda:0', grad_fn=<DivBackward0>)
+300
+301
+loss2:  tensor(0.5461, device='cuda:0', grad_fn=<DivBackward0>)
+302
+
+  0%|▏                                                 | 38/10000 [03:46<16:46:13,  6.06s/it]
+loss2:  tensor(0.6876, device='cuda:0', grad_fn=<DivBackward0>)
+304
+305
+loss2:  tensor(0.6599, device='cuda:0', grad_fn=<DivBackward0>)
+306
+307
+loss2:  tensor(0.5996, device='cuda:0', grad_fn=<DivBackward0>)
+308
+309
+loss2:  tensor(0.7115, device='cuda:0', grad_fn=<DivBackward0>)
+310
+
+  0%|▏                                                 | 39/10000 [03:52<16:49:16,  6.08s/it]
+loss2:  tensor(0.6639, device='cuda:0', grad_fn=<DivBackward0>)
+312
+313
+loss2:  tensor(0.6126, device='cuda:0', grad_fn=<DivBackward0>)
+314
+315
+loss2:  tensor(0.7051, device='cuda:0', grad_fn=<DivBackward0>)
+316
+317
+
+  0%|▏                                                 | 40/10000 [03:59<16:56:41,  6.12s/it]
+318
+319
+loss2:  tensor(0.7161, device='cuda:0', grad_fn=<DivBackward0>)
+{'loss': 1.3916, 'grad_norm': 0.2149481326341629, 'learning_rate': 1.9920000000000002e-05, 'epoch': 0.0}
+320
+321
+loss2:  tensor(0.6105, device='cuda:0', grad_fn=<DivBackward0>)
+322
+323
+loss2:  tensor(0.6333, device='cuda:0', grad_fn=<DivBackward0>)
+324
+325
+
+  0%|▏                                                 | 41/10000 [04:05<17:02:32,  6.16s/it]
+326
+327
+loss2:  tensor(0.3719, device='cuda:0', grad_fn=<DivBackward0>)
+328
+329
+loss2:  tensor(0.9862, device='cuda:0', grad_fn=<DivBackward0>)
+330
+331
+loss2:  tensor(0.7924, device='cuda:0', grad_fn=<DivBackward0>)
+332
+333
+
+  0%|▏                                                 | 42/10000 [04:11<16:54:08,  6.11s/it]
+334
+335
+loss2:  tensor(0.6320, device='cuda:0', grad_fn=<DivBackward0>)
+336
+337
+loss2:  tensor(0.5785, device='cuda:0', grad_fn=<DivBackward0>)
+338
+339
+loss2:  tensor(0.7328, device='cuda:0', grad_fn=<DivBackward0>)
+340
+341
+loss2:  tensor(0.6301, device='cuda:0', grad_fn=<DivBackward0>)
+342
+343
+
+  0%|▏                                                 | 43/10000 [04:17<17:00:00,  6.15s/it]
+344
+345
+loss2:  tensor(0.6544, device='cuda:0', grad_fn=<DivBackward0>)
+346
+347
+loss2:  tensor(0.6199, device='cuda:0', grad_fn=<DivBackward0>)
+348
+349
+
+  0%|▏                                                 | 44/10000 [04:23<16:47:06,  6.07s/it]
+350
+351
+loss2:  tensor(0.3992, device='cuda:0', grad_fn=<DivBackward0>)
+352
+353
+loss2:  tensor(0.6092, device='cuda:0', grad_fn=<DivBackward0>)
+354
+355
+loss2:  tensor(0.7595, device='cuda:0', grad_fn=<DivBackward0>)
+356
+357
+loss2:  tensor(0.7237, device='cuda:0', grad_fn=<DivBackward0>)
+358
+359
+
+  0%|▏                                                 | 45/10000 [04:29<16:51:17,  6.10s/it]
+{'loss': 1.3065, 'grad_norm': 0.1918138563632965, 'learning_rate': 1.9910000000000004e-05, 'epoch': 0.0}
+360
+361
+loss2:  tensor(0.4246, device='cuda:0', grad_fn=<DivBackward0>)
+362
+363
+loss2:  tensor(0.1946, device='cuda:0', grad_fn=<DivBackward0>)
+364
+365
+
+  0%|▏                                                 | 46/10000 [04:34<16:13:09,  5.87s/it]
+366
+367
+loss2:  tensor(0.8214, device='cuda:0', grad_fn=<DivBackward0>)
+368
+369
+loss2:  tensor(1.2985, device='cuda:0', grad_fn=<DivBackward0>)
+370
+371
+loss2:  tensor(0.6899, device='cuda:0', grad_fn=<DivBackward0>)
+372
+373
+loss2:  tensor(0.4508, device='cuda:0', grad_fn=<DivBackward0>)
+374
+
+  0%|▏                                                 | 47/10000 [04:40<16:00:26,  5.79s/it]
+loss2:  tensor(0.3012, device='cuda:0', grad_fn=<DivBackward0>)
+376
+377
+loss2:  tensor(0.6132, device='cuda:0', grad_fn=<DivBackward0>)
+378
+379
+loss2:  tensor(0.6679, device='cuda:0', grad_fn=<DivBackward0>)
+380
+381
+loss2:  tensor(0.9320, device='cuda:0', grad_fn=<DivBackward0>)
+382
+383
+
+loss2:  tensor(1.1545, device='cuda:0', grad_fn=<DivBackward0>)
+384
+385
+loss2:  tensor(1.1781, device='cuda:0', grad_fn=<DivBackward0>)
+386
+387
+loss2:  tensor(0.6464, device='cuda:0', grad_fn=<DivBackward0>)
+388
+389
+loss2:  tensor(0.5863, device='cuda:0', grad_fn=<DivBackward0>)
+390
+391
+
+  0%|▏                                                 | 49/10000 [04:52<16:07:54,  5.84s/it]
+392
+393
+loss2:  tensor(0.7157, device='cuda:0', grad_fn=<DivBackward0>)
+394
+395
+loss2:  tensor(0.6767, device='cuda:0', grad_fn=<DivBackward0>)
+396
+397
+loss2:  tensor(0.2180, device='cuda:0', grad_fn=<DivBackward0>)
+398
+399
+
+  0%|▎                                                 | 50/10000 [04:57<15:47:22,  5.71s/it]
+{'loss': 1.3722, 'grad_norm': 0.2727770209312439, 'learning_rate': 1.9900000000000003e-05, 'epoch': 0.0}
+400
+401
+loss2:  tensor(0.7303, device='cuda:0', grad_fn=<DivBackward0>)
+402
+403
+loss2:  tensor(0.3822, device='cuda:0', grad_fn=<DivBackward0>)
+404
+405
+loss2:  tensor(0.8967, device='cuda:0', grad_fn=<DivBackward0>)
+406
+407
+
+  1%|▎                                                 | 51/10000 [05:03<16:13:23,  5.87s/it]
+408
+409
+loss2:  tensor(0.7572, device='cuda:0', grad_fn=<DivBackward0>)
+410
+411
+loss2:  tensor(0.4947, device='cuda:0', grad_fn=<DivBackward0>)
+412
+413
+loss2:  tensor(0.5718, device='cuda:0', grad_fn=<DivBackward0>)
+414
+415
+
+  1%|▎                                                 | 52/10000 [05:10<16:27:23,  5.96s/it]
+416
+417
+loss2:  tensor(0.3196, device='cuda:0', grad_fn=<DivBackward0>)
+418
+419
+loss2:  tensor(0.7328, device='cuda:0', grad_fn=<DivBackward0>)
+420
+421
+loss2:  tensor(0.6794, device='cuda:0', grad_fn=<DivBackward0>)
+422
+423
+
+  1%|▎                                                 | 53/10000 [05:16<16:37:55,  6.02s/it]
+424
+425
+loss2:  tensor(0.7866, device='cuda:0', grad_fn=<DivBackward0>)
+426
+427
+loss2:  tensor(0.6937, device='cuda:0', grad_fn=<DivBackward0>)
+428
+429
+loss2:  tensor(0.5396, device='cuda:0', grad_fn=<DivBackward0>)
+430
+431
+
+  1%|▎                                                 | 54/10000 [05:22<16:31:17,  5.98s/it]
+432
+433
+loss2:  tensor(0.5195, device='cuda:0', grad_fn=<DivBackward0>)
+434
+435
+loss2:  tensor(0.7381, device='cuda:0', grad_fn=<DivBackward0>)
+436
+437
+loss2:  tensor(0.6768, device='cuda:0', grad_fn=<DivBackward0>)
+438
+439
+
+  1%|▎                                                 | 55/10000 [05:28<16:35:51,  6.01s/it]
+{'loss': 1.3774, 'grad_norm': 0.29126811027526855, 'learning_rate': 1.989e-05, 'epoch': 0.0}
+440
+441
+loss2:  tensor(0.6144, device='cuda:0', grad_fn=<DivBackward0>)
+442
+443
+loss2:  tensor(0.8149, device='cuda:0', grad_fn=<DivBackward0>)
+444
+445
+loss2:  tensor(0.5944, device='cuda:0', grad_fn=<DivBackward0>)
+446
+447
+
+  1%|▎                                                 | 56/10000 [05:34<16:44:43,  6.06s/it]
+448
+449
+loss2:  tensor(0.6357, device='cuda:0', grad_fn=<DivBackward0>)
+450
+451
+loss2:  tensor(0.6472, device='cuda:0', grad_fn=<DivBackward0>)
+452
+453
+loss2:  tensor(0.7522, device='cuda:0', grad_fn=<DivBackward0>)
+454
+455
+
+loss2:  tensor(0.6387, device='cuda:0', grad_fn=<DivBackward0>)
+456
+457
+loss2:  tensor(0.4731, device='cuda:0', grad_fn=<DivBackward0>)
+458
+459
+loss2:  tensor(0.4660, device='cuda:0', grad_fn=<DivBackward0>)
+460
+461
+loss2:  tensor(0.7062, device='cuda:0', grad_fn=<DivBackward0>)
+462
+463
+
+loss2:  tensor(0.6456, device='cuda:0', grad_fn=<DivBackward0>)
+464
+465
+loss2:  tensor(0.6895, device='cuda:0', grad_fn=<DivBackward0>)
+466
+467
+loss2:  tensor(0.5825, device='cuda:0', grad_fn=<DivBackward0>)
+468
+469
+loss2:  tensor(0.7330, device='cuda:0', grad_fn=<DivBackward0>)
+470
+
+  1%|▎                                                 | 59/10000 [05:52<16:50:05,  6.10s/it]
+loss2:  tensor(0.7927, device='cuda:0', grad_fn=<DivBackward0>)
+472
+473
+loss2:  tensor(0.5852, device='cuda:0', grad_fn=<DivBackward0>)
+474
+475
+loss2:  tensor(0.3825, device='cuda:0', grad_fn=<DivBackward0>)
+476
+477
+loss2:  tensor(0.7311, device='cuda:0', grad_fn=<DivBackward0>)
+478
+
+  1%|▎                                                 | 60/10000 [05:58<16:55:30,  6.13s/it]
+loss2:  tensor(0.7463, device='cuda:0', grad_fn=<DivBackward0>)
+{'loss': 1.3448, 'grad_norm': 0.19901728630065918, 'learning_rate': 1.9880000000000003e-05, 'epoch': 0.0}
+480
+481
+loss2:  tensor(0.6113, device='cuda:0', grad_fn=<DivBackward0>)
+482
+483
+loss2:  tensor(0.6611, device='cuda:0', grad_fn=<DivBackward0>)
+484
+485
+loss2:  tensor(0.3786, device='cuda:0', grad_fn=<DivBackward0>)
+486
+487
+loss2:  tensor(0.7697, device='cuda:0', grad_fn=<DivBackward0>)
+488
+
+  1%|▎                                                 | 61/10000 [06:05<17:00:31,  6.16s/it]
+loss2:  tensor(0.5518, device='cuda:0', grad_fn=<DivBackward0>)
+490
+491
+loss2:  tensor(0.6967, device='cuda:0', grad_fn=<DivBackward0>)
+492
+493
+loss2:  tensor(0.5798, device='cuda:0', grad_fn=<DivBackward0>)
+494
+
+  1%|▎                                                 | 62/10000 [06:10<16:42:35,  6.05s/it]
+loss2:  tensor(0.5533, device='cuda:0', grad_fn=<DivBackward0>)
+496
+497
+loss2:  tensor(0.7674, device='cuda:0', grad_fn=<DivBackward0>)
+498
+499
+loss2:  tensor(0.4665, device='cuda:0', grad_fn=<DivBackward0>)
+500
+501
+loss2:  tensor(0.5654, device='cuda:0', grad_fn=<DivBackward0>)
+502
+
+  1%|▎                                                 | 63/10000 [06:17<16:48:18,  6.09s/it]
+loss2:  tensor(0.9530, device='cuda:0', grad_fn=<DivBackward0>)
+504
+505
+loss2:  tensor(0.5982, device='cuda:0', grad_fn=<DivBackward0>)
+506
+507
+loss2:  tensor(0.7016, device='cuda:0', grad_fn=<DivBackward0>)
+508
+509
+loss2:  tensor(0.6149, device='cuda:0', grad_fn=<DivBackward0>)
+510
+
+  1%|▎                                                 | 64/10000 [06:23<16:53:21,  6.12s/it]
+loss2:  tensor(0.7167, device='cuda:0', grad_fn=<DivBackward0>)
+512
+513
+loss2:  tensor(0.6547, device='cuda:0', grad_fn=<DivBackward0>)
+514
+515
+loss2:  tensor(0.6197, device='cuda:0', grad_fn=<DivBackward0>)
+516
+517
+
+  1%|▎                                                 | 65/10000 [06:29<16:59:31,  6.16s/it]
+518
+519
+loss2:  tensor(0.2978, device='cuda:0', grad_fn=<DivBackward0>)
+{'loss': 1.2975, 'grad_norm': 0.21363095939159393, 'learning_rate': 1.987e-05, 'epoch': 0.0}
+520
+521
+loss2:  tensor(0.2044, device='cuda:0', grad_fn=<DivBackward0>)
+522
+523
+loss2:  tensor(0.9174, device='cuda:0', grad_fn=<DivBackward0>)
+524
+525
+loss2:  tensor(0.6852, device='cuda:0', grad_fn=<DivBackward0>)
+526
+527
+loss2:  tensor(0.3733, device='cuda:0', grad_fn=<DivBackward0>)
+528
+
+  1%|▎                                                 | 66/10000 [06:35<16:57:31,  6.15s/it]
+loss2:  tensor(1.0857, device='cuda:0', grad_fn=<DivBackward0>)
+530
+531
+loss2:  tensor(1.0997, device='cuda:0', grad_fn=<DivBackward0>)
+532
+533
+
+  1%|▎                                                 | 67/10000 [06:41<16:24:33,  5.95s/it]
+534
+535
+loss2:  tensor(0.4435, device='cuda:0', grad_fn=<DivBackward0>)
+536
+537
+loss2:  tensor(0.6205, device='cuda:0', grad_fn=<DivBackward0>)
+538
+539
+loss2:  tensor(0.3978, device='cuda:0', grad_fn=<DivBackward0>)
+540
+541
+loss2:  tensor(0.8441, device='cuda:0', grad_fn=<DivBackward0>)
+542
+543
+loss2:  tensor(0.5457, device='cuda:0', grad_fn=<DivBackward0>)
+544
+
+  1%|▎                                                 | 68/10000 [06:47<16:38:47,  6.03s/it]
+loss2:  tensor(0.7872, device='cuda:0', grad_fn=<DivBackward0>)
+546
+547
+loss2:  tensor(0.6478, device='cuda:0', grad_fn=<DivBackward0>)
+548
+549
+loss2:  tensor(0.6695, device='cuda:0', grad_fn=<DivBackward0>)
+550
+551
+loss2:  tensor(0.9992, device='cuda:0', grad_fn=<DivBackward0>)
+552
+
+  1%|▎                                                 | 69/10000 [06:53<16:41:52,  6.05s/it]
+loss2:  tensor(0.6983, device='cuda:0', grad_fn=<DivBackward0>)
+554
+555
+loss2:  tensor(0.6351, device='cuda:0', grad_fn=<DivBackward0>)
+556
+557
+loss2:  tensor(0.6148, device='cuda:0', grad_fn=<DivBackward0>)
+558
+559
+loss2:  tensor(0.7205, device='cuda:0', grad_fn=<DivBackward0>)
+{'loss': 1.3286, 'grad_norm': 0.22224436700344086, 'learning_rate': 1.9860000000000003e-05, 'epoch': 0.0}
+560
+
+  1%|▎                                                 | 70/10000 [06:59<16:29:01,  5.98s/it]
+loss2:  tensor(0.6120, device='cuda:0', grad_fn=<DivBackward0>)
+562
+563
+loss2:  tensor(0.6103, device='cuda:0', grad_fn=<DivBackward0>)
+564
+565
+
+  1%|▎                                                 | 71/10000 [07:05<16:24:53,  5.95s/it]
+566
+567
+loss2:  tensor(0.7887, device='cuda:0', grad_fn=<DivBackward0>)
+568
+569
+loss2:  tensor(0.3523, device='cuda:0', grad_fn=<DivBackward0>)
+570
+571
+loss2:  tensor(0.6397, device='cuda:0', grad_fn=<DivBackward0>)
+572
+573
+loss2:  tensor(0.5069, device='cuda:0', grad_fn=<DivBackward0>)
+574
+575
+loss2:  tensor(0.6660, device='cuda:0', grad_fn=<DivBackward0>)
+576
+
+  1%|▎                                                 | 72/10000 [07:11<16:37:29,  6.03s/it]
+loss2:  tensor(0.8082, device='cuda:0', grad_fn=<DivBackward0>)
+578
+579
+loss2:  tensor(0.6571, device='cuda:0', grad_fn=<DivBackward0>)
+580
+581
+loss2:  tensor(0.1749, device='cuda:0', grad_fn=<DivBackward0>)
+582
+583
+loss2:  tensor(0.4820, device='cuda:0', grad_fn=<DivBackward0>)
+584
+
+  1%|▎                                                 | 73/10000 [07:17<16:29:49,  5.98s/it]
+loss2:  tensor(0.4884, device='cuda:0', grad_fn=<DivBackward0>)
+586
+587
+loss2:  tensor(0.5808, device='cuda:0', grad_fn=<DivBackward0>)
+588
+589
+loss2:  tensor(0.5289, device='cuda:0', grad_fn=<DivBackward0>)
+590
+591
+loss2:  tensor(0.6571, device='cuda:0', grad_fn=<DivBackward0>)
+592
+
+  1%|▎                                                 | 74/10000 [07:23<16:33:40,  6.01s/it]
+loss2:  tensor(0.7872, device='cuda:0', grad_fn=<DivBackward0>)
+594
+595
+loss2:  tensor(0.6827, device='cuda:0', grad_fn=<DivBackward0>)
+596
+597
+loss2:  tensor(0.8423, device='cuda:0', grad_fn=<DivBackward0>)
+598
+599
+loss2:  tensor(0.6421, device='cuda:0', grad_fn=<DivBackward0>)
+{'loss': 1.2854, 'grad_norm': 0.31213539838790894, 'learning_rate': 1.985e-05, 'epoch': 0.0}
+600
+
+  1%|▍                                                 | 75/10000 [07:29<16:31:10,  5.99s/it]
+loss2:  tensor(0.5427, device='cuda:0', grad_fn=<DivBackward0>)
+602
+603
+loss2:  tensor(0.8601, device='cuda:0', grad_fn=<DivBackward0>)
+604
+605
+loss2:  tensor(0.4351, device='cuda:0', grad_fn=<DivBackward0>)
+606
+
+  1%|▍                                                 | 76/10000 [07:34<16:07:46,  5.85s/it]
+loss2:  tensor(0.5553, device='cuda:0', grad_fn=<DivBackward0>)
+608
+609
+loss2:  tensor(0.4729, device='cuda:0', grad_fn=<DivBackward0>)
+610
+611
+loss2:  tensor(0.3344, device='cuda:0', grad_fn=<DivBackward0>)
+612
+613
+loss2:  tensor(0.7903, device='cuda:0', grad_fn=<DivBackward0>)
+614
+
+  1%|▍                                                 | 77/10000 [07:40<16:16:12,  5.90s/it]
+loss2:  tensor(0.7983, device='cuda:0', grad_fn=<DivBackward0>)
+616
+617
+loss2:  tensor(0.6408, device='cuda:0', grad_fn=<DivBackward0>)
+618
+619
+loss2:  tensor(0.5468, device='cuda:0', grad_fn=<DivBackward0>)
+620
+621
+loss2:  tensor(0.6396, device='cuda:0', grad_fn=<DivBackward0>)
+622
+  1%|▍                                                 | 77/10000 [07:40<16:16:12,  5.90s/it]Traceback (most recent call last):
+  File "/home/jingbo/KVMemory/finetune_combine.py", line 94, in <module>
+    main()
+  File "/home/jingbo/KVMemory/finetune_combine.py", line 86, in main
+    trainer.train()
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 1938, in train
+    return inner_training_loop(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 2274, in _inner_training_loop
+    tr_loss_step = self.training_step(model, inputs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 3313, in training_step
+    loss = self.compute_loss(model, inputs)
+  File "/home/jingbo/KVMemory/src/training/trainer.py", line 351, in compute_loss
+    print("loss2: ",batch_loss2)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor.py", line 464, in __repr__
+    return torch._tensor_str._str(self, tensor_contents=tensor_contents)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor_str.py", line 697, in _str
+    return _str_intern(self, tensor_contents=tensor_contents)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor_str.py", line 617, in _str_intern
+    tensor_str = _tensor_str(self, indent)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor_str.py", line 349, in _tensor_str
+    formatter = _Formatter(get_summarized_data(self) if summarize else self)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor_str.py", line 137, in __init__
+    nonzero_finite_vals = torch.masked_select(
+KeyboardInterrupt
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/home/jingbo/KVMemory/finetune_combine.py", line 94, in <module>
+[rank0]:     main()
+[rank0]:   File "/home/jingbo/KVMemory/finetune_combine.py", line 86, in main
+[rank0]:     trainer.train()
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 1938, in train
+[rank0]:     return inner_training_loop(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 2274, in _inner_training_loop
+[rank0]:     tr_loss_step = self.training_step(model, inputs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 3313, in training_step
+[rank0]:     loss = self.compute_loss(model, inputs)
+[rank0]:   File "/home/jingbo/KVMemory/src/training/trainer.py", line 351, in compute_loss
+[rank0]:     print("loss2: ",batch_loss2)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor.py", line 464, in __repr__
+[rank0]:     return torch._tensor_str._str(self, tensor_contents=tensor_contents)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor_str.py", line 697, in _str
+[rank0]:     return _str_intern(self, tensor_contents=tensor_contents)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor_str.py", line 617, in _str_intern
+[rank0]:     tensor_str = _tensor_str(self, indent)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor_str.py", line 349, in _tensor_str
+[rank0]:     formatter = _Formatter(get_summarized_data(self) if summarize else self)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/_tensor_str.py", line 137, in __init__
+[rank0]:     nonzero_finite_vals = torch.masked_select(
+[rank0]: KeyboardInterrupt
+loss2:

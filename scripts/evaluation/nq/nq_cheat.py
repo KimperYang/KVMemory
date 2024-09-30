@@ -3,33 +3,58 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, DynamicCache
 import pandas as pd    
 import json
 import datetime
+import string
+from typing import List
+from peft import PeftModel, PeftConfig
+import regex
 
-jsonObj = pd.read_json(path_or_buf='data/nq/nq-open-10_9.jsonl', lines=True)
+jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
 global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
-global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16, device_map="auto")
+base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16, device_map="auto")
+
+peft_config_path = "/mnt/data/jingbo/kv_dump_combine"  # Path to the directory where LoRA weights are stored
+lora_config = PeftConfig.from_pretrained(peft_config_path)
+
+global_model = PeftModel.from_pretrained(base_model, peft_config_path)
+#!/usr/bin/env python3
+
+
+def normalize_answer(s: str) -> str:
+    """Normalization from the SQuAD evaluation script.
+
+    See https://worksheets.codalab.org/rest/bundles/0x6b567e1cf2e041ec80d7098f031c5c9e/contents/blob/
+    """
+
+    def remove_articles(text):
+        return regex.sub(r"\b(a|an|the)\b", " ", text)
+
+    def white_space_fix(text):
+        return " ".join(text.split())
+
+    def remove_punc(text):
+        exclude = set(string.punctuation)
+        return "".join(ch for ch in text if ch not in exclude)
+
+    def lower(text):
+        return text.lower()
+
+    return white_space_fix(remove_articles(remove_punc(lower(s))))
+
+
+def best_subspan_em(prediction: str, ground_truths: List[str]) -> float:
+    normalized_prediction = normalize_answer(prediction)
+
+    for ground_truth in ground_truths:
+        normalized_ground_truth = normalize_answer(ground_truth)
+        if normalized_ground_truth.lower() in normalized_prediction.lower():
+            return 1.0
+    return 0.0
 
 def generate_kv_with_id(input_ids, p_id):
 
-    model = global_model
-    input_ids = input_ids.to(model.device)
-
     with torch.no_grad():
-        out = model(input_ids, position_ids = p_id)
+        out = global_model(input_ids, position_ids = p_id)
         past_key_values = out.past_key_values
-
-    #filter <s>
-    # filtered_past_key_values = ()
-
-    # for past_keys, past_values in past_key_values:
-
-    #     filtered_keys = past_keys[:, :, 1:, :] 
-    #     filtered_values = past_values[:, :, 1:, :] 
-    #     filtered_past_key_values = filtered_past_key_values + ((filtered_keys, filtered_values),)
-
-    # input_ids = input_ids[:, 1:]
-
-    # print(filtered_past_key_values[0][0].size())
-    # print(filtered_past_key_values.get_seq_length())
 
     return past_key_values
 
@@ -53,46 +78,23 @@ def append_kv(kv_list):
 
     return concatenated_past_key_values
 
-def inference_with_kv(id_list, past_key_values, model_name="meta-llama/Llama-2-7b-chat-hf", max_length=2000, num_return_sequences=1):
+def inference(input_ids, past_key_values, model_name="meta-llama/Llama-2-7b-chat-hf", max_length=2000):
 
     tokenizer = global_tokenizer
     model = global_model
     
-    # past_key_values = (
-    #     (keys.to(model.device), values.to(model.device))
-    #     for keys, values in past_key_values
-    # )
-
-    # id_list = []
-    # for mem in prompt:
-    #     input_id = tokenizer(prompt, return_tensors="pt").input_ids
-    #     id_list.extend(tokens['input_ids'].squeeze().tolist())
-    # input_ids = torch.tensor([id_list])
-
-
-    # input_ids = input_ids[:, 1:]
-
-    # for token_id in input_ids:
-    #     token = tokenizer.decode([token_id], clean_up_tokenization_spaces=False)
-    #     print(f"Token ID: {token_id}, Token: '{token}'")
-    for i in range(len(id_list)):
-        id_list[i].to(model.device)
-        # print(id_list[i])
-    
-    input_ids = torch.cat(id_list, dim=1)
-    input_ids = input_ids.to(model.device)
-    # inputs = tokenizer(prompt, return_tensors="pt", add_special_tokens=True).to(model.device)
-    # print("final",input_ids)
     model.eval()
 
-    max_length = input_ids.size(1) + 400
+    max_length = input_ids.size(1) + 200
 
     with torch.no_grad():
 
         outputs = model.generate(
             input_ids=input_ids,
             max_length=max_length,
-            num_return_sequences=num_return_sequences,
+            do_sample=False,
+            temperature=None,
+            top_p=1.0,
             past_key_values=past_key_values,
             use_cache=True
         )
@@ -101,103 +103,74 @@ def inference_with_kv(id_list, past_key_values, model_name="meta-llama/Llama-2-7
     
     return generated_sequences
 
-def count_tokens(input_text):
-
-    tokenizer = global_tokenizer
-
-    tokens = tokenizer.encode(input_text, add_special_tokens=True)
-
-    num_tokens = len(tokens)
-    for token_id in tokens:
-        token = tokenizer.decode([token_id], clean_up_tokenization_spaces=False)
-        print(f"Token ID: {token_id}, Token: '{token}'")
-    print(f"Number of tokens including special tokens: {num_tokens}")
-
-def check_result(ans_list, response):
-    for ans in ans_list:
-        if ans in response: 
-            print("Response: ", response, "\nTRUE")
-            return True
-
-    print("Response: ", response, "\nFALSE")
-    return False
-
 def main():
+    global_model.to('cuda')
     # template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
 
-    template = "[INST] <<SYS>>\nYou're an assistant who answer the question with the knowledge provided in the prompt\n<</SYS>>\n\n"
+    template = "<s> [INST] Write a high-quality answer for the given question using only the provided search results (some of which might be irrelevant).\n\n"
 
     total_num = len(jsonObj)
     correct_num = 0
-    res_dict = {}
+    res_list = []
 
     for i in range(total_num):
 
-        print("id:", str(i))
-        memory_list = []
+        print("Processing sample:", str(i))
+        memory_list = [template]
 
+        
         for j in range(0,10):
-            memory_list.append(jsonObj["ctxs"][i][j]["text"])
+            title = jsonObj["ctxs"][i][j]["title"]
+            text = jsonObj["ctxs"][i][j]["text"]
+            memory_list.append(f"Document [{j+1}](Title: {title}) {text}"+"\n")
 
-        start_token = "<s>"
-        end_token = "[/INST]"
-        memory_list.insert(0, template)
-        memory_list.insert(0, start_token)
-        # memory_list.append(end_token)
-
-        new_prompt = "Question: " + jsonObj["question"][i] + "[/INST]"
+        new_prompt = "\n\nQuestion: " + jsonObj["question"][i] + "\nAnswer:[/INST]"
 
         kv_list = []
         id_list = []
-        seq = ""
         idx = 0
 
         for st in memory_list:
             # print(st)
-            id = global_tokenizer(st, return_tensors="pt").input_ids[:, 1:]
+            id = global_tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
             position_id = torch.arange(idx, idx + id.size(1)).unsqueeze(0)
             # print(position_id[0])
             # print(id.size(1))
-            kv = generate_kv_with_id(id, position_id)
+            kv = generate_kv_with_id(id.to(global_model.device), position_id.to(global_model.device))
             id_list.append(id)
             kv_list.append(kv)
-            seq = seq + st
 
             idx = idx + id.size(1)
 
         appended_kv = append_kv(kv_list)
 
-        prompt_id = global_tokenizer(new_prompt, return_tensors="pt").input_ids[:, 1:]
+        prompt_id = global_tokenizer(new_prompt, return_tensors="pt", add_special_tokens=False).input_ids
         id_list.append(prompt_id)
 
-        generated_seq = inference_with_kv(id_list, appended_kv)
+        concat_id = torch.cat(id_list, dim=1).to(global_model.device)
+        generated_seq = inference(concat_id, appended_kv)
         response = generated_seq[0].split('[/INST]')[1]
-        res_dict["res_"+str(i)] = response
         print(response)
 
-        if check_result(jsonObj["answers"][i], response):
-            res_dict["score_"+str(i)] = "TRUE"
-            correct_num = correct_num + 1
-            print("TRUE")
+        score = best_subspan_em(response, jsonObj["answers"][i])
 
-        else:
-            res_dict["score_"+str(i)] = "FALSE"
-            print("FALSE")
+        correct_num = correct_num + int(score)
+
+        res_list.append({"id": str(i),"question": jsonObj["question"][i], "response": response, "gold_answer": jsonObj["answers"][i], "Score": score})
+        print("Correct progress", correct_num)
         
-        print("progress", correct_num)
-        
-    res_dict["Correct Number"] = str(correct_num)
-    res_dict["Total Number"] =str(total_num)
-    res_dict["Accuracy"] = str(correct_num / total_num)
-    print(correct_num / total_num)
+    accuracy = correct_num / total_num
+    print(accuracy)
 
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/nq/nq_cheat_at9_{time_str}.json"
+    file_name = f"result/nq/nq_combinecheat_at0_{accuracy}_{time_str}.jsonl"
 
-    with open(file_name, 'w', encoding='utf-8') as file:
-        json.dump(res_dict, file, ensure_ascii=False, indent=4)
+    with open(file_name, 'w', encoding='utf-8') as f:
+        for entry in res_list:
+            json_line = json.dumps(entry)
+            f.write(json_line + '\n')
 
     print(f"Dumped at {file_name}")
 
