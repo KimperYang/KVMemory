@@ -8,11 +8,11 @@ from typing import List
 from peft import PeftModel, PeftConfig
 import regex
 
-jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
+jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_9.jsonl', lines=True)
 global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
-base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16, device_map="auto")
+base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16)
 
-peft_config_path = "/mnt/data/jingbo/kv_dump_combine"  # Path to the directory where LoRA weights are stored
+peft_config_path = "/mnt/data/jingbo/kv_dump_combine_new/checkpoint-10000"  # Path to the directory where LoRA weights are stored
 lora_config = PeftConfig.from_pretrained(peft_config_path)
 
 global_model = PeftModel.from_pretrained(base_model, peft_config_path)
@@ -165,7 +165,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/nq/nq_combinecheat_at0_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/nq/nq_combinecheat2_at9_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

@@ -1,6 +1,6 @@
 import os
 import torch
-# import wandb
+import wandb
 from torch.optim import AdamW
 from transformers import TrainingArguments
 from torch.utils.data import DataLoader
@@ -31,13 +31,13 @@ def main():
     # num_data_used = 20000
     # data = load_data(num_data_used)
     data1 = load_dataset('json', data_files='/mnt/data2/jingbo/kvmemory/filtered_strings_900000.json')
-    data1 = data1['train']['text']
+    data1 = data1['train']['text'][40000:]
 
     # data2 = load_dataset("nvidia/Daring-Anteater")
     # data2 = data2['train']['conversations']
     # data2 = load_dataset('json', data_files='/mnt/data2/jingbo/kvmemory/filtered_strings_sft.json')
     data2 = load_from_disk("/mnt/data2/jingbo/kvmemory/filtered_strings_sft_new")
-    data2 = data2['conversations']
+    data2 = data2['conversations'][40000:]
 
 
     dataset = CustomDatasetCombine(global_tokenizer, data1, data2)
@@ -48,6 +48,8 @@ def main():
     # os.environ["WANDB_LOG_MODEL"]="true"
     os.environ["WANDB_WATCH"]="false"
 
+    # wandb.init(entity="jingboy-uc-santa-barbara",project="kvmemory", name = "kv_dump_combine_new", resume="allow")
+
     # Set training arguments
     training_args = TrainingArguments(
         output_dir="/mnt/data/jingbo/kv_dump_combine_new",
@@ -57,11 +59,11 @@ def main():
         max_steps=30000,
         logging_dir="/mnt/data/jingbo/logs",
         logging_steps=5,
-        save_steps=100,
-        save_total_limit=2,
+        save_steps=2000,
         gradient_accumulation_steps=4,
         bf16=True,
-        learning_rate=2e-5
+        learning_rate=2e-5,
+        overwrite_output_dir = False
     )
 
     # optimizer = AdamW(global_model.parameters(), lr=1e-5)
@@ -71,13 +73,6 @@ def main():
     # scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=500, num_training_steps=10000)
 
     accelerator = Accelerator()
-    # trainer = accelerator.prepare(CustomTrainer(
-    #     model=global_model,
-    #     tokenizer=global_tokenizer,
-    #     args=training_args,
-    #     data_loader = data_loader,
-    #     # optimizers=(optimizer, scheduler)
-    # ))
 
     trainer = accelerator.prepare(CustomTrainerCombine(
         model=global_model,
@@ -87,7 +82,7 @@ def main():
         # optimizers=(optimizer, scheduler)
     ))
 
-    trainer.train()
+    trainer.train(resume_from_checkpoint = True)
 
     global_model.save_pretrained("/mnt/data/jingbo/kv_dump_combine_new")
     global_tokenizer.save_pretrained("/mnt/data/jingbo/kv_dump_combine_new")

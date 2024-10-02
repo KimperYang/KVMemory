@@ -1,0 +1,342 @@
+
+  0%|                                                                                                                                                                                | 0/30000 [00:00<?, ?it/s]We detected that you are passing `past_key_values` as a tuple and this is deprecated and will be removed in v4.43. Please use an appropriate `Cache` class (https://huggingface.co/docs/transformers/v4.41.3/en/internal/generation_utils#transformers.Cache)
+
+
+
+ 33%|██████████████████████████████████████████████████████▎                                                                                                            | 10005/30000 [00:28<01:22, 243.35it/s]
+
+
+
+ 33%|██████████████████████████████████████████████████████▋                                                                                                             | 10009/30000 [00:51<03:52, 85.89it/s]
+
+
+
+
+
+ 33%|██████████████████████████████████████████████████████▋                                                                                                             | 10015/30000 [01:26<10:04, 33.04it/s]
+
+
+
+
+
+ 33%|██████████████████████████████████████████████████████▊                                                                                                             | 10020/30000 [01:56<32:38, 10.20it/s]
+
+
+
+ 33%|██████████████████████████████████████████████████████▏                                                                                                           | 10025/30000 [02:24<1:14:59,  4.44it/s]
+
+
+
+
+
+ 33%|██████████████████████████████████████████████████████▏                                                                                                           | 10030/30000 [02:53<2:29:47,  2.22it/s]
+
+
+
+
+ 33%|██████████████████████████████████████████████████████▏                                                                                                           | 10034/30000 [03:21<4:42:17,  1.18it/s]
+
+
+
+
+ 33%|█████████████████████████████████████████████████████▉                                                                                                           | 10039/30000 [03:44<11:40:04,  2.10s/it]
+
+
+
+
+ 33%|█████████████████████████████████████████████████████▉                                                                                                           | 10043/30000 [04:07<18:15:18,  3.29s/it]
+
+
+
+
+
+
+ 34%|█████████████████████████████████████████████████████▉                                                                                                           | 10050/30000 [04:48<29:10:25,  5.26s/it]
+
+
+
+
+ 34%|█████████████████████████████████████████████████████▉                                                                                                           | 10054/30000 [05:12<31:31:04,  5.69s/it]
+
+
+
+
+
+
+ 34%|█████████████████████████████████████████████████████▉                                                                                                           | 10060/30000 [05:47<32:03:05,  5.79s/it]
+
+
+
+
+ 34%|██████████████████████████████████████████████████████                                                                                                           | 10064/30000 [06:11<32:12:39,  5.82s/it]
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████                                                                                                           | 10069/30000 [06:40<33:09:01,  5.99s/it]
+
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████                                                                                                           | 10075/30000 [07:15<32:30:46,  5.87s/it]
+
+
+
+
+ 34%|██████████████████████████████████████████████████████                                                                                                           | 10079/30000 [07:38<32:17:19,  5.84s/it]
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████                                                                                                           | 10084/30000 [08:07<32:32:25,  5.88s/it]
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▏                                                                                                          | 10089/30000 [08:38<32:15:32,  5.83s/it]
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▏                                                                                                          | 10094/30000 [09:06<30:37:33,  5.54s/it]
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▏                                                                                                          | 10099/30000 [09:35<32:33:25,  5.89s/it]
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▏                                                                                                          | 10104/30000 [10:04<32:09:02,  5.82s/it]
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▎                                                                                                          | 10109/30000 [10:34<32:49:51,  5.94s/it]
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▎                                                                                                          | 10114/30000 [11:05<34:48:11,  6.30s/it]
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▎                                                                                                          | 10119/30000 [11:34<32:46:25,  5.93s/it]
+
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▎                                                                                                          | 10125/30000 [12:09<31:51:08,  5.77s/it]
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▎                                                                                                          | 10129/30000 [12:32<32:28:34,  5.88s/it]
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▍                                                                                                          | 10134/30000 [13:00<31:40:33,  5.74s/it]
+
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▍                                                                                                          | 10140/30000 [13:36<31:50:22,  5.77s/it]
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▍                                                                                                          | 10145/30000 [14:05<32:13:27,  5.84s/it]
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▍                                                                                                          | 10149/30000 [14:29<32:33:01,  5.90s/it]
+
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▍                                                                                                          | 10155/30000 [15:04<32:03:26,  5.82s/it]
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▌                                                                                                          | 10160/30000 [15:31<30:40:53,  5.57s/it]
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▌                                                                                                          | 10164/30000 [15:55<31:34:30,  5.73s/it]
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▌                                                                                                          | 10169/30000 [16:25<33:22:00,  6.06s/it]
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▌                                                                                                          | 10174/30000 [16:55<32:15:11,  5.86s/it]
+
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▋                                                                                                          | 10180/30000 [17:30<32:33:51,  5.91s/it]
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▋                                                                                                          | 10185/30000 [17:59<31:59:40,  5.81s/it]
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▋                                                                                                          | 10189/30000 [18:24<32:55:21,  5.98s/it]
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▋                                                                                                          | 10194/30000 [18:53<32:22:16,  5.88s/it]
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▋                                                                                                          | 10199/30000 [19:22<32:10:33,  5.85s/it]
+
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▊                                                                                                          | 10205/30000 [19:56<32:08:48,  5.85s/it]
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▊                                                                                                          | 10209/30000 [20:19<31:55:55,  5.81s/it]
+
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▊                                                                                                          | 10215/30000 [20:54<32:29:36,  5.91s/it]
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▊                                                                                                          | 10220/30000 [21:24<33:21:20,  6.07s/it]
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▊                                                                                                          | 10224/30000 [21:49<33:15:57,  6.06s/it]
+
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▉                                                                                                          | 10230/30000 [22:24<32:20:40,  5.89s/it]
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▉                                                                                                          | 10235/30000 [22:52<31:15:52,  5.69s/it]
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▉                                                                                                          | 10239/30000 [23:15<31:23:17,  5.72s/it]
+
+
+
+
+
+ 34%|██████████████████████████████████████████████████████▉                                                                                                          | 10244/30000 [23:45<32:27:38,  5.92s/it]Traceback (most recent call last):
+  File "/home/jingbo/KVMemory/finetune_combine.py", line 91, in <module>
+    main()
+  File "/home/jingbo/KVMemory/finetune_combine.py", line 85, in main
+    trainer.train(resume_from_checkpoint = True)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 1938, in train
+    return inner_training_loop(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 2279, in _inner_training_loop
+    tr_loss_step = self.training_step(model, inputs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 3318, in training_step
+    loss = self.compute_loss(model, inputs)
+  File "/home/jingbo/KVMemory/src/training/trainer.py", line 332, in compute_loss
+    outputs = self.model(input_ids=input_ids, attention_mask=attention_mask, labels = input_ids)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/peft_model.py", line 1430, in forward
+    return self.base_model(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/tuners/tuners_utils.py", line 179, in forward
+    return self.model.forward(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 1159, in forward
+    logits = logits.float()
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 384.00 MiB. GPU
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/home/jingbo/KVMemory/finetune_combine.py", line 91, in <module>
+[rank0]:     main()
+[rank0]:   File "/home/jingbo/KVMemory/finetune_combine.py", line 85, in main
+[rank0]:     trainer.train(resume_from_checkpoint = True)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 1938, in train
+[rank0]:     return inner_training_loop(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 2279, in _inner_training_loop
+[rank0]:     tr_loss_step = self.training_step(model, inputs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 3318, in training_step
+[rank0]:     loss = self.compute_loss(model, inputs)
+[rank0]:   File "/home/jingbo/KVMemory/src/training/trainer.py", line 332, in compute_loss
+[rank0]:     outputs = self.model(input_ids=input_ids, attention_mask=attention_mask, labels = input_ids)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/peft_model.py", line 1430, in forward
+[rank0]:     return self.base_model(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/tuners/tuners_utils.py", line 179, in forward
+[rank0]:     return self.model.forward(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 1159, in forward
+[rank0]:     logits = logits.float()
+[rank0]: torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 384.00 MiB. GPU

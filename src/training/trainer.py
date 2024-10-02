@@ -276,7 +276,7 @@ class CustomTrainerCombine(Trainer):
     def compute_loss(self, model, inputs, return_outputs=False):
         dataset_id = inputs["dataset_id"]
         # print(dataset_id)
-        final_loss = []
+
         if dataset_id[0] == 'text':
             input_ids = inputs["input_ids"][0].unsqueeze(0)
             attention_mask = inputs["attention_mask"][0].unsqueeze(0)
@@ -349,7 +349,5 @@ class CustomTrainerCombine(Trainer):
 
             batch_loss2 = masked_losses_sum / valid_positions
             # print("loss2: ",batch_loss2)
-
-        final_loss = (batch_loss1 + batch_loss2) / 2
         
-        return final_loss
+        return (batch_loss1 + batch_loss2) / 2

@@ -1,0 +1,484 @@
+
+  0%|                                                                                                                                 | 0/30000 [00:00<?, ?it/s]We detected that you are passing `past_key_values` as a tuple and this is deprecated and will be removed in v4.43. Please use an appropriate `Cache` class (https://huggingface.co/docs/transformers/v4.41.3/en/internal/generation_utils#transformers.Cache)
+99 99 cpu cpu
+541 541 cpu cpu
+721 721 cpu cpu
+159 159 cpu cpu
+502 502 cpu cpu
+587 587 cpu cpu
+907 907 cpu cpu
+ 33%|██████████████████████████████████████▎                                                                            | 10001/30000 [00:05<00:11, 1716.20it/s]
+764 764 cpu cpu
+892 892 cpu cpu
+106 106 cpu cpu
+572 572 cpu cpu
+404 404 cpu cpu
+523 523 cpu cpu
+258 258 cpu cpu
+354 354 cpu cpu
+820 820 cpu cpu
+590 590 cpu cpu
+687 687 cpu cpu
+350 350 cpu cpu
+426 426 cpu cpu
+545 545 cpu cpu
+479 479 cpu cpu
+67 67 cpu cpu
+731 731 cpu cpu
+724 724 cpu cpu
+219 219 cpu cpu
+576 576 cpu cpu
+589 589 cpu cpu
+644 644 cpu cpu
+742 742 cpu cpu
+752 752 cpu cpu
+610 610 cpu cpu
+808 808 cpu cpu
+268 268 cpu cpu
+514 514 cpu cpu
+984 984 cpu cpu
+
+ 33%|██████████████████████████████████████▋                                                                             | 10004/30000 [00:22<01:00, 330.08it/s]
+595 595 cpu cpu
+638 638 cpu cpu
+535 535 cpu cpu
+628 628 cpu cpu
+516 516 cpu cpu
+540 540 cpu cpu
+590 590 cpu cpu
+663 663 cpu cpu
+491 491 cpu cpu
+625 625 cpu cpu
+758 758 cpu cpu
+
+ 33%|██████████████████████████████████████▋                                                                             | 10005/30000 [00:28<01:22, 243.08it/s]
+377 377 cpu cpu
+61 61 cpu cpu
+220 220 cpu cpu
+118 118 cpu cpu
+{'loss': 1.2002, 'grad_norm': 0.37541836500167847, 'learning_rate': 1.3330000000000001e-05, 'epoch': 0.12}
+314 314 cpu cpu
+543 543 cpu cpu
+316 316 cpu cpu
+603 603 cpu cpu
+741 741 cpu cpu
+236 236 cpu cpu
+3 3 cpu cpu
+92 92 cpu cpu
+509 509 cpu cpu
+628 628 cpu cpu
+781 781 cpu cpu
+678 678 cpu cpu
+247 247 cpu cpu
+571 571 cpu cpu
+524 524 cpu cpu
+570 570 cpu cpu
+81 81 cpu cpu
+401 401 cpu cpu
+505 505 cpu cpu
+180 180 cpu cpu
+936 936 cpu cpu
+402 402 cpu cpu
+705 705 cpu cpu
+712 712 cpu cpu
+
+ 33%|██████████████████████████████████████▋                                                                             | 10007/30000 [00:41<01:22, 243.08it/s]
+718 718 cpu cpu
+687 687 cpu cpu
+287 287 cpu cpu
+766 766 cpu cpu
+679 679 cpu cpu
+773 773 cpu cpu
+
+ 33%|██████████████████████████████████████▋                                                                             | 10008/30000 [00:46<03:06, 107.18it/s]
+591 591 cpu cpu
+603 603 cpu cpu
+480 480 cpu cpu
+452 452 cpu cpu
+391 391 cpu cpu
+612 612 cpu cpu
+679 679 cpu cpu
+777 777 cpu cpu
+251 251 cpu cpu
+
+ 33%|███████████████████████████████████████                                                                              | 10009/30000 [00:51<03:52, 85.81it/s]
+726 726 cpu cpu
+675 675 cpu cpu
+575 575 cpu cpu
+609 609 cpu cpu
+477 477 cpu cpu
+571 571 cpu cpu
+688 688 cpu cpu
+65 65 cpu cpu
+765 765 cpu cpu
+766 766 cpu cpu
+
+ 33%|███████████████████████████████████████                                                                              | 10010/30000 [00:57<03:52, 85.81it/s]
+{'loss': 1.2748, 'grad_norm': 0.33776572346687317, 'learning_rate': 1.3326666666666667e-05, 'epoch': 0.12}
+695 695 cpu cpu
+509 509 cpu cpu
+400 400 cpu cpu
+90 90 cpu cpu
+368 368 cpu cpu
+737 737 cpu cpu
+388 388 cpu cpu
+651 651 cpu cpu
+619 619 cpu cpu
+503 503 cpu cpu
+1284 1284 cpu cpu
+847 847 cpu cpu
+934 934 cpu cpu
+63 63 cpu cpu
+117 117 cpu cpu
+517 517 cpu cpu
+585 585 cpu cpu
+562 562 cpu cpu
+877 877 cpu cpu
+884 884 cpu cpu
+14 14 cpu cpu
+670 670 cpu cpu
+607 607 cpu cpu
+
+ 33%|███████████████████████████████████████                                                                              | 10012/30000 [01:11<03:52, 85.81it/s]
+121 121 cpu cpu
+518 518 cpu cpu
+757 757 cpu cpu
+640 640 cpu cpu
+612 612 cpu cpu
+480 480 cpu cpu
+516 516 cpu cpu
+677 677 cpu cpu
+
+ 33%|███████████████████████████████████████                                                                              | 10013/30000 [01:15<08:29, 39.24it/s]
+994 994 cpu cpu
+691 691 cpu cpu
+712 712 cpu cpu
+281 281 cpu cpu
+218 218 cpu cpu
+357 357 cpu cpu
+186 186 cpu cpu
+845 845 cpu cpu
+676 676 cpu cpu
+
+ 33%|███████████████████████████████████████                                                                              | 10014/30000 [01:20<10:05, 33.03it/s]
+672 672 cpu cpu
+882 882 cpu cpu
+198 198 cpu cpu
+437 437 cpu cpu
+683 683 cpu cpu
+509 509 cpu cpu
+657 657 cpu cpu
+501 501 cpu cpu
+{'loss': 1.2854, 'grad_norm': 0.308660626411438, 'learning_rate': 1.3323333333333335e-05, 'epoch': 0.12}
+628 628 cpu cpu
+605 605 cpu cpu
+
+ 33%|███████████████████████████████████████                                                                              | 10015/30000 [01:26<10:05, 33.03it/s]
+892 892 cpu cpu
+730 730 cpu cpu
+85 85 cpu cpu
+462 462 cpu cpu
+547 547 cpu cpu
+
+ 33%|███████████████████████████████████████                                                                              | 10015/30000 [01:31<10:05, 33.03it/s]
+525 525 cpu cpu
+724 724 cpu cpu
+764 764 cpu cpu
+
+ 33%|███████████████████████████████████████                                                                              | 10016/30000 [01:32<14:53, 22.36it/s]
+741 741 cpu cpu
+265 265 cpu cpu
+741 741 cpu cpu
+161 161 cpu cpu
+606 606 cpu cpu
+672 672 cpu cpu
+376 376 cpu cpu
+
+ 33%|███████████████████████████████████████                                                                              | 10017/30000 [01:38<18:19, 18.17it/s]
+795 795 cpu cpu
+576 576 cpu cpu
+207 207 cpu cpu
+617 617 cpu cpu
+786 786 cpu cpu
+292 292 cpu cpu
+209 209 cpu cpu
+464 464 cpu cpu
+481 481 cpu cpu
+411 411 cpu cpu
+639 639 cpu cpu
+600 600 cpu cpu
+35 35 cpu cpu
+751 751 cpu cpu
+721 721 cpu cpu
+282 282 cpu cpu
+630 630 cpu cpu
+660 660 cpu cpu
+314 314 cpu cpu
+735 735 cpu cpu
+708 708 cpu cpu
+91 91 cpu cpu
+634 634 cpu cpu
+
+ 33%|███████████████████████████████████████                                                                              | 10019/30000 [01:51<18:19, 18.17it/s]
+601 601 cpu cpu
+583 583 cpu cpu
+301 301 cpu cpu
+897 897 cpu cpu
+883 883 cpu cpu
+738 738 cpu cpu
+776 776 cpu cpu
+
+ 33%|███████████████████████████████████████                                                                              | 10020/30000 [01:56<32:39, 10.20it/s]
+{'loss': 1.222, 'grad_norm': 0.3685115575790405, 'learning_rate': 1.3320000000000001e-05, 'epoch': 0.12}
+361 361 cpu cpu
+7 7 cpu cpu
+295 295 cpu cpu
+190 190 cpu cpu
+8 8 cpu cpu
+7 7 cpu cpu
+836 836 cpu cpu
+720 720 cpu cpu
+761 761 cpu cpu
+222 222 cpu cpu
+408 408 cpu cpu
+677 677 cpu cpu
+
+ 33%|███████████████████████████████████████                                                                              | 10021/30000 [02:01<38:09,  8.73it/s]
+734 734 cpu cpu
+713 713 cpu cpu
+254 254 cpu cpu
+570 570 cpu cpu
+957 957 cpu cpu
+135 135 cpu cpu
+668 668 cpu cpu
+696 696 cpu cpu
+370 370 cpu cpu
+11 11 cpu cpu
+680 680 cpu cpu
+707 707 cpu cpu
+348 348 cpu cpu
+415 415 cpu cpu
+546 546 cpu cpu
+634 634 cpu cpu
+1050 1050 cpu cpu
+
+ 33%|███████████████████████████████████████                                                                              | 10022/30000 [02:11<38:09,  8.73it/s]
+665 665 cpu cpu
+741 741 cpu cpu
+282 282 cpu cpu
+378 378 cpu cpu
+
+ 33%|███████████████████████████████████████                                                                              | 10023/30000 [02:13<56:56,  5.85it/s]
+13 13 cpu cpu
+8 8 cpu cpu
+14 14 cpu cpu
+635 635 cpu cpu
+595 595 cpu cpu
+496 496 cpu cpu
+526 526 cpu cpu
+681 681 cpu cpu
+
+ 33%|██████████████████████████████████████▍                                                                            | 10024/30000 [02:18<1:09:13,  4.81it/s]
+501 501 cpu cpu
+963 963 cpu cpu
+111 111 cpu cpu
+677 677 cpu cpu
+663 663 cpu cpu
+396 396 cpu cpu
+950 950 cpu cpu
+825 825 cpu cpu
+706 706 cpu cpu
+792 792 cpu cpu
+
+ 33%|██████████████████████████████████████▍                                                                            | 10025/30000 [02:24<1:09:13,  4.81it/s]
+{'loss': 1.2637, 'grad_norm': 0.3571632206439972, 'learning_rate': 1.3316666666666669e-05, 'epoch': 0.12}
+589 589 cpu cpu
+543 543 cpu cpu
+493 493 cpu cpu
+912 912 cpu cpu
+100 100 cpu cpu
+749 749 cpu cpu
+615 615 cpu cpu
+333 333 cpu cpu
+437 437 cpu cpu
+819 819 cpu cpu
+454 454 cpu cpu
+746 746 cpu cpu
+806 806 cpu cpu
+
+ 33%|██████████████████████████████████████▍                                                                            | 10026/30000 [02:31<1:09:13,  4.81it/s]
+538 538 cpu cpu
+530 530 cpu cpu
+577 577 cpu cpu
+738 738 cpu cpu
+232 232 cpu cpu
+231 231 cpu cpu
+317 317 cpu cpu
+342 342 cpu cpu
+628 628 cpu cpu
+399 399 cpu cpu
+640 640 cpu cpu
+704 704 cpu cpu
+
+ 33%|██████████████████████████████████████▍                                                                            | 10027/30000 [02:37<2:05:33,  2.65it/s]
+602 602 cpu cpu
+591 591 cpu cpu
+489 489 cpu cpu
+656 656 cpu cpu
+126 126 cpu cpu
+610 610 cpu cpu
+509 509 cpu cpu
+265 265 cpu cpu
+
+ 33%|██████████████████████████████████████▍                                                                            | 10028/30000 [02:42<2:28:40,  2.24it/s]
+771 771 cpu cpu
+697 697 cpu cpu
+717 717 cpu cpu
+774 774 cpu cpu
+12 12 cpu cpu
+805 805 cpu cpu
+624 624 cpu cpu
+253 253 cpu cpu
+754 754 cpu cpu
+711 711 cpu cpu
+235 235 cpu cpu
+191 191 cpu cpu
+267 267 cpu cpu
+467 467 cpu cpu
+486 486 cpu cpu
+567 567 cpu cpu
+655 655 cpu cpu
+375 375 cpu cpu
+613 613 cpu cpu
+453 453 cpu cpu
+{'loss': 1.2779, 'grad_norm': 0.4486094117164612, 'learning_rate': 1.3313333333333333e-05, 'epoch': 0.12}
+491 491 cpu cpu
+624 624 cpu cpu
+
+ 33%|██████████████████████████████████████▍                                                                            | 10030/30000 [02:53<2:28:39,  2.24it/s]
+563 563 cpu cpu
+661 661 cpu cpu
+361 361 cpu cpu
+724 724 cpu cpu
+794 794 cpu cpu
+341 341 cpu cpu
+636 636 cpu cpu
+713 713 cpu cpu
+788 788 cpu cpu
+721 721 cpu cpu
+ 33%|██████████████████████████████████████▍                                                                            | 10030/30000 [02:53<2:28:39,  2.24it/s]Traceback (most recent call last):
+  File "/home/jingbo/KVMemory/finetune_combine.py", line 91, in <module>
+    main()
+  File "/home/jingbo/KVMemory/finetune_combine.py", line 85, in main
+    trainer.train(resume_from_checkpoint = True)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 1938, in train
+    return inner_training_loop(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 2279, in _inner_training_loop
+    tr_loss_step = self.training_step(model, inputs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 3318, in training_step
+    loss = self.compute_loss(model, inputs)
+  File "/home/jingbo/KVMemory/src/training/trainer.py", line 332, in compute_loss
+    outputs = self.model(input_ids=input_ids, attention_mask=attention_mask, labels = input_ids)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/peft_model.py", line 1430, in forward
+    return self.base_model(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/tuners/tuners_utils.py", line 179, in forward
+    return self.model.forward(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 1139, in forward
+    outputs = self.model(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 942, in forward
+    layer_outputs = decoder_layer(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 677, in forward
+    hidden_states, self_attn_weights, present_key_value = self.self_attn(
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 438, in forward
+    query_states = self.q_proj(hidden_states)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/tuners/lora/layer.py", line 569, in forward
+    result = result + lora_B(lora_A(dropout(x))) * scaling
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/linear.py", line 116, in forward
+    return F.linear(input, self.weight, self.bias)
+KeyboardInterrupt
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/home/jingbo/KVMemory/finetune_combine.py", line 91, in <module>
+[rank0]:     main()
+[rank0]:   File "/home/jingbo/KVMemory/finetune_combine.py", line 85, in main
+[rank0]:     trainer.train(resume_from_checkpoint = True)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 1938, in train
+[rank0]:     return inner_training_loop(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 2279, in _inner_training_loop
+[rank0]:     tr_loss_step = self.training_step(model, inputs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 3318, in training_step
+[rank0]:     loss = self.compute_loss(model, inputs)
+[rank0]:   File "/home/jingbo/KVMemory/src/training/trainer.py", line 332, in compute_loss
+[rank0]:     outputs = self.model(input_ids=input_ids, attention_mask=attention_mask, labels = input_ids)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/peft_model.py", line 1430, in forward
+[rank0]:     return self.base_model(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/tuners/tuners_utils.py", line 179, in forward
+[rank0]:     return self.model.forward(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 1139, in forward
+[rank0]:     outputs = self.model(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 942, in forward
+[rank0]:     layer_outputs = decoder_layer(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 677, in forward
+[rank0]:     hidden_states, self_attn_weights, present_key_value = self.self_attn(
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 438, in forward
+[rank0]:     query_states = self.q_proj(hidden_states)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/tuners/lora/layer.py", line 569, in forward
+[rank0]:     result = result + lora_B(lora_A(dropout(x))) * scaling
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/linear.py", line 116, in forward
+[rank0]:     return F.linear(input, self.weight, self.bias)
+[rank0]: KeyboardInterrupt

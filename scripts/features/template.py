@@ -1,13 +1,13 @@
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
-
+from transformers import LlamaModel
 checkpoint = "meta-llama/Llama-2-7b-chat-hf"
 tokenizer = AutoTokenizer.from_pretrained(checkpoint)
 # model = AutoModelForCausalLM.from_pretrained(checkpoint)  # You may want to use bfloat16 and/or move to GPU here
 
-test = "<s> [INST] I love you </s>"
-
-tokens = tokenizer(test, return_tensors="pt", add_special_tokens=False).attention_mask
+test = "</s>"
+# tokenizer.pad_token = tokenizer.eos
+tokens = tokenizer(test)
 print(tokens)
 # print(tokenizer.convert_ids_to_tokens(tokens[0]))
 # messages = [

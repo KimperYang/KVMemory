@@ -1,0 +1,39 @@
+
+[2024-10-01 20:58:17,920] [INFO] [real_accelerator.py:203:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[93m [WARNING] [39m async_io requires the dev libaio .so object and headers but these were not found.
+[93m [WARNING] [39m async_io: please install the libaio-dev package with apt
+[93m [WARNING] [39m If libaio is already installed (perhaps from source), try setting the CFLAGS and LDFLAGS environment variables to where it can be found.
+[93m [WARNING] [39m Please specify the CUTLASS repo directory as environment variable $CUTLASS_PATH
+[93m [WARNING] [39m sparse_attn requires a torch version >= 1.5 and < 2.0 but detected 2.3
+[93m [WARNING] [39m using untested triton version (2.3.1), only 1.0.0 is known to be compatible
+[2024-10-01 20:58:22,048] [INFO] [comm.py:637:init_distributed] cdb=None
+max_steps is given, it will override any value given in num_train_epochs
+We detected that you are passing `past_key_values` as a tuple and this is deprecated and will be removed in v4.43. Please use an appropriate `Cache` class (https://huggingface.co/docs/transformers/v4.41.3/en/internal/generation_utils#transformers.Cache)
+[rank2]: Traceback (most recent call last):
+[rank2]:   File "/home/jingbo/KVMemory/finetune_combine.py", line 91, in <module>
+[rank2]:     main()
+[rank2]:   File "/home/jingbo/KVMemory/finetune_combine.py", line 85, in main
+[rank2]:     trainer.train(resume_from_checkpoint = True)
+[rank2]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 1938, in train
+[rank2]:     return inner_training_loop(
+[rank2]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 2279, in _inner_training_loop
+[rank2]:     tr_loss_step = self.training_step(model, inputs)
+[rank2]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/trainer.py", line 3318, in training_step
+[rank2]:     loss = self.compute_loss(model, inputs)
+[rank2]:   File "/home/jingbo/KVMemory/src/training/trainer.py", line 332, in compute_loss
+[rank2]:     outputs = self.model(input_ids=input_ids, attention_mask=attention_mask, labels = input_ids)
+[rank2]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank2]:     return self._call_impl(*args, **kwargs)
+[rank2]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank2]:     return forward_call(*args, **kwargs)
+[rank2]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/peft_model.py", line 1430, in forward
+[rank2]:     return self.base_model(
+[rank2]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+[rank2]:     return self._call_impl(*args, **kwargs)
+[rank2]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+[rank2]:     return forward_call(*args, **kwargs)
+[rank2]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/peft/tuners/tuners_utils.py", line 179, in forward
+[rank2]:     return self.model.forward(*args, **kwargs)
+[rank2]:   File "/home/jingbo/anaconda3/envs/unlearning/lib/python3.9/site-packages/transformers/models/llama/modeling_llama.py", line 1159, in forward
+[rank2]:     logits = logits.float()
+[rank2]: torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 384.00 MiB. GPU  has a total capacity of 47.54 GiB of which 349.25 MiB is free. Including non-PyTorch memory, this process has 47.19 GiB memory in use. Of the allocated memory 41.79 GiB is allocated by PyTorch, and 4.42 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
