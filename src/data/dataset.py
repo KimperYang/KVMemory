@@ -106,7 +106,7 @@ class CustomDatasetCombine(Dataset):
                 tokenized = self.tokenizer(t)
 
                 input_ids = tokenized.input_ids[1:]
-                if len(mask) + len(input_ids) > self.max_length: 
+                if len(mask) + len(input_ids) >= self.max_length: 
                     break
                 attention_msk = tokenized.attention_mask[1:]
 
@@ -205,7 +205,7 @@ class CustomDatasetCombine(Dataset):
             # samples_to_pack = self.dataset2[start_idx:start_idx + 5]  # Pack up to 5 samples
             # input_ids, attention_mask = self.pack_samples(samples_to_pack)
             # dataset_id = 'sft'
-            conversation = self.dataset2[idx // 2]
+            conversation = self.dataset2[(idx // 2)%99483]
             return self.process_conversation(conversation)
     
 def custom_collate_combine(batch):
@@ -225,7 +225,7 @@ def custom_collate_combine(batch):
     padded_input_ids = torch.cat([torch.cat([torch.tensor([ids]), torch.zeros(max_length - len(ids), dtype=torch.int64).unsqueeze(0)], dim = 1) for ids in input_ids], dim = 0)
     padded_attention_mask = torch.cat([torch.cat([torch.tensor([mask]), torch.zeros(max_length - len(mask), dtype=torch.int64).unsqueeze(0)], dim = 1) for mask in attention_mask], dim = 0)
     padded_loss_mask = torch.cat([torch.cat([torch.tensor([mask]), torch.zeros(max_length - len(mask), dtype=torch.int64).unsqueeze(0)], dim = 1) for mask in loss_masks], dim = 0)
-    print(padded_input_ids.size(), padded_attention_mask.size(), padded_loss_mask.size())
+    # print(padded_input_ids.size(), padded_attention_mask.size(), padded_loss_mask.size())
     return {
         'input_ids': padded_input_ids,
         'attention_mask': padded_attention_mask,
@@ -233,4 +233,4 @@ def custom_collate_combine(batch):
         'loss_mask': padded_loss_mask
     }
 
-# add position encoding in KV; edit compute loss for different situations
+

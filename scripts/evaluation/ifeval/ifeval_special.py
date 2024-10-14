@@ -3,11 +3,21 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, DynamicCache
 import pandas as pd    
 import json
 import datetime
-from rouge_score import rouge_scorer
-from datasets import load_dataset
+from peft import PeftModel, PeftConfig
 
-global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
-global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16, device_map="auto")
+global_tokenizer = AutoTokenizer.from_pretrained("/mnt/data/jingbo/kv_dump_combine_special2")
+
+base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16)
+
+vocab_size = len(global_tokenizer)
+base_model.resize_token_embeddings(vocab_size)
+
+peft_config_path = "/mnt/data/jingbo/kv_dump_combine_special2"  # Path to the directory where LoRA weights are stored
+lora_config = PeftConfig.from_pretrained(peft_config_path)
+
+global_model = PeftModel.from_pretrained(base_model, peft_config_path)
+
+global_model.to("cuda")
 
 def generate_kv(prompt):
 
@@ -34,7 +44,7 @@ def generate_kv(prompt):
 
     input_ids = input_ids[:, 1:]
 
-    # print(filtered_past_key_values[0][0].size())
+    print(filtered_past_key_values[0][0].size())
     # print(filtered_past_key_values.get_seq_length())
 
     return input_ids, filtered_past_key_values
@@ -61,14 +71,14 @@ def append_kv(kv_list):
     # torch.save(values, "values.pt")
     return concatenated_past_key_values
 
-def inference(input_ids, past_key_values, model_name="meta-llama/Llama-2-7b-chat-hf", max_length=2000, num_return_sequences=1):
+def inference(input_ids, past_key_values, model_name="meta-llama/Llama-2-7b-chat-hf", max_length=2000):
 
     tokenizer = global_tokenizer
     model = global_model
     
     model.eval()
 
-    max_length = input_ids.size(1) + 100
+    max_length = input_ids.size(1) + 400
 
     with torch.no_grad():
 
@@ -98,91 +108,44 @@ def count_tokens(input_text):
         print(f"Token ID: {token_id}, Token: '{token}'")
     print(f"Number of tokens including special tokens: {num_tokens}")
 
-def reorganize_dialog(data):
-    organized_dialog = []
-    
-    for entry in data:
-        dialog = entry['dialog']
-        
-        # Assume alternating text between PersonA and PersonB
-        for i in range(0, len(dialog) - 1, 2):
-            person_a_text = dialog[i]['text']
-            person_b_text = dialog[i + 1]['text']
-            
-            # Append each exchange as a dictionary entry
-            organized_dialog.append({
-                "Assistant": person_a_text,
-                "User": person_b_text
-            })
-    
-    return organized_dialog
-
-def reorganize_summary(sum1, sum2):
-
-    concatenated_asst = "You: " + " ".join(sum1)
-    concatenated_user = "User: " + " ".join(sum2)
-
-    return concatenated_asst + " " + concatenated_user
-
-def calculate_rouge_l_score(candidate, reference):
-    scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
-    scores = scorer.score(reference, candidate)
-    rouge_l_score = scores['rougeL'].recall
-    return rouge_l_score
-
 def main():
 
-    dataset = load_dataset("MemGPT/MSC-Self-Instruct")
+    jsonObj = pd.read_json(path_or_buf='/home/jingbo/KVMemory/data/raw/ifeval/input_data.jsonl', lines=True)
 
-    # print(reorganize_dialog(dataset["train"]["previous_dialogs"][0]))
+    template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
 
-    # template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
     # template = "[INST] <<SYS>>\nYou're an assistant who answer the question with the knowledge provided in the prompt\n<</SYS>>\n\n"
 
-    data = dataset["train"]["summary_speaker_1"]
-    total_num = len(data)
-    print(total_num)
+    total_num = len(jsonObj)
+
     res_list = []
-    score_list = []
 
     for i in range(total_num):
-        memory_list = []
+
         print("id:", str(i))
-        # memory_list.append(template)
+        raw_prompt = jsonObj["prompt"][i]
+        
+        start_token = "<s>"
 
-        for j in range(len(dataset["train"]["summary_speaker_1"][i])):
-            # print(j)
-            memory = reorganize_summary(dataset["train"]["summary_speaker_1"][i][j], dataset["train"]["summary_speaker_2"][i][j])
-            memory_list.append(memory)
+        new_prompt = "[/INST]"
 
-        memory = " ".join(memory_list)
-        template = f"[INST] Your task is to answer a question from the user about your prior conversations. The following is a summary of all your prior conversations: {memory} Answer from the perspective of the conversation summaries provided (do not say that you are an AI assistant). "
-        # print(memory_list)
-        # print(new_prompt)
+        seq = template + raw_prompt + new_prompt
 
-        seq = template + dataset["train"]["self_instruct"][i]["B"] + "'[/INST]"
-        # print(seq)
         input_ids = global_tokenizer(seq, return_tensors="pt").input_ids
         input_ids = input_ids.to(global_model.device)
 
         generated_seq = inference(input_ids, None)
         response = generated_seq[0].split('[/INST]')[1]
 
-        gold_answer = dataset["train"]["self_instruct"][i]["A"]
-        score = calculate_rouge_l_score(response, gold_answer)
+        print(response)
 
-        print('answer', response)
-        print('score:', str(score))
-        score_list.append(score)
-        res_list.append({"score": str(score),"question": dataset["train"]["self_instruct"][i]["B"], "response": response, "gold_answer": gold_answer})
+        res_list.append({"prompt": raw_prompt, "response": response})
         
 
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    final_score = sum(score_list) / len(score_list)
-
-    file_name = f"result/dialog/dialog_upper_{final_score}_{time_str}.json"
+    file_name = f"result/ifeval_special_{time_str}.jsonl"
 
     with open(file_name, 'w') as f:
         for entry in res_list:

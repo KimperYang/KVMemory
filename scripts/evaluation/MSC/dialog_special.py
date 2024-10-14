@@ -7,13 +7,17 @@ from rouge_score import rouge_scorer
 from datasets import load_dataset
 from peft import PeftModel, PeftConfig
 
-global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
-global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16, device_map="auto")
+global_tokenizer = AutoTokenizer.from_pretrained("/mnt/data/jingbo/kv_dump_combine_special2")
 
-# peft_config_path = "/mnt/data/jingbo/kv_dump_combine_new"  # Path to the directory where LoRA weights are stored
-# lora_config = PeftConfig.from_pretrained(peft_config_path)
+base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16)
 
-# global_model = PeftModel.from_pretrained(base_model, peft_config_path)
+vocab_size = len(global_tokenizer)
+base_model.resize_token_embeddings(vocab_size)
+
+peft_config_path = "/mnt/data/jingbo/kv_dump_combine_special2"  # Path to the directory where LoRA weights are stored
+lora_config = PeftConfig.from_pretrained(peft_config_path)
+
+global_model = PeftModel.from_pretrained(base_model, peft_config_path)
 
 def generate_kv(prompt):
 
@@ -128,7 +132,7 @@ def reorganize_summary(sum1, sum2):
     concatenated_asst = "You: " + " ".join(sum1)
     concatenated_user = "User: " + " ".join(sum2)
 
-    return concatenated_asst + " " + concatenated_user
+    return concatenated_asst + " " + concatenated_user + " <MEM>"
 
 def calculate_rouge_l_score(candidate, reference):
     scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
@@ -152,7 +156,7 @@ def main():
     score_list = []
 
     for i in range(total_num):
-        memory_list = ["<s>[INST] Your task is to answer a question from the user about your prior conversations. The following is a summary of all your prior conversations: "]
+        memory_list = ["<s>[INST] Your task is to answer a question from the user about your prior conversations. The following is a summary of all your prior conversations: <MEM>"]
         print("id:", str(i))
         # memory_list.append(template)
 
@@ -161,16 +165,18 @@ def main():
             memory = reorganize_summary(dataset["train"]["summary_speaker_1"][i][j], dataset["train"]["summary_speaker_2"][i][j])
             memory_list.append(memory)
      
-        # memory_list.append(" Answer from the perspective of the persona provided (do not say that you are an AI assistant). If you do not have enough information to answer the question, reply 'NO ANSWER'. Either reply with the answer, or reply 'NO ANSWER', do not say anything else. ")
-        memory_list.append(" Answer from the perspective of the persona provided (do not say that you are an AI assistant).")
+        memory_list.append(" Answer from the perspective of the conversation summaries provided (do not say that you are an AI assistant). <MEM>")
+        # template = f"[INST] Your task is to answer a question from the user about your prior conversations. The following is a summary of all your prior conversations: {memory} Answer from the perspective of the persona provided (do not say that you are an AI assistant). If you do not have enough information to answer the question, reply 'NO ANSWER'. Either reply with the answer, or reply 'NO ANSWER', do not say anything else. "
+        # print(memory_list)
+        # print(new_prompt)
 
+        # tokenized_batch  = global_tokenizer(memory_list, return_tensors="pt", add_special_tokens=False, padding=False, truncation=False)
         tokenized_sentences = [global_tokenizer(sentence, return_tensors="pt", add_special_tokens=False) for sentence in memory_list]
     
         current_position = 0
         kv_list = []
         for tokenized in tokenized_sentences:
             sentence_length = tokenized['input_ids'].size(1)
-            print(sentence_length)
             position_ids = torch.arange(current_position, current_position + sentence_length).unsqueeze(0)
             outputs = global_model(input_ids=tokenized['input_ids'].to(global_model.device), attention_mask=tokenized['attention_mask'].to(global_model.device), position_ids=position_ids.to(global_model.device))
             kv_list.append(outputs.past_key_values)
@@ -206,7 +212,7 @@ def main():
 
     final_score = sum(score_list) / len(score_list)
 
-    file_name = f"result/dialog/dialog_unfinetuned_{final_score}_{time_str}.json"
+    file_name = f"result/dialog/dialog_special_{final_score}_{time_str}.json"
 
     with open(file_name, 'w') as f:
         for entry in res_list:

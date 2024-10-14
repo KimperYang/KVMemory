@@ -9,7 +9,7 @@ from peft import LoraConfig, get_peft_model, TaskType
 from datasets import load_dataset, load_from_disk
 from accelerate import Accelerator
 from src.data.dataset import CustomDatasetCombine, custom_collate_combine
-from src.training.trainer import CustomTrainerCombine
+from src.training.trainer import CustomTrainerSpecial
 # import transformers.models.llama.modeling_llama
 def main():
     # Prepare model and tokenizer
@@ -17,10 +17,15 @@ def main():
     global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.bfloat16, use_flash_attention_2=True)
     # global_model.to("cuda")
 
+    new_token = "<MEM>"
+    global_tokenizer.add_tokens([new_token])
+    global_model.resize_token_embeddings(len(global_tokenizer))
+
     config = LoraConfig(
-        r= 16,
+        r= 64,
         lora_alpha=32,
-        target_modules=["q_proj", "v_proj"],
+        target_modules=["q_proj","v_proj","k_proj","o_proj"],
+        modules_to_save=["embed_tokens","lm_head"],
         lora_dropout=0.05,
         task_type=TaskType.CAUSAL_LM
     )
@@ -48,11 +53,11 @@ def main():
     # os.environ["WANDB_LOG_MODEL"]="true"
     os.environ["WANDB_WATCH"]="false"
 
-    # wandb.init(entity="jingboy-uc-santa-barbara",project="kvmemory", name = "kv_dump_combine_new", resume="allow")
+    # wandb.init(entity="jingboy-uc-santa-barbara",project="kvmemory", name = "kv_dump_combine_special", resume="allow")
 
     # Set training arguments
     training_args = TrainingArguments(
-        output_dir="/mnt/data/jingbo/kv_dump_combine_new",
+        output_dir="/mnt/data/jingbo/kv_dump_combine_special2",
         report_to="wandb",
         per_device_train_batch_size=2,
         # num_train_epochs=2,
@@ -74,7 +79,7 @@ def main():
 
     accelerator = Accelerator()
 
-    trainer = accelerator.prepare(CustomTrainerCombine(
+    trainer = accelerator.prepare(CustomTrainerSpecial(
         model=global_model,
         tokenizer=global_tokenizer,
         args=training_args,
@@ -82,10 +87,10 @@ def main():
         # optimizers=(optimizer, scheduler)
     ))
 
-    trainer.train(resume_from_checkpoint = True)
+    trainer.train()
 
-    global_model.save_pretrained("/mnt/data/jingbo/kv_dump_combine_new")
-    global_tokenizer.save_pretrained("/mnt/data/jingbo/kv_dump_combine_new")
+    global_model.save_pretrained("/mnt/data/jingbo/kv_dump_combine_special2")
+    global_tokenizer.save_pretrained("/mnt/data/jingbo/kv_dump_combine_special2")
 
 if __name__ == "__main__":
     main()

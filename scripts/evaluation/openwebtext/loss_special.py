@@ -6,14 +6,24 @@ import json
 import datetime
 from datasets import load_dataset
 from peft import PeftModel, PeftConfig
+import pdb
+global_tokenizer = AutoTokenizer.from_pretrained("/mnt/data/jingbo/kv_dump_combine_special2")
 
-global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
-base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16, device_map="auto", use_flash_attention_2=True)
+base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16)
+lm_head = base_model.state_dict()['lm_head.weight'].detach().numpy()
+vocab_size = len(global_tokenizer)
+base_model.resize_token_embeddings(vocab_size)
+pdb.set_trace()
 
 peft_config_path = "/mnt/data/jingbo/kv_dump_combine_special2"  # Path to the directory where LoRA weights are stored
 lora_config = PeftConfig.from_pretrained(peft_config_path)
-
+test_model = base_model.add_adapter(lora_config)
+test_model.enable_adapters()
 global_model = PeftModel.from_pretrained(base_model, peft_config_path)
+
+lora_lm_head = global_model.state_dict()['base_model.model.lm_head.modules_to_save.default.weight'].detach().numpy()
+original_lm_head = global_model.state_dict()['base_model.model.lm_head.original_module.weight'].detach().numpy()
+pdb.set_trace()
 global_model.to("cuda")
 
 def generate_kv_with_id(input_ids, p_id):
@@ -146,17 +156,20 @@ def main():
 
             kv_list = [generate_kv_with_id(global_tokenizer("", return_tensors="pt").input_ids, torch.tensor([[0]]).to(global_model.device))] #initialize with kv cache for <s>
 
+            current_position = 1
             for k in range(len(split_input_ids)):
-                position_id = torch.arange(k * num_tokens_per_part[j] + 1, k * num_tokens_per_part[j] + 1 + split_input_ids[k].size(1)).unsqueeze(0)
-                kv_cache = generate_kv_with_id(split_input_ids[k], position_id.to(global_model.device))
+                tem_input_ids = torch.cat([split_input_ids[k], torch.tensor([[32000]]).to(split_input_ids[k].device)],dim=1)
+                position_id = torch.arange(current_position, current_position + tem_input_ids.size(1)).unsqueeze(0)
+                kv_cache = generate_kv_with_id(tem_input_ids, position_id.to(global_model.device))
                 kv_list.append(kv_cache)
+                current_position += tem_input_ids.size(1)
 
             past_key_values =  append_kv(kv_list)
             remaining_ids = input_ids[:, 505:].to(global_model.device)
 
             # print(past_key_values[0][0].device, remaining_ids.device, attention_mask.device)
 
-            outputs = global_model(input_ids=remaining_ids, attention_mask=attention_mask, labels=remaining_ids, past_key_values=past_key_values, use_cache=True)
+            outputs = global_model(input_ids=remaining_ids, past_key_values=past_key_values, use_cache=True)
 
             logits = outputs.logits  
 
@@ -187,7 +200,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
     
-    file_name = f"result/openwebtext_{str(num_data_used)}_cheatmodel_{time_str}.json"
+    file_name = f"result/openwebtext_{str(num_data_used)}_special_{time_str}.json"
 
     with open(file_name, 'w', encoding='utf-8') as file:
         json.dump(res_dict, file, ensure_ascii=False, indent=4)

@@ -7,7 +7,7 @@ from peft import PeftModel, PeftConfig
 global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
 base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16, device_map="auto")
 
-peft_config_path = "/mnt/data/jingbo/kv_dump_combine_new/checkpoint-10000"   # Path to the directory where LoRA weights are stored
+peft_config_path = "/mnt/data/jingbo/kv_dump_combine_new"   # Path to the directory where LoRA weights are stored
 lora_config = PeftConfig.from_pretrained(peft_config_path)
 
 global_model = PeftModel.from_pretrained(base_model, peft_config_path)
@@ -65,7 +65,7 @@ def append_kv(kv_list):
     # torch.save(values, "values.pt")
     return concatenated_past_key_values
 
-def inference(input_ids, past_key_values, model_name="meta-llama/Llama-2-7b-chat-hf", max_length=2000, num_return_sequences=1):
+def inference(input_ids, past_key_values, model_name="meta-llama/Llama-2-7b-chat-hf", max_length=2000):
 
     tokenizer = global_tokenizer
     model = global_model
@@ -79,7 +79,9 @@ def inference(input_ids, past_key_values, model_name="meta-llama/Llama-2-7b-chat
         outputs = model.generate(
             input_ids=input_ids,
             max_length=max_length,
-            num_return_sequences=num_return_sequences,
+            do_sample=False,
+            temperature=None,
+            top_p=1.0,
             past_key_values=past_key_values,
             use_cache=True
         )
@@ -137,7 +139,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/ifeval_combinemodel2_{time_str}.jsonl"
+    file_name = f"result/ifeval_combinemodel30000_{time_str}.jsonl"
 
     with open(file_name, 'w') as f:
         for entry in res_list:

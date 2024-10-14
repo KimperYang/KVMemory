@@ -351,3 +351,99 @@ class CustomTrainerCombine(Trainer):
             # print("loss2: ",batch_loss2)
         
         return (batch_loss1 + batch_loss2) / 2
+
+class CustomTrainerSpecial(Trainer):
+    def __init__(self, *args, data_loader, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.data_loader = data_loader
+        self.train_loss_history = []
+
+    def get_train_dataloader(self):
+        return self.data_loader
+
+    def compute_loss(self, model, inputs, return_outputs=False):
+        dataset_id = inputs["dataset_id"]
+        # print(dataset_id)
+
+        if dataset_id[0] == 'text':
+            input_ids = inputs["input_ids"][0].unsqueeze(0)
+            attention_mask = inputs["attention_mask"][0].unsqueeze(0)
+
+            num_memory = random.randint(5, 10)
+            each_mem_len = random.randint(30, 80)
+            mum_len = num_memory * each_mem_len
+
+            input_len = input_ids.size(1)
+            input_ids = input_ids[:, :input_len - num_memory]
+
+            attention_mask_len = attention_mask.size(1)
+            attention_mask = attention_mask[:, :attention_mask_len - num_memory]
+            attention_mask = torch.cat([torch.tensor([[1] * num_memory]).to(attention_mask.device), attention_mask], dim=1)
+
+            memory_ids = input_ids[:, 1:mum_len + 1]
+            remaining_ids_batch = input_ids[:, mum_len + 1:]
+
+            split_input_ids = memory_ids.reshape(-1, each_mem_len)
+            split_input_ids = torch.cat([split_input_ids, torch.tensor([[32000]]*split_input_ids.size(0)).to(split_input_ids.device)], dim=1)
+
+            memory_position = torch.arange(1, 1 + mum_len + num_memory).unsqueeze(0)
+            memory_positions = torch.cat([memory_position] * input_ids.size(0))
+            memory_position_batch = memory_positions.reshape(-1, each_mem_len + 1)
+
+            split_past_key_values = generate_kv_with_position(self.model, split_input_ids, position_ids = memory_position_batch)
+            kv_s = generate_kv_with_position(self.model, self.tokenizer("", return_tensors="pt").input_ids, position_ids = torch.tensor([[0]]))
+
+            past_key_values_batch = concat_kv(split_past_key_values, num_memory)
+            kv_s_concat = append_kv([kv_s] * past_key_values_batch[0][0].size(0),0)
+            past_key_values_batch = append_kv([kv_s_concat, past_key_values_batch],2)
+
+            # print(remaining_ids_batch.shape, attention_mask.shape,  past_key_values_batch[0][0].shape)
+            outputs = self.model(input_ids=remaining_ids_batch, attention_mask=attention_mask, labels = remaining_ids_batch, past_key_values=past_key_values_batch, use_cache=True)
+
+            logits = outputs.logits  
+
+            shift_logits = logits[..., :-1, :].contiguous()
+            shift_labels = remaining_ids_batch[..., 1:].contiguous()
+
+            loss_fct = CrossEntropyLoss(reduction='none')
+            losses = loss_fct(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1))
+
+            losses = losses.view(shift_logits.size(0), -1)
+            
+            mask = attention_mask[:, 1:].clone()
+            mask = mask[:, mum_len  + num_memory + 1:]
+            masked_losses = losses * mask
+
+            masked_losses_sum = masked_losses.sum()
+            valid_positions = mask.sum()
+
+            batch_loss1 = masked_losses_sum / valid_positions
+            # print("loss1: ",batch_loss1)
+        
+        if dataset_id[1] == 'sft':
+            input_ids = inputs["input_ids"][1].unsqueeze(0)
+            attention_mask = inputs["attention_mask"][1].unsqueeze(0)
+            mask = inputs["loss_mask"][1].unsqueeze(0)
+
+            outputs = self.model(input_ids=input_ids, attention_mask=attention_mask, labels = input_ids)
+
+            logits = outputs.logits  
+
+            shift_logits = logits[..., :-1, :].contiguous()
+            shift_labels = input_ids[..., 1:].contiguous()
+
+            loss_fct = CrossEntropyLoss(reduction='none')
+            losses = loss_fct(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1))
+
+            losses = losses.view(shift_logits.size(0), -1)
+
+            mask = mask[:, 1:]
+            masked_losses = losses * mask
+            # print(masked_losses)
+            masked_losses_sum = masked_losses.sum()
+            valid_positions = mask.sum()
+
+            batch_loss2 = masked_losses_sum / valid_positions
+            # print("loss2: ",batch_loss2)
+        
+        return (batch_loss1 + batch_loss2) / 2
