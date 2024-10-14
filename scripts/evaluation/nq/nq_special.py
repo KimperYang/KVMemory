@@ -9,13 +9,17 @@ from peft import PeftModel, PeftConfig
 import regex
 
 jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_9.jsonl', lines=True)
-global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
-global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16)
+global_tokenizer = AutoTokenizer.from_pretrained("/mnt/data/jingbo/kv_dump_combine_special2")
 
-# peft_config_path = "/mnt/data/jingbo/kv_dump_combine_special2"  # Path to the directory where LoRA weights are stored
-# lora_config = PeftConfig.from_pretrained(peft_config_path)
+base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16)
 
-# global_model = PeftModel.from_pretrained(base_model, peft_config_path)
+vocab_size = len(global_tokenizer)
+base_model.resize_token_embeddings(vocab_size)
+
+peft_config_path = "/mnt/data/jingbo/kv_dump_combine_special2"  # Path to the directory where LoRA weights are stored
+lora_config = PeftConfig.from_pretrained(peft_config_path)
+
+global_model = PeftModel.from_pretrained(base_model, peft_config_path)
 #!/usr/bin/env python3
 
 
@@ -107,7 +111,7 @@ def main():
     global_model.to('cuda')
     # template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
 
-    template = "<s> [INST] Write a high-quality answer for the given question using only the provided search results (some of which might be irrelevant).\n\n"
+    template = "<s> [INST] Write a high-quality answer for the given question using only the provided search results (some of which might be irrelevant).\n\n <MEM>"
 
     total_num = len(jsonObj)
     correct_num = 0
@@ -122,7 +126,7 @@ def main():
         for j in range(0,10):
             title = jsonObj["ctxs"][i][j]["title"]
             text = jsonObj["ctxs"][i][j]["text"]
-            memory_list.append(f"Document [{j+1}](Title: {title}) {text}"+"\n")
+            memory_list.append(f"Document [{j+1}](Title: {title}) {text}"+"\n  <MEM>")
 
         new_prompt = "\n\nQuestion: " + jsonObj["question"][i] + "\nAnswer:[/INST]"
 
@@ -165,7 +169,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/nq/nq_unfinetuned_at9_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/nq/nq_special_at9_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

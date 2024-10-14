@@ -79,7 +79,7 @@ def main():
             memory_list.append(memory)
 
         memory = " ".join(memory_list)
-        template = f"Your task is to answer a question from the user about your prior conversations. The following is a summary of all your prior conversations: {memory} Answer from the perspective of the persona provided (do not say that you are an AI assistant). If you do not have enough information to answer the question, reply 'NO ANSWER'. Either reply with the answer, or reply 'NO ANSWER', do not say anything else."
+        template = f"Your task is to answer a question from the user about your prior conversations. The following is a summary of all your prior conversations: {memory} Answer from the perspective of the persona provided (do not say that you are an AI assistant)."
         # print(memory_list)
         # print(new_prompt)
 

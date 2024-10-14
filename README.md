@@ -18,5 +18,5 @@ python3 -m instruction_following_eval.evaluation_main \
 
 python3 -m instruction_following_eval.evaluation_main \
   --input_data=/home/jingbo/KVMemory/data/raw/ifeval/input_data.jsonl \
-  --input_response_data=/home/jingbo/KVMemory/result/ifeval_combinemodel_20240925-235953.jsonl \
-  --output_dir=/home/jingbo/KVMemory/result/ifeval_combine
+  --input_response_data=/home/jingbo/KVMemory/result/ifeval_special_20241009-092708.jsonl \
+  --output_dir=/home/jingbo/KVMemory/result/ifeval_special

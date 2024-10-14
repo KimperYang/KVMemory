@@ -14,32 +14,33 @@ import matplotlib.pyplot as plt
 #         "10": 2.0697534081866285
 #     }
 
-# loss2 = {
-#         "1": 1.8298580955245538,
-#         "2": 1.8508882448058612,
-#         "3": 1.871770836280923,
-#         "4": 1.8920899423382092,
-#         "5": 1.9135232144639551,
-#         "6": 1.9347833750654242,
-#         "7": 1.9562568763408534,
-#         "8": 1.9765955668664026,
-#         "9": 1.996237723301806,
-#         "10": 2.0163359790668633
-#     }
+loss2 = {
+        "1": 1.875140547045988,
+        "2": 1.8775941343167555,
+        "3": 1.8801402652119388,
+        "4": 1.8825745206110611,
+        "5": 1.8853234514731638,
+        "6": 1.8870132734363307,
+        "7": 1.889431428229306,
+        "8": 1.8916498774554795,
+        "9": 1.8937261783389632,
+        "10": 1.895896255284057
+    }
 
 loss3 = {
-        "1": 1.9066307102404385,
-        "2": 1.9088274213437089,
-        "3": 1.9120724506456843,
-        "4": 1.9154816194067519,
-        "5": 1.918934540668811,
-        "6": 1.9215957291271843,
-        "7": 1.9248291780677682,
-        "8": 1.9280335223320835,
-        "9": 1.93110067622658,
-        "10": 1.9346309569097326
+        "1": 1.9003554125020872,
+        "2": 1.9022951618286812,
+        "3": 1.9053146421022624,
+        "4": 1.9083975025818882,
+        "5": 1.9115223559567671,
+        "6": 1.913911387813231,
+        "7": 1.9167457351557717,
+        "8": 1.9194175950260814,
+        "9": 1.9220569041407036,
+        "10": 1.9248186036156205
     
 }
+
 # accuracy_claude_13_100k = [100, 95, 93, 94]
 # accuracy_gpt = [100, 92, 90, 91]
 
@@ -48,8 +49,8 @@ plt.figure(figsize=(6, 4))
 
 # Plot each line with different styles and markers
 # plt.plot(loss.keys(), loss.values(), label='Original Model', marker='o', linestyle='-', color='cornflowerblue', linewidth=2)
-# plt.plot(loss2.keys(), loss2.values(), label='With position info', marker='o', linestyle='-', color='tan', linewidth=2)
-plt.plot(loss3.keys(), loss3.values(), label='Finetuned KVMemory Model', marker='o', linestyle='-', color='slategray', linewidth=2)
+plt.plot(loss2.keys(), loss2.values(), label='KVMemory(Special Token)', marker='o', linestyle='-', color='tan', linewidth=2)
+plt.plot(loss3.keys(), loss3.values(), label='KVMemory(No Special Token)', marker='o', linestyle='-', color='slategray', linewidth=2)
 plt.axhline(y=2.0452591440400587, color='red', linestyle='--', linewidth=2, label='Llama2-7b-chat')
 plt.axhline(y=1.8297557709654961, color='green', linestyle='--', linewidth=2, label='Llama2-7b-base')
 # Customizing the plot
