@@ -5,7 +5,7 @@ import random
 from transformers import Trainer
 from torch.nn import CrossEntropyLoss
 from src.utils.cache import generate_kv_with_id, concat_kv, append_kv, generate_kv_with_position
-
+# from transformers import LlamaModel
 class CustomTrainer(Trainer):
     def __init__(self, *args, data_loader, **kwargs):
         super().__init__(*args, **kwargs)
@@ -447,3 +447,79 @@ class CustomTrainerSpecial(Trainer):
             # print("loss2: ",batch_loss2)
         
         return (batch_loss1 + batch_loss2) / 2
+
+class CustomTrainerMixSpecial(Trainer):
+    def __init__(self, *args, data_loader, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.data_loader = data_loader
+        self.train_loss_history = []
+
+    def get_train_dataloader(self):
+        return self.data_loader
+
+    def textinst_loss(self, input_ids, labels, split_input_ids, memory_positions, sys_tokens):
+        num_memory = memory_positions.size(0)
+
+        split_past_key_values = generate_kv_with_position(self.model, split_input_ids, position_ids = memory_positions)
+        memory_key_values = concat_kv(split_past_key_values, num_memory)
+
+
+        sys_key_values = generate_kv_with_id(self.model, sys_tokens)
+        past_key_values = append_kv([sys_key_values, memory_key_values], 2)
+
+        outputs = self.model(input_ids=input_ids, labels = labels, past_key_values = past_key_values, use_cache = True)
+        return outputs.loss
+    
+    def sftmem_loss(self, input_ids, labels, memory_ids, memory_positions, sys_tokens):
+        num_memory = len(memory_positions)
+        sys_key_values = generate_kv_with_id(self.model, sys_tokens)
+        kv_list = [sys_key_values]
+
+        for idx in range(num_memory):
+            kv_list.append(generate_kv_with_position(self.model, torch.tensor([memory_ids[idx]]), position_ids = torch.tensor([memory_positions[idx]])))
+        past_key_values = append_kv(kv_list, 2)
+
+        outputs = self.model(input_ids=input_ids, labels = labels, past_key_values = past_key_values, use_cache = True)
+        return outputs.loss
+    
+    def text_loss(self, input_ids, labels):
+        outputs = self.model(input_ids=input_ids, labels = labels)
+        return outputs.loss
+    
+    def textmem_loss(self, input_ids, labels, memory_ids, memory_positions, sys_tokens):
+        num_memory = memory_positions.size(0)
+
+        split_past_key_values = generate_kv_with_position(self.model, memory_ids, position_ids = memory_positions)
+        memory_key_values = concat_kv(split_past_key_values, num_memory)
+
+
+        sys_key_values = generate_kv_with_id(self.model, sys_tokens)
+        past_key_values = append_kv([sys_key_values, memory_key_values], 2)
+
+        outputs = self.model(input_ids=input_ids, labels = labels, past_key_values = past_key_values, use_cache = True)
+        return outputs.loss
+
+    def sft_loss(self, input_ids, labels):
+        outputs = self.model(input_ids=input_ids, labels = labels)
+        return outputs.loss
+
+    def compute_loss(self, model, inputs, return_outputs=False):
+        # loss_list = []
+        final_loss = torch.tensor(0)
+        for i in range(len(inputs["dataset_id"])):
+            if inputs["dataset_id"][i] == 'textinst':
+                loss = self.textinst_loss(inputs["input_ids"][i].unsqueeze(0), inputs["labels"][i].unsqueeze(0), torch.tensor(inputs["split_memory_id"][i]), torch.tensor(inputs["memory_position"][i]), inputs["sys_id"][i])
+                final_loss = final_loss.to(loss.device) + loss
+            elif inputs["dataset_id"][i] == 'sftmem':
+                loss = self.sftmem_loss(inputs["input_ids"][i].unsqueeze(0), inputs["labels"][i].unsqueeze(0), inputs["split_memory_id"][i], inputs["memory_position"][i], inputs["sys_id"][i])
+                final_loss = final_loss.to(loss.device) + loss
+            elif inputs["dataset_id"][i] == 'text':
+                loss = self.text_loss(inputs["input_ids"][i].unsqueeze(0), inputs["labels"][i].unsqueeze(0))
+                final_loss = final_loss.to(loss.device) + loss
+            elif inputs["dataset_id"][i] == 'textmem':
+                loss = self.textmem_loss(inputs["input_ids"][i].unsqueeze(0), inputs["labels"][i].unsqueeze(0), torch.tensor(inputs["split_memory_id"][i]), torch.tensor(inputs["memory_position"][i]), inputs["sys_id"][i])
+                final_loss = final_loss.to(loss.device) + loss
+            elif inputs["dataset_id"][i] == 'sft':
+                loss = self.sft_loss(inputs["input_ids"][i].unsqueeze(0), inputs["labels"][i].unsqueeze(0))
+                final_loss = final_loss.to(loss.device) + loss
+        return final_loss / len(inputs["dataset_id"])

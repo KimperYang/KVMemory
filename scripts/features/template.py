@@ -1,34 +1,33 @@
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers import LlamaModel
-checkpoint = "meta-llama/Llama-2-7b-chat-hf"
+checkpoint = "meta-llama/Llama-3.2-1B-Instruct"
 tokenizer = AutoTokenizer.from_pretrained(checkpoint)
 # model = AutoModelForCausalLM.from_pretrained(checkpoint)  # You may want to use bfloat16 and/or move to GPU here
 
-tokens = tokenizer("Hello how are you <MEM>")
+tokens = tokenizer("<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n")['input_ids']
 print(tokens)
+print(tokenizer.convert_ids_to_tokens(tokens))
 # Add the custom token
 new_token = "<MEM>"
 tokenizer.add_tokens([new_token])
 # tokenizer.pad_token = tokenizer.eos
-tokens = tokenizer("Hello how are you <MEM>")
+tokens = tokenizer("Hello how are you <MEM>")['input_ids']
 print(tokens)
-print(tokenizer.convert_ids_to_tokens([32000]))
-print(torch.tensor([[32000]]*3))
+print(tokenizer.convert_ids_to_tokens(tokens))
 
-# print(tokenizer.convert_ids_to_tokens(tokens[0]))
-# messages = [
-#     {
-#         "role": "system",
-#         "content": "You are a friendly chatbot who always responds in the style of a pirate",
-#     },
-#     {"role": "user", "content": "How many helicopters can a human eat in one sitting?"},
-#     {"role": "assistant", "content": "Six in total"},
-#     {"role": "user", "content": "How many helicopters can a human eat in one sitting?"}
-#  ]
-# tokenized_chat = tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=False, return_tensors="pt")
+messages = [
+    {
+        "role": "system",
+        "content": "You are a friendly chatbot who always responds in the style of a pirate",
+    },
+    {"role": "user", "content": "How many helicopters can a human eat in one sitting?"},
+    {"role": "assistant", "content": "Six in total"},
+    {"role": "user", "content": "How many helicopters can a human eat in one sitting?"}
+ ]
+tokenized_chat = tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=False, return_tensors="pt")
 
-# print(tokenizer.decode(tokenized_chat[0]))
+print(tokenizer.decode(tokenized_chat[0]))
 
 # print(tokenizer.decode(torch.tensor([518, 29914, 25580, 29962])))
 # print(tokenizer.decode(torch.tensor([518, 25580, 29962])))

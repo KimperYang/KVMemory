@@ -234,3 +234,28 @@ def custom_collate_combine(batch):
     }
 
 
+def custom_collate_mix(batch):
+    
+    input_ids = [item['input_ids'][0] for item in batch]
+    labels = [item['labels'][0] for item in batch]
+
+    max_length = max([len(ids) for ids in input_ids])
+    padded_input_ids = torch.cat([torch.cat([torch.tensor([ids]), torch.zeros(max_length - len(ids), dtype=torch.int64).unsqueeze(0)], dim = 1) for ids in input_ids], dim = 0)
+    padded_labels = torch.cat([torch.cat([torch.tensor([label]), torch.tensor([-100] * (max_length - len(label)), dtype=torch.int64).unsqueeze(0)], dim = 1) for label in labels], dim = 0)
+
+    dataset_ids = [item['dataset_id'] for item in batch]
+    memory_positions = [item['memory_position'] if item['memory_position'] is not None else None for item in batch]
+    memory_ids = [item['split_memory_id'] if item['split_memory_id'] is not None else None for item in batch]
+    sys_tokens = [torch.tensor(item['sys_id']) if item['sys_id'] is not None else None for item in batch]
+
+    return {
+        'input_ids': padded_input_ids,
+        'labels': padded_labels,
+        'dataset_id': dataset_ids,
+        'memory_position': memory_positions,
+        'split_memory_id': memory_ids,
+        'sys_id': sys_tokens,
+        'max': max_length
+    }
+    
+
