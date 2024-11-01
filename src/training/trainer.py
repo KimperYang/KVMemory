@@ -490,8 +490,8 @@ class CustomTrainerMixSpecial(Trainer):
         num_memory = memory_positions.size(0)
 
         split_past_key_values = generate_kv_with_position(self.model, memory_ids, position_ids = memory_positions)
+        # print(memory_ids.size(), memory_positions.size())
         memory_key_values = concat_kv(split_past_key_values, num_memory)
-
 
         sys_key_values = generate_kv_with_id(self.model, sys_tokens)
         past_key_values = append_kv([sys_key_values, memory_key_values], 2)
@@ -501,6 +501,18 @@ class CustomTrainerMixSpecial(Trainer):
 
     def sft_loss(self, input_ids, labels):
         outputs = self.model(input_ids=input_ids, labels = labels)
+        return outputs.loss
+
+    def nqmem_loss(self, input_ids, labels, memory_ids, memory_positions, sys_tokens):
+        num_memory = len(memory_positions)
+        sys_key_values = generate_kv_with_id(self.model, sys_tokens)
+        kv_list = [sys_key_values]
+
+        for idx in range(num_memory):
+            kv_list.append(generate_kv_with_position(self.model, torch.tensor([memory_ids[idx]]), position_ids = torch.tensor([memory_positions[idx]])))
+        past_key_values = append_kv(kv_list, 2)
+        # print("kv", past_key_values[0][0].size())
+        outputs = self.model(input_ids=input_ids, labels = labels, past_key_values = past_key_values, use_cache = True)
         return outputs.loss
 
     def compute_loss(self, model, inputs, return_outputs=False):
@@ -522,4 +534,72 @@ class CustomTrainerMixSpecial(Trainer):
             elif inputs["dataset_id"][i] == 'sft':
                 loss = self.sft_loss(inputs["input_ids"][i].unsqueeze(0), inputs["labels"][i].unsqueeze(0))
                 final_loss = final_loss.to(loss.device) + loss
+            elif inputs["dataset_id"][i] == 'nqmem':
+                loss = self.nqmem_loss(inputs["input_ids"][i].unsqueeze(0), inputs["labels"][i].unsqueeze(0), inputs["split_memory_id"][i], inputs["memory_position"][i], inputs["sys_id"][i])
+                final_loss = final_loss.to(loss.device) + loss
+        return final_loss / len(inputs["dataset_id"])
+    
+class CustomTrainerMixBaseline(Trainer):
+    def __init__(self, *args, data_loader, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.data_loader = data_loader
+        self.train_loss_history = []
+
+    def get_train_dataloader(self):
+        return self.data_loader
+
+    def textinst_loss(self, input_ids, labels):
+        outputs = self.model(input_ids=input_ids, labels = labels)
+        return outputs.loss
+    
+    def sftmem_loss(self, input_ids, labels):
+        outputs = self.model(input_ids=input_ids, labels = labels)
+        return outputs.loss
+    
+    def text_loss(self, input_ids, labels):
+        outputs = self.model(input_ids=input_ids, labels = labels)
+        return outputs.loss
+    
+    def textmem_loss(self, input_ids, labels):
+        outputs = self.model(input_ids=input_ids, labels = labels)
+        return outputs.loss
+
+    def sft_loss(self, input_ids, labels):
+        outputs = self.model(input_ids=input_ids, labels = labels)
+        return outputs.loss
+
+    # def nqmem_loss(self, input_ids, labels, memory_ids, memory_positions, sys_tokens):
+    #     num_memory = len(memory_positions)
+    #     sys_key_values = generate_kv_with_id(self.model, sys_tokens)
+    #     kv_list = [sys_key_values]
+
+    #     for idx in range(num_memory):
+    #         kv_list.append(generate_kv_with_position(self.model, torch.tensor([memory_ids[idx]]), position_ids = torch.tensor([memory_positions[idx]])))
+    #     past_key_values = append_kv(kv_list, 2)
+    #     # print("kv", past_key_values[0][0].size())
+    #     outputs = self.model(input_ids=input_ids, labels = labels, past_key_values = past_key_values, use_cache = True)
+    #     return outputs.loss
+
+    def compute_loss(self, model, inputs, return_outputs=False):
+        # loss_list = []
+        final_loss = torch.tensor(0)
+        for i in range(len(inputs["dataset_id"])):
+            if inputs["dataset_id"][i] == 'textinst':
+                loss = self.textinst_loss(inputs["input_ids"][i].unsqueeze(0), inputs["labels"][i].unsqueeze(0))
+                final_loss = final_loss.to(loss.device) + loss
+            elif inputs["dataset_id"][i] == 'sftmem':
+                loss = self.sftmem_loss(inputs["input_ids"][i].unsqueeze(0), inputs["labels"][i].unsqueeze(0))
+                final_loss = final_loss.to(loss.device) + loss
+            elif inputs["dataset_id"][i] == 'text':
+                loss = self.text_loss(inputs["input_ids"][i].unsqueeze(0), inputs["labels"][i].unsqueeze(0))
+                final_loss = final_loss.to(loss.device) + loss
+            elif inputs["dataset_id"][i] == 'textmem':
+                loss = self.textmem_loss(inputs["input_ids"][i].unsqueeze(0), inputs["labels"][i].unsqueeze(0))
+                final_loss = final_loss.to(loss.device) + loss
+            elif inputs["dataset_id"][i] == 'sft':
+                loss = self.sft_loss(inputs["input_ids"][i].unsqueeze(0), inputs["labels"][i].unsqueeze(0))
+                final_loss = final_loss.to(loss.device) + loss
+            # elif inputs["dataset_id"][i] == 'nqmem':
+            #     loss = self.nqmem_loss(inputs["input_ids"][i].unsqueeze(0), inputs["labels"][i].unsqueeze(0), inputs["split_memory_id"][i], inputs["memory_position"][i], inputs["sys_id"][i])
+            #     final_loss = final_loss.to(loss.device) + loss
         return final_loss / len(inputs["dataset_id"])

@@ -5,14 +5,14 @@ import json
 import datetime
 from peft import PeftModel, PeftConfig
 
-global_tokenizer = AutoTokenizer.from_pretrained("/mnt/data/jingbo/kv_dump_combine_special2")
+global_tokenizer = AutoTokenizer.from_pretrained("/mnt/data/jingbo/kv_dump_combine_mix5/checkpoint-5000")
 
-base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16)
+base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.float16)
 
 vocab_size = len(global_tokenizer)
 base_model.resize_token_embeddings(vocab_size)
 
-peft_config_path = "/mnt/data/jingbo/kv_dump_combine_special2"  # Path to the directory where LoRA weights are stored
+peft_config_path = "/mnt/data/jingbo/kv_dump_combine_mix5/checkpoint-5000"  # Path to the directory where LoRA weights are stored
 lora_config = PeftConfig.from_pretrained(peft_config_path)
 
 global_model = PeftModel.from_pretrained(base_model, peft_config_path)
@@ -113,7 +113,7 @@ def main():
     jsonObj = pd.read_json(path_or_buf='/home/jingbo/KVMemory/data/raw/ifeval/input_data.jsonl', lines=True)
 
     template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
-
+    template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.<|eot_id|><|start_header_id|>user<|end_header_id|>"
     # template = "[INST] <<SYS>>\nYou're an assistant who answer the question with the knowledge provided in the prompt\n<</SYS>>\n\n"
 
     total_num = len(jsonObj)

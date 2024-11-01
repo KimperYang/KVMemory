@@ -27,7 +27,7 @@ class multi_kv_preprocessor():
     ):
         dataset_id = 'sftmem'
         conversation = example["conversations"]
-        sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who answer the question with the knowledge provided in the prompt<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+        sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who answer the question with the knowledge provided in the prompt<|eot_id|>"
         sys_tokens = self.tokenizer(sys, add_special_tokens= False, return_tensors= "pt")['input_ids']
         sys_len = sys_tokens.size(1)
 
@@ -47,17 +47,18 @@ class multi_kv_preprocessor():
                 conversation[idx]["from"] == "User" and
                 conversation[idx + 1]["from"] == "Assistant"
             ):
-                text = "<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n" + conversation[idx]["value"] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n" + conversation[idx + 1]["value"]
+                text = "<|start_header_id|>user<|end_header_id|>\n\n" + conversation[idx]["value"] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n" + conversation[idx + 1]["value"] + "<|eot_id|>"
                 memory_tokens = self.tokenizer(text, add_special_tokens= False, return_tensors= "pt")['input_ids']
-                memory_tokens = torch.cat([memory_tokens, torch.tensor([[128256]]).to(memory_tokens.device)], dim = 1)
+                memory_tokens = torch.cat([torch.tensor([[128256]]).to(memory_tokens.device), memory_tokens, torch.tensor([[128257]]).to(memory_tokens.device)], dim = 1)
                 memory_ids.append(memory_tokens[0])
 
                 mem_len = memory_tokens.size(1)
                 memory_positions.append(torch.arange(current_position, current_position + mem_len))
                 current_position += mem_len
 
-        last_q = "<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n" + conversation[len(conversation) - 2]["value"] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        last_q = "<|start_header_id|>user<|end_header_id|>\n\n" + conversation[len(conversation) - 2]["value"] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         remaining_ids = self.tokenizer(last_q, add_special_tokens= False, return_tensors= "pt")['input_ids']
+        remaining_ids = torch.cat([torch.tensor([[128258]]), remaining_ids], dim = 1)
         labels = torch.tensor([[-100] * remaining_ids.size(1)])
 
         last_a = conversation[len(conversation) - 1]["value"] + "<|eot_id|>"
@@ -149,19 +150,22 @@ class multi_kv_preprocessor():
         self,
         example: Dict[str, str],
     ):
-        sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who will complete the sentence after the text chunks given below<|eot_id|><|start_header_id|>user<|end_header_id|>\n\nHere is the chunked sentence for you to complete:"
+        sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who will complete the sentence after the text chunks given below<|eot_id|>"
         sys_tokens = self.tokenizer(sys, add_special_tokens= False, return_tensors= "pt")['input_ids']
         sys_len = sys_tokens.size(1)
+
+        user = "<|start_header_id|>user<|end_header_id|>\n\nPlease complete the sentence<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        user_tokens = self.tokenizer(user, add_special_tokens= False, return_tensors= "pt")['input_ids']
+        user_tokens = torch.cat([torch.tensor([[128258]]), user_tokens], dim = 1)
+        user_len = user_tokens.size(1)
 
         text = example["text"]
         tokenized = self.tokenizer(text, add_special_tokens= False, return_tensors= "pt")
         input_ids = tokenized.input_ids
-        attention_mask = tokenized.attention_mask
         dataset_id = 'textinst'
 
-        # allocate space for "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n". [128009, 128006, 78191, 128007, 27]
-        input_ids = input_ids[:, :self.max_len - 5 - sys_len] 
-        attention_mask = attention_mask[:, :self.max_len - 5 - sys_len]
+        # allocate space for "<MEM_SUM><|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n". [128009, 128006, 78191, 128007, 271]
+        input_ids = input_ids[:, :self.max_len - user_len - sys_len] 
         
         num_memory = random.randint(1, 10)
         each_mem_len = random.randint(50, 150)
@@ -169,25 +173,24 @@ class multi_kv_preprocessor():
 
         # allocate space for special tokens
         input_len = input_ids.size(1)
-        input_ids = input_ids[:, :input_len - num_memory] 
+        input_ids = input_ids[:, :input_len - 2 * num_memory] 
 
         memory_ids = input_ids[:, :mem_len]
         remaining_ids = input_ids[:, mem_len:]
 
-        # add <|eot_id|>
-        remaining_ids = torch.cat([torch.tensor([[128009, 128006, 78191, 128007, 27]]).to(remaining_ids.device), remaining_ids], dim=1)
-
         split_input_ids = memory_ids.reshape(-1, each_mem_len)
-        split_input_ids = torch.cat([split_input_ids, torch.tensor([[128256]] * split_input_ids.size(0)).to(split_input_ids.device)], dim=1)
+        split_input_ids = torch.cat([torch.tensor([[128256]] * split_input_ids.size(0)).to(split_input_ids.device), split_input_ids, torch.tensor([[128257]] * split_input_ids.size(0)).to(split_input_ids.device)], dim=1)
 
-        mem_len = mem_len + num_memory
-        each_mem_len = each_mem_len + 1
+        mem_len = mem_len + 2 * num_memory
+        each_mem_len = each_mem_len + 2
         
         memory_position = torch.arange(sys_len, sys_len + mem_len).unsqueeze(0)
         # memory_positions = torch.cat([memory_position] * input_ids.size(0)
         memory_position_batch = memory_position.reshape(-1, each_mem_len)
 
-        labels = torch.cat([torch.tensor([[-100] * 5]), remaining_ids[:, 5:]], dim=1)
+        labels = torch.cat([torch.tensor([[-100] * user_len]), remaining_ids], dim=1)
+        # add <MEM_SUM><|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n
+        remaining_ids = torch.cat([user_tokens, remaining_ids], dim=1)
         return {
             'input_ids': remaining_ids,
             'labels': labels,
@@ -225,7 +228,7 @@ class multi_kv_preprocessor():
         text = example["text"]
         input_ids = self.tokenizer(text, add_special_tokens= False, return_tensors= "pt")["input_ids"]
     
-        input_ids = input_ids[:, :self.max_len - 1] 
+        input_ids = input_ids[:, :self.max_len - 2] 
         
         num_memory = random.randint(1, 10)
         each_mem_len = random.randint(50, 150)
@@ -233,7 +236,7 @@ class multi_kv_preprocessor():
 
         # allocate space for special tokens
         input_len = input_ids.size(1)
-        input_ids = input_ids[:, :input_len - num_memory] 
+        input_ids = input_ids[:, :input_len - 2 * num_memory] 
 
         memory_ids = input_ids[:, :mem_len]
         remaining_ids = input_ids[:, mem_len:]
@@ -243,16 +246,18 @@ class multi_kv_preprocessor():
 
  
         split_input_ids = memory_ids.reshape(-1, each_mem_len)
-        split_input_ids = torch.cat([split_input_ids, torch.tensor([[128256]] * split_input_ids.size(0)).to(split_input_ids.device)], dim=1)
+        split_input_ids = torch.cat([torch.tensor([[128256]] * split_input_ids.size(0)).to(split_input_ids.device), split_input_ids, torch.tensor([[128257]] * split_input_ids.size(0)).to(split_input_ids.device)], dim=1)
 
-        mem_len = mem_len + num_memory
-        each_mem_len = each_mem_len + 1
+        mem_len = mem_len + 2 * num_memory
+        each_mem_len = each_mem_len + 2
         
         memory_position = torch.arange(1, 1 + mem_len).unsqueeze(0)
         # memory_positions = torch.cat([memory_position] * input_ids.size(0)
         memory_position_batch = memory_position.reshape(-1, each_mem_len)
-
-        labels = remaining_ids
+        
+        labels = torch.cat([torch.tensor([[-100]]), remaining_ids], dim = 1)
+        remaining_ids = torch.cat([torch.tensor([[128258]]), remaining_ids], dim = 1)
+        
         return {
             'input_ids': remaining_ids,
             'labels': labels,
@@ -261,7 +266,50 @@ class multi_kv_preprocessor():
             'split_memory_id': split_input_ids,
             'sys_id': torch.tensor([[128000]])
         }
-    
+
+    def process_raft_nqmem(
+        self,
+        example: Dict[str, str],
+    ):
+        dataset_id = 'nqmem'
+        memory_text = example['context']['sentences'][0]
+
+        sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who answer the question with the documents retrieved below. Some documents may be irrelevant to the question.<|eot_id|>"
+        sys_tokens = self.tokenizer(sys, add_special_tokens= False, return_tensors= "pt")['input_ids']
+        sys_len = sys_tokens.size(1)
+        
+        memory_ids = []
+        memory_positions = []
+        current_position = sys_len
+
+        for idx in range(len(memory_text)):
+            text = memory_text[idx]
+            memory_tokens = self.tokenizer(text, add_special_tokens= False, return_tensors= "pt")['input_ids']
+            memory_tokens = torch.cat([torch.tensor([[128256]]).to(memory_tokens.device), memory_tokens, torch.tensor([[128257]]).to(memory_tokens.device)], dim = 1)
+            memory_ids.append(memory_tokens[0])
+
+            mem_len = memory_tokens.size(1)
+            memory_positions.append(torch.arange(current_position, current_position + mem_len))
+            current_position += mem_len
+
+        last_q = "<|start_header_id|>user<|end_header_id|>\n\n" + example['question'][3:] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        remaining_ids = self.tokenizer(last_q, add_special_tokens= False, return_tensors= "pt")['input_ids']
+        remaining_ids = torch.cat([torch.tensor([[128258]]), remaining_ids], dim = 1)
+        labels = torch.tensor([[-100] * remaining_ids.size(1)])
+
+        last_a = example['cot_answer'] + "<|eot_id|>"
+        answer_tokens = self.tokenizer(last_a, add_special_tokens= False, return_tensors= "pt")['input_ids']
+        remaining_ids = torch.cat([remaining_ids, answer_tokens], dim = 1)
+        labels = torch.cat([labels, answer_tokens], dim = 1)
+
+        return {
+                'input_ids': remaining_ids,
+                'labels': labels,
+                'dataset_id': dataset_id,
+                'memory_position': memory_positions,
+                'split_memory_id': memory_ids,
+                'sys_id': sys_tokens
+            } 
     # def process_daring_anteater(
     #     self,
     #     example: Dict[str, str],
@@ -375,3 +423,261 @@ class multi_kv_preprocessor():
     #                     labels += assistant_text_ids[:remaining_length - len(user_text_ids)]
 
     #     return input_ids, labels
+
+class baseline_preprocessor():
+    def __init__(
+        self,
+        tokenizer: PreTrainedTokenizerBase,
+        max_len: int
+    ) -> None:
+        """
+        Apply chat template to the conversation between a user and the assistant.
+        Args:
+            texts: the message from user and assistant.
+            roles: the sources of the messages in `texts`, where 0 means human and 1 means assistant.
+            max_len: the maximum length of the processed text.
+            eot_id: the token id of the <turn_end> token.
+            prepend_eos: whether prepend an eos token to the processed text.
+        """
+        self.tokenizer = tokenizer
+        self.max_len = max_len
+
+    def process_sftmem(
+        self,
+        example: Dict[str, str],
+    ):
+        dataset_id = 'sftmem'
+        conversation = example["conversations"]
+        sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who answer the question with the knowledge provided in the prompt<|eot_id|>"
+        sys_tokens = self.tokenizer(sys, add_special_tokens= False, return_tensors= "pt")['input_ids']
+        
+        prefix_num = sys_tokens.size(1)
+        input_ids = sys_tokens
+
+        if len(conversation) % 2 != 0:
+            if conversation[0]["from"] == "Assistant":
+                conversation = conversation[1:]
+            elif conversation[-1]["from"] == "User":
+                conversation = conversation[:-1]
+            else:
+                conversation = conversation[:-1]
+        
+        for idx in range(0, len(conversation) - 2, 2):
+            if (
+                conversation[idx]["from"] == "User" and
+                conversation[idx + 1]["from"] == "Assistant"
+            ):
+                text = "<|start_header_id|>user<|end_header_id|>\n\n" + conversation[idx]["value"] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n" + conversation[idx + 1]["value"] + "<|eot_id|>"
+                memory_tokens = self.tokenizer(text, add_special_tokens= False, return_tensors= "pt")['input_ids']
+
+                prefix_num += memory_tokens.size(1)
+                input_ids = torch.cat([input_ids, memory_tokens], dim = 1)
+
+        last_q = "<|start_header_id|>user<|end_header_id|>\n\n" + conversation[len(conversation) - 2]["value"] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        last_q_ids = self.tokenizer(last_q, add_special_tokens= False, return_tensors= "pt")['input_ids']
+
+        input_ids = torch.cat([input_ids, last_q_ids], dim = 1)
+        prefix_num += last_q_ids.size(1)
+        labels = torch.tensor([[-100] * prefix_num])
+
+        last_a = conversation[len(conversation) - 1]["value"] + "<|eot_id|>"
+        answer_tokens = self.tokenizer(last_a, add_special_tokens= False, return_tensors= "pt")['input_ids']
+        input_ids = torch.cat([input_ids, answer_tokens], dim = 1)
+        labels = torch.cat([labels, answer_tokens], dim = 1)
+
+        return {
+                'input_ids': input_ids,
+                'labels': labels,
+                'dataset_id': dataset_id,
+                'memory_position': None,
+                'split_memory_id': None,
+                'sys_id': sys_tokens
+            }    
+
+    def process_sft(
+        self,
+        example: Dict[str, str],
+    ):
+        conversation = example['conversations']
+        # Extract "Assistant" responses and mask "User" queries
+        system = "[<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who answer the question with the knowledge provided in the prompt<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+        system_tokenized = self.tokenizer(system, add_special_tokens=False)
+        system_input_ids = system_tokenized.input_ids
+
+        input_ids_list = system_input_ids
+        labels = [-100] * len(system_input_ids)
+
+        for i in range(len(conversation)):
+            
+            if conversation[i]["from"] == "User":
+                if i==0:
+                    t = conversation[i]["value"] + "<|eot_id|>"
+                else:
+                    t = "<|start_header_id|>user<|end_header_id|>\n\n" + conversation[i]["value"]  + "<|eot_id|>" 
+                    # t = " </s><s>[INST] " + conversation[i]["value"]  + " [/INST] " 
+                
+                tokenized = self.tokenizer(t)
+
+                input_ids = tokenized.input_ids[1:]
+                if len(labels) + len(input_ids) >= self.max_len: 
+                    break
+
+                labels.extend([-100] * len(input_ids))
+                input_ids_list += input_ids
+
+            elif conversation[i]["from"] == "Assistant":
+                t = "<|start_header_id|>assistant<|end_header_id|>\n\n" + conversation[i]["value"]
+                
+                tokenized = self.tokenizer(t)
+
+                input_ids = tokenized.input_ids[1:]
+                if len(labels) + len(input_ids) > self.max_len - 1: 
+                    input_ids = input_ids[:self.max_len - 1 - len(labels)]
+
+                input_ids += [128009]
+
+
+                labels.extend(input_ids)
+
+                input_ids_list += input_ids
+    
+        
+        return {
+            'input_ids': [input_ids_list],
+            'labels': [labels],
+            'dataset_id': 'sft',
+            'memory_position': None,
+            'split_memory_id': None,
+            'sys_id': None
+        }
+    
+    def process_textinst(
+        self,
+        example: Dict[str, str],
+    ):
+        sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who will complete the sentence after the text chunks given below<|eot_id|>"
+        sys_tokens = self.tokenizer(sys, add_special_tokens= False, return_tensors= "pt")['input_ids']
+        sys_len = sys_tokens.size(1)
+
+        user = "<|start_header_id|>user<|end_header_id|>\n\nPlease complete the sentence<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        user_tokens = self.tokenizer(user, add_special_tokens= False, return_tensors= "pt")['input_ids']
+        user_len = user_tokens.size(1)
+
+        text = example["text"]
+        tokenized = self.tokenizer(text, add_special_tokens= False, return_tensors= "pt")
+        text_ids = tokenized.input_ids
+        dataset_id = 'textinst'
+
+        # allocate space for "<MEM_SUM><|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n". [128009, 128006, 78191, 128007, 271]
+        text_ids = text_ids[:, :self.max_len - user_len - sys_len] 
+        
+        num_memory = random.randint(1, 10)
+        each_mem_len = random.randint(50, 150)
+        mem_len = num_memory * each_mem_len
+
+        memory_ids = text_ids[:, :mem_len]
+        remaining_ids = text_ids[:, mem_len:]
+
+        labels = torch.cat([torch.tensor([[-100] * (sys_len + mem_len + user_len)]), remaining_ids], dim=1)
+        input_ids = torch.cat([sys_tokens, memory_ids, user_tokens, remaining_ids], dim=1)
+        return {
+            'input_ids': input_ids,
+            'labels': labels,
+            'dataset_id': dataset_id,
+            'memory_position': None,
+            'split_memory_id': None,
+            'sys_id': sys_tokens
+        }
+     
+    def process_text(
+        self,
+        example: Dict[str, str],
+    ):
+        dataset_id = 'text'
+        text_tokens = self.tokenizer(example["text"], add_special_tokens= False, return_tensors= "pt")['input_ids']
+        text_tokens = text_tokens[:, :self.max_len - 1]
+        remaining_ids = torch.cat([torch.tensor([[128000]]).to(text_tokens.device), text_tokens], dim = 1)
+
+        labels = torch.cat([torch.tensor([[-100]]).to(text_tokens.device), text_tokens], dim = 1)
+        return {
+            'input_ids': remaining_ids,
+            'labels': labels,
+            'dataset_id': dataset_id,
+            'memory_position': None,
+            'split_memory_id': None,
+            'sys_id': None
+        }
+    
+    def process_textmem(
+        self,
+        example: Dict[str, str],
+    ):
+        dataset_id = 'textmem'
+
+        text = example["text"]
+        text_ids = self.tokenizer(text, add_special_tokens= False, return_tensors= "pt")["input_ids"]
+    
+        text_ids = text_ids[:, :self.max_len - 1] 
+        
+        num_memory = random.randint(1, 10)
+        each_mem_len = random.randint(50, 150)
+        mem_len = num_memory * each_mem_len
+        
+        memory_ids = text_ids[:, :mem_len]
+        remaining_ids = text_ids[:, mem_len:]
+
+        labels = torch.cat([torch.tensor([[-100] * (1 + mem_len)]), remaining_ids], dim = 1)
+        input_ids = torch.cat([torch.tensor([[128000]]), memory_ids, remaining_ids], dim = 1)
+        
+        return {
+            'input_ids': input_ids,
+            'labels': labels,
+            'dataset_id': dataset_id,
+            'memory_position': None,
+            'split_memory_id': None,
+            'sys_id': torch.tensor([[128000]])
+        }
+
+    def process_raft_nqmem(
+        self,
+        example: Dict[str, str],
+    ):
+        dataset_id = 'nqmem'
+        memory_text = example['context']['sentences'][0]
+
+        sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who answer the question with the documents retrieved below. Some documents may be irrelevant to the question.<|eot_id|>"
+        sys_tokens = self.tokenizer(sys, add_special_tokens= False, return_tensors= "pt")['input_ids']
+        sys_len = sys_tokens.size(1)
+        
+        memory_ids = []
+        memory_positions = []
+        current_position = sys_len
+
+        for idx in range(len(memory_text)):
+            text = memory_text[idx]
+            memory_tokens = self.tokenizer(text, add_special_tokens= False, return_tensors= "pt")['input_ids']
+            memory_tokens = torch.cat([torch.tensor([[128256]]).to(memory_tokens.device), memory_tokens, torch.tensor([[128257]]).to(memory_tokens.device)], dim = 1)
+            memory_ids.append(memory_tokens[0])
+
+            mem_len = memory_tokens.size(1)
+            memory_positions.append(torch.arange(current_position, current_position + mem_len))
+            current_position += mem_len
+
+        last_q = "<|start_header_id|>user<|end_header_id|>\n\n" + example['question'][3:] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        remaining_ids = self.tokenizer(last_q, add_special_tokens= False, return_tensors= "pt")['input_ids']
+        remaining_ids = torch.cat([torch.tensor([[128258]]), remaining_ids], dim = 1)
+        labels = torch.tensor([[-100] * remaining_ids.size(1)])
+
+        last_a = example['cot_answer'] + "<|eot_id|>"
+        answer_tokens = self.tokenizer(last_a, add_special_tokens= False, return_tensors= "pt")['input_ids']
+        remaining_ids = torch.cat([remaining_ids, answer_tokens], dim = 1)
+        labels = torch.cat([labels, answer_tokens], dim = 1)
+
+        return {
+                'input_ids': remaining_ids,
+                'labels': labels,
+                'dataset_id': dataset_id,
+                'memory_position': memory_positions,
+                'split_memory_id': memory_ids,
+                'sys_id': sys_tokens
+            } 

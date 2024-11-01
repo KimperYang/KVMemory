@@ -7,14 +7,14 @@ from rouge_score import rouge_scorer
 from datasets import load_dataset
 from peft import PeftModel, PeftConfig
 
-global_tokenizer = AutoTokenizer.from_pretrained("/mnt/data/jingbo/kv_dump_combine_special2")
+global_tokenizer = AutoTokenizer.from_pretrained("/mnt/data/jingbo/kv_dump_combine_mix5/checkpoint-5000")
 
-base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16)
+base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16)
 
 vocab_size = len(global_tokenizer)
 base_model.resize_token_embeddings(vocab_size)
 
-peft_config_path = "/mnt/data/jingbo/kv_dump_combine_special2"  # Path to the directory where LoRA weights are stored
+peft_config_path = "/mnt/data/jingbo/kv_dump_combine_mix5/checkpoint-5000"  # Path to the directory where LoRA weights are stored
 lora_config = PeftConfig.from_pretrained(peft_config_path)
 
 global_model = PeftModel.from_pretrained(base_model, peft_config_path)
@@ -71,11 +71,11 @@ def append_kv(kv_list):
     # torch.save(values, "values.pt")
     return concatenated_past_key_values
 
-def inference(input_ids, past_key_values, model_name="meta-llama/Llama-2-7b-chat-hf", max_length=2000):
+def inference(input_ids, past_key_values, model_name="meta-llama/Llama-3.2-1B-Instruct", max_length=2000):
 
     tokenizer = global_tokenizer
     model = global_model
-    
+    attention_msk = torch.tensor([[1]*(input_ids.size(1) + past_key_values[0][0].size(2))]).to(input_ids.device)
     model.eval()
 
     max_length = input_ids.size(1) + 100
@@ -84,6 +84,7 @@ def inference(input_ids, past_key_values, model_name="meta-llama/Llama-2-7b-chat
 
         outputs = model.generate(
             input_ids=input_ids,
+            attention_mask=attention_msk,
             max_length=max_length,
             do_sample=False,
             temperature=None,
@@ -132,7 +133,7 @@ def reorganize_summary(sum1, sum2):
     concatenated_asst = "You: " + " ".join(sum1)
     concatenated_user = "User: " + " ".join(sum2)
 
-    return concatenated_asst + " " + concatenated_user + " <MEM>"
+    return concatenated_asst + " " + concatenated_user + "<MEM>"
 
 def calculate_rouge_l_score(candidate, reference):
     scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
@@ -156,7 +157,7 @@ def main():
     score_list = []
 
     for i in range(total_num):
-        memory_list = ["<s>[INST] Your task is to answer a question from the user about your prior conversations. The following is a summary of all your prior conversations: <MEM>"]
+        memory_list = ["<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYour task is to answer a question from the user about your prior conversations.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n The following is a summary of all your prior conversations.\n"]
         print("id:", str(i))
         # memory_list.append(template)
 
@@ -184,7 +185,7 @@ def main():
         
         concatenated_past_key_values = append_kv(kv_list)
 
-        question = dataset["train"]["self_instruct"][i]["B"] + "'[/INST]"
+        question = dataset["train"]["self_instruct"][i]["B"] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         # print(seq)
         question_ids = global_tokenizer(question, return_tensors="pt", add_special_tokens=False).input_ids
 
@@ -192,11 +193,12 @@ def main():
 
         final_ids = torch.cat([cache_ids, question_ids], dim=1)
 
-        print(cache_ids.size(1), question_ids.size(1), concatenated_past_key_values[0][0].size(2))
+        # print(cache_ids.size(1), question_ids.size(1), concatenated_past_key_values[0][0].size(2))
         generated_seq = inference(final_ids.to(global_model.device), past_key_values= concatenated_past_key_values)
 
 
-        response = generated_seq[0].split('[/INST]')[1]
+        # print(generated_seq[0])
+        response = generated_seq[0].split("assistant\n\n")[-1]
 
         gold_answer = dataset["train"]["self_instruct"][i]["A"]
         score = calculate_rouge_l_score(response, gold_answer)
@@ -212,7 +214,7 @@ def main():
 
     final_score = sum(score_list) / len(score_list)
 
-    file_name = f"result/dialog/dialog_special_{final_score}_{time_str}.json"
+    file_name = f"result/dialog/dialog_llama3.21B_mix5_5000steps_{final_score}_{time_str}.json"
 
     with open(file_name, 'w') as f:
         for entry in res_list:

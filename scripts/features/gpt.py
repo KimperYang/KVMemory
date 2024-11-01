@@ -37,7 +37,7 @@ def completion_with_backoff_mcopenai(**kwargs):
 #     return result
 
 
-file_path = "/home/jingbo/KVMemory/result/dialog/dialog_unfinetuned_noanswerdisabled_0.5231973231017353_20241009-230330.jsonl"
+file_path = "/home/jingbo/KVMemory/result/dialog/dialog_llama3.21B_5000steps_resume3000steps_0.5426433989213407_20241031-014705.jsonl"
 jsonObj = pd.read_json(path_or_buf=file_path, lines=True)
 
 total = len(jsonObj)
@@ -75,7 +75,7 @@ print("Total Num: ",total)
 current_time = datetime.datetime.now()
 time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-file_name = f"result/dialog/LLMJudge/MSCJudge_unfinetuned_noanswerdisabled_{time_str}.json"
+file_name = f"result/dialog/LLMJudge/MSCJudge_llama3.21B_5000resume3000_{time_str}.json"
 
 with open(file_name, 'w', encoding='utf-8') as file:
     json.dump(resdict, file, ensure_ascii=False, indent=4)

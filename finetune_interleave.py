@@ -17,20 +17,20 @@ def main():
     global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
     global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16, use_flash_attention_2=True)
 
-    new_token = "<MEM>"
-    global_tokenizer.add_tokens([new_token])
+    new_token = ["<MEM_START>","<MEM_END>", "<MEM_SUM>"]
+    global_tokenizer.add_tokens(new_token)
     global_model.resize_token_embeddings(len(global_tokenizer))
 
-    config = LoraConfig(
-        r= 64,
-        lora_alpha=32,
-        target_modules=["q_proj","v_proj","k_proj","o_proj"],
-        modules_to_save=["embed_tokens","lm_head"],
-        lora_dropout=0.05,
-        task_type=TaskType.CAUSAL_LM
-    )
+    # config = LoraConfig(
+    #     r= 64,
+    #     lora_alpha=32,
+    #     target_modules=["q_proj","v_proj","k_proj","o_proj"],
+    #     modules_to_save=["embed_tokens","lm_head"],
+    #     lora_dropout=0.05,
+    #     task_type=TaskType.CAUSAL_LM
+    # )
 
-    global_model = get_peft_model(global_model, config)
+    # global_model = get_peft_model(global_model, config)
 
     preprocessor = multi_kv_preprocessor(
         tokenizer=global_tokenizer,
@@ -75,7 +75,7 @@ def main():
 #        load_from_cache_file=False
     )
 
-    sftmem_raw = load_from_disk("/mnt/data2/jingbo/kvmemory/data/maxlen4096/sftmem")
+    sftmem_raw = load_from_disk("/mnt/data2/jingbo/kvmemory/data/maxlen4096/sftmem_new")
 
     sftmem = sftmem_raw.map(
         preprocessor.process_sftmem,
@@ -85,22 +85,22 @@ def main():
 #        load_from_cache_file=False
     )
 
-    dataset = interleave_datasets([sftmem, sft, textinst, text, textmem], probabilities=[0.25, 0.25, 0.2, 0.1, 0.2], seed=42, stopping_strategy="all_exhausted")
+    nqmem_raw = load_from_disk("/mnt/data2/jingbo/kvmemory/data/maxlen4096/nqmem")
+    nqmem = nqmem_raw.map(
+        preprocessor.process_raft_nqmem,
+        num_proc=32,
+        remove_columns=['id', 'type', 'question', 'context', 'oracle_context', 'cot_answer', 'instruction'],
+        batched=False,
+#        load_from_cache_file=False
+    )
+
+    dataset = interleave_datasets([sftmem, sft, textinst, text, textmem, nqmem], probabilities=[0.2, 0.2, 0.15, 0.1, 0.2, 0.15], seed=42, stopping_strategy="all_exhausted")
     # dataset = interleave_datasets([sftmem], probabilities=[1], seed=42, stopping_strategy="all_exhausted")
 
     # print(dataset[0])
     # print(dataset[0]['input_ids'].size(1), dataset[0]['labels'].size(1), (dataset[0]['labels'] == -100).sum().item(), dataset[0]['memory_position_batch'].size())
 
     data_loader = DataLoader(dataset, batch_size=2, collate_fn=custom_collate_mix, pin_memory=False)
-    # Assuming 'data_loader' is your DataLoader
-    # i = 0
-    # for batch in data_loader:
-    #     max_len = batch['max']
-    #     print(max_len)
-    #     if(max_len>4096 or max_len ==4096):
-    #         print(batch['dataset_id'][0], batch['dataset_id'][1],i)
-    #         break 
-    #     i+=1
 
     # set the wandb project where this run will be logged
     os.environ["WANDB_PROJECT"]="kvmemory"
@@ -111,19 +111,20 @@ def main():
 
     # Set training arguments
     training_args = TrainingArguments(
-        output_dir="/mnt/data/jingbo/kv_dump_combine_mix5",
+        output_dir="/mnt/data/jingbo/kv_dump_combine_mix6",
         report_to="wandb",
-        run_name="llama3.2_1B_30000steps_mix5",
+        run_name="llama3.2_1B_30000steps_mix6_addnq",
         per_device_train_batch_size=2,
         # num_train_epochs=2,
         max_steps=30000,
         logging_dir="/mnt/data/jingbo/logs",
-        logging_steps=5,
-        save_steps=1000,
+        logging_steps=10,
+        save_steps=2000,
         gradient_accumulation_steps=4,
         # gradient_checkpointing=True,
         bf16=True,
         learning_rate=3e-5,
+        save_total_limit=3,
         # overwrite_output_dir = False
     )
 
@@ -148,8 +149,9 @@ def main():
 
     trainer.train()
 
-    global_model.save_pretrained("/mnt/data/jingbo/kv_dump_combine_mix5")
-    global_tokenizer.save_pretrained("/mnt/data/jingbo/kv_dump_combine_mix5")
+    trainer.save_model()
+    # global_model.save_pretrained("/mnt/data/jingbo/kv_dump_combine_mix6")
+    global_tokenizer.save_pretrained("/mnt/data/jingbo/kv_dump_combine_mix6")
 
 if __name__ == "__main__":
     main()

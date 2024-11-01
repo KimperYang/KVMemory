@@ -7,13 +7,15 @@ from rouge_score import rouge_scorer
 from datasets import load_dataset
 from peft import PeftModel, PeftConfig
 
-global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
-global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16, device_map="auto")
+# global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
+# base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16, device_map="auto")
 
-# peft_config_path = "/mnt/data/jingbo/kv_dump_combine_new"  # Path to the directory where LoRA weights are stored
-# lora_config = PeftConfig.from_pretrained(peft_config_path)
+global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16, device_map="auto")
+peft_config_path = "/mnt/data/jingbo/kv_dump_combine_mix5/checkpoint-5000"  # Path to the directory where LoRA weights are stored
+lora_config = PeftConfig.from_pretrained(peft_config_path)
 
-# global_model = PeftModel.from_pretrained(base_model, peft_config_path)
+global_model = PeftModel.from_pretrained(base_model, peft_config_path)
 
 def generate_kv(prompt):
 
@@ -152,7 +154,8 @@ def main():
     score_list = []
 
     for i in range(total_num):
-        memory_list = ["<s>[INST] Your task is to answer a question from the user about your prior conversations. The following is a summary of all your prior conversations: "]
+        # memory_list = ["<s>[INST] Your task is to answer a question from the user about your prior conversations. The following is a summary of all your prior conversations: "]
+        memory_list = ["<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYour task is to answer a question from the user about your prior conversations.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n The following is a summary of all your prior conversations.\n"]
         print("id:", str(i))
         # memory_list.append(template)
 
@@ -206,7 +209,7 @@ def main():
 
     final_score = sum(score_list) / len(score_list)
 
-    file_name = f"result/dialog/dialog_unfinetuned_{final_score}_{time_str}.json"
+    file_name = f"result/dialog/dialog_llama3.21B_mix5_5000steps_{final_score}_{time_str}.json"
 
     with open(file_name, 'w') as f:
         for entry in res_list:

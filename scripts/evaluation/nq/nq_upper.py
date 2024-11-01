@@ -8,10 +8,20 @@ from typing import List
 from peft import PeftModel, PeftConfig
 import regex
 
-jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_9.jsonl', lines=True)
-global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
-global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16, device_map="auto")
-#!/usr/bin/env python3
+# jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
+# global_tokenizer = AutoTokenizer.from_pretrained("/mnt/data/jingbo/kv_dump_combine_baseline_5000steps/checkpoint-5000")
+# global_model = AutoModelForCausalLM.from_pretrained("/mnt/data/jingbo/kv_dump_combine_baseline_5000steps/checkpoint-5000", torch_dtype=torch.bfloat16, device_map="auto")
+jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
+global_tokenizer = AutoTokenizer.from_pretrained("/mnt/data/jingbo/kv_dump_combine_mix5_5000steps_5e-6_full/checkpoint-1000")
+
+global_model = AutoModelForCausalLM.from_pretrained("/mnt/data/jingbo/kv_dump_combine_mix5_5000steps_5e-6_full/checkpoint-1000", torch_dtype=torch.bfloat16)
+
+# vocab_size = len(global_tokenizer)
+# base_model.resize_token_embeddings(vocab_size)
+
+# peft_config_path = "/mnt/data/jingbo/kv_dump_combine_mix5_5000steps/checkpoint-5000"  # Path to the directory where LoRA weights are stored
+
+# global_model = PeftModel.from_pretrained(base_model, peft_config_path)
 
 
 def normalize_answer(s: str) -> str:
@@ -73,7 +83,7 @@ def append_kv(kv_list):
 
     return concatenated_past_key_values
 
-def inference(input_ids, model_name="meta-llama/Llama-2-7b-chat-hf", max_length=2000):
+def inference(input_ids):
 
     tokenizer = global_tokenizer
     model = global_model
@@ -100,9 +110,10 @@ def main():
     global_model.to('cuda')
     # template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
 
-    template = "<s> [INST] Write a high-quality answer for the given question using only the provided search results (some of which might be irrelevant).\n\n"
+    template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a helpful, respectful and honest assistant.<|eot_id|><|start_header_id|>user<|end_header_id|>Write a high-quality answer for the given question using only the provided search results (some of which might be irrelevant)."
 
-    total_num = len(jsonObj)
+    # total_num = len(jsonObj)
+    total_num = 500
     correct_num = 0
     res_list = []
 
@@ -118,13 +129,14 @@ def main():
             memory_list.append(f"Document [{j+1}](Title: {title}) {text}"+"\n")
 
         prompt = "".join(memory_list)
-        new_prompt = "\n\nQuestion: " + jsonObj["question"][i] + "\nAnswer:[/INST]"
+        new_prompt = "\n\nQuestion: " + jsonObj["question"][i] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         prompt += new_prompt
+        # prompt = template + new_prompt
 
         prompt_id = global_tokenizer(prompt, return_tensors="pt").input_ids
 
         generated_seq = inference(prompt_id.to(global_model.device))
-        response = generated_seq[0].split('[/INST]')[1]
+        response = generated_seq[0].split('assistant\n\n')[-1]
         print(response)
 
         score = best_subspan_em(response, jsonObj["answers"][i])
@@ -140,7 +152,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/nq/nq_upper_at9_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/10-28/nq/nq_llama3.21b_mix5(nomem)_1000steps_at0_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

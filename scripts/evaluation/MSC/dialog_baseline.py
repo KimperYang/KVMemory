@@ -6,8 +6,8 @@ import datetime
 from rouge_score import rouge_scorer
 from datasets import load_dataset
 
-global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
-global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16, device_map="auto")
+global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16, device_map="auto")
 
 def generate_kv(prompt):
 
@@ -61,7 +61,7 @@ def append_kv(kv_list):
     # torch.save(values, "values.pt")
     return concatenated_past_key_values
 
-def inference(input_ids, past_key_values, model_name="meta-llama/Llama-2-7b-chat-hf", max_length=2000, num_return_sequences=1):
+def inference(input_ids, past_key_values, model_name="meta-llama/Llama-3.2-1B-Instruct", max_length=2000, num_return_sequences=1):
 
     tokenizer = global_tokenizer
     model = global_model
@@ -156,17 +156,17 @@ def main():
             memory_list.append(memory)
 
         memory = " ".join(memory_list)
-        template = f"[INST] Your task is to answer a question from the user about your prior conversations. The following is a summary of all your prior conversations: {memory} Answer from the perspective of the conversation summaries provided (do not say that you are an AI assistant). "
+        template = f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYour task is to answer a question from the user about your prior conversations.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n The following is a summary of all your prior conversations.\n {memory} Answer from the perspective of the conversation summaries provided (do not say that you are an AI assistant). "
         # print(memory_list)
         # print(new_prompt)
 
-        seq = template + dataset["train"]["self_instruct"][i]["B"] + "'[/INST]"
+        seq = template + dataset["train"]["self_instruct"][i]["B"] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         # print(seq)
         input_ids = global_tokenizer(seq, return_tensors="pt").input_ids
         input_ids = input_ids.to(global_model.device)
 
         generated_seq = inference(input_ids, None)
-        response = generated_seq[0].split('[/INST]')[1]
+        response = generated_seq[0].split('assistant\n\n')[-1]
 
         gold_answer = dataset["train"]["self_instruct"][i]["A"]
         score = calculate_rouge_l_score(response, gold_answer)
@@ -182,7 +182,7 @@ def main():
 
     final_score = sum(score_list) / len(score_list)
 
-    file_name = f"result/dialog/dialog_upper_{final_score}_{time_str}.json"
+    file_name = f"result/dialog/dialog_llama3.21b_original_{final_score}_{time_str}.json"
 
     with open(file_name, 'w') as f:
         for entry in res_list:
