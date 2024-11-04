@@ -515,6 +515,18 @@ class CustomTrainerMixSpecial(Trainer):
         outputs = self.model(input_ids=input_ids, labels = labels, past_key_values = past_key_values, use_cache = True)
         return outputs.loss
 
+    def xsum_loss(self, input_ids, labels, memory_ids, memory_positions, sys_tokens):
+        num_memory = len(memory_positions)
+        sys_key_values = generate_kv_with_id(self.model, sys_tokens)
+        kv_list = [sys_key_values]
+
+        for idx in range(num_memory):
+            kv_list.append(generate_kv_with_position(self.model, torch.tensor([memory_ids[idx]]), position_ids = torch.tensor([memory_positions[idx]])))
+        past_key_values = append_kv(kv_list, 2)
+
+        outputs = self.model(input_ids=input_ids, labels = labels, past_key_values = past_key_values, use_cache = True)
+        return outputs.loss
+    
     def compute_loss(self, model, inputs, return_outputs=False):
         # loss_list = []
         final_loss = torch.tensor(0)
@@ -536,6 +548,9 @@ class CustomTrainerMixSpecial(Trainer):
                 final_loss = final_loss.to(loss.device) + loss
             elif inputs["dataset_id"][i] == 'nqmem':
                 loss = self.nqmem_loss(inputs["input_ids"][i].unsqueeze(0), inputs["labels"][i].unsqueeze(0), inputs["split_memory_id"][i], inputs["memory_position"][i], inputs["sys_id"][i])
+                final_loss = final_loss.to(loss.device) + loss
+            elif inputs["dataset_id"][i] == 'xsum':
+                loss = self.xsum_loss(inputs["input_ids"][i].unsqueeze(0), inputs["labels"][i].unsqueeze(0), inputs["split_memory_id"][i], inputs["memory_position"][i], inputs["sys_id"][i])
                 final_loss = final_loss.to(loss.device) + loss
         return final_loss / len(inputs["dataset_id"])
     

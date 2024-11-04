@@ -50,18 +50,14 @@
 # # model_name = "/mnt/data/jingbo/kv_dump_combine_special2"  # Replace with your desired model
 # check_embedding_layer_length(model_name)
 
+from datasets import load_dataset, load_from_disk
+from transformers import AutoTokenizer
 
-import torch
+xsum = load_from_disk('/mnt/data2/jingbo/kvmemory/data/maxlen4096/xsum_min5paragraphs')
+print(xsum[10])
+# cnn = load_dataset('EdinburghNLP/xsum')
+# tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
 
-# a = torch.tensor([[1,2,2]])
-# b = a
-# print(b)
-# a = torch.cat([a, torch.tensor([[3,4,5]])], dim=1)
-# print(b)
-# print(a)
-
-a = [1,2,3]
-b = a
-b.extend([5])
-print(a)
+# for i in range(len(cnn['train']['document'])):
+#     print(len(tokenizer(cnn['train']['document'][i])['input_ids']))
 

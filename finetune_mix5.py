@@ -14,6 +14,7 @@ from src.data.mapfunc import multi_kv_preprocessor
 
 def main():
     # Prepare model and tokenizer
+    
     global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
     global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16, use_flash_attention_2=True)
 
@@ -85,6 +86,15 @@ def main():
 #        load_from_cache_file=False
     )
 
+    xsum_raw = load_from_disk("/mnt/data2/jingbo/kvmemory/data/maxlen4096/xsum_min5paragraphs")
+    xsum = xsum_raw.map(
+        preprocessor.process_sftmem,
+        num_proc=32,
+        remove_columns=["document", "summary", "id"],
+        batched=False,
+#        load_from_cache_file=False
+    )
+
 #     nqmem_raw = load_from_disk("/mnt/data2/jingbo/kvmemory/data/maxlen4096/nqmem")
 #     nqmem = nqmem_raw.map(
 #         preprocessor.process_raft_nqmem,
@@ -94,11 +104,8 @@ def main():
 # #        load_from_cache_file=False
 #     )
 
-    dataset = interleave_datasets([sftmem, sft, textinst, text, textmem], probabilities=[0.25, 0.25, 0.2, 0.1, 0.2], seed=42, stopping_strategy="all_exhausted")
-    # dataset = interleave_datasets([sftmem], probabilities=[1], seed=42, stopping_strategy="all_exhausted")
-
-    # print(dataset[0])
-    # print(dataset[0]['input_ids'].size(1), dataset[0]['labels'].size(1), (dataset[0]['labels'] == -100).sum().item(), dataset[0]['memory_position_batch'].size())
+    # dataset = interleave_datasets([sftmem, sft, textinst, text, textmem], probabilities=[0.25, 0.25, 0.2, 0.1, 0.2], seed=42, stopping_strategy="all_exhausted")
+    dataset = interleave_datasets([sftmem, sft, textinst, text, textmem, xsum], probabilities=[0.2, 0.2, 0.2, 0.1, 0.15, 0.15], seed=42, stopping_strategy="all_exhausted")
 
     data_loader = DataLoader(dataset, batch_size=2, collate_fn=custom_collate_mix, pin_memory=False)
 
@@ -125,7 +132,7 @@ def main():
         lr_scheduler_type='cosine',
         bf16=True,
         learning_rate=5e-6,
-        # resume_from_checkpoint=False
+        # resume_from_checkpoint=True
         # save_total_limit=3,
         # overwrite_output_dir = False
     )

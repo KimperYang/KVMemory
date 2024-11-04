@@ -14,8 +14,9 @@ from src.data.mapfunc import baseline_preprocessor
 
 def main():
     # Prepare model and tokenizer
-    global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
-    global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16, use_flash_attention_2=True)
+    model_path = "/mnt/data/jingbo/kv_dump_combine_baseline_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-6000"
+    global_tokenizer = AutoTokenizer.from_pretrained(model_path)
+    global_model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype=torch.bfloat16, use_flash_attention_2=True)
 
     # new_token = ["<MEM_START>","<MEM_END>", "<MEM_SUM>"]
     # global_tokenizer.add_tokens(new_token)
@@ -111,17 +112,19 @@ def main():
 
     # Set training arguments
     training_args = TrainingArguments(
-        output_dir="/mnt/data/jingbo/kv_dump_combine_baseline_5000steps_5e-6_full",
+        output_dir="/mnt/data/jingbo/kv_dump_combine_baseline_30000steps_warmup0.1_decaycosine_5e-6_full",
         report_to="wandb",
-        run_name="llama3.2_1B_30000steps_baseline_5000steps_5e-6_full",
+        run_name="baseline_30000_warmup0.1_decaycosine_5e-6_full",
         per_device_train_batch_size=2,
         # num_train_epochs=2,
-        max_steps=5000,
+        max_steps=30000,
         logging_dir="/mnt/data/jingbo/logs",
         logging_steps=10,
-        save_steps=1000,
+        save_steps=2000,
         gradient_accumulation_steps=8,
         # gradient_checkpointing=True,
+        warmup_ratio=0.1,
+        lr_scheduler_type='cosine',
         bf16=True,
         learning_rate=5e-6,
         # save_total_limit=3,
@@ -147,11 +150,11 @@ def main():
         # optimizers=(optimizer, scheduler)
     ))
 
-    trainer.train()
+    trainer.train(resume_from_checkpoint=True)
 
     trainer.save_model()
     # global_model.save_pretrained("/mnt/data/jingbo/kv_dump_combine_baseline_5000steps_5e-6_full")
-    global_tokenizer.save_pretrained("/mnt/data/jingbo/kv_dump_combine_baseline_5000steps_5e-6_full")
+    global_tokenizer.save_pretrained(training_args.output_dir)
 
 if __name__ == "__main__":
     main()
