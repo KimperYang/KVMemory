@@ -7,9 +7,9 @@ from rouge_score import rouge_scorer
 from datasets import load_dataset
 from peft import PeftModel, PeftConfig
 
-global_tokenizer = AutoTokenizer.from_pretrained("/mnt/data/jingbo/kv_dump_combine_mix5_5000steps_resume10000_warmup0.1_decaycosine_5e-6_full/checkpoint-3000")
+global_tokenizer = AutoTokenizer.from_pretrained("/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-30000")
 
-global_model = AutoModelForCausalLM.from_pretrained("/mnt/data/jingbo/kv_dump_combine_mix5_5000steps_resume10000_warmup0.1_decaycosine_5e-6_full/checkpoint-3000", torch_dtype=torch.bfloat16)
+global_model = AutoModelForCausalLM.from_pretrained("/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-30000", torch_dtype=torch.bfloat16)
 
 # vocab_size = len(global_tokenizer)
 # base_model.resize_token_embeddings(vocab_size)
@@ -215,7 +215,7 @@ def main():
 
     final_score = sum(score_list) / len(score_list)
 
-    file_name = f"result/dialog/dialog_llama3.21B_5000steps_resume3000steps_{final_score}_{time_str}.json"
+    file_name = f"result/dialog/dialog_llama3.21B_30000steps_resume3000steps_{final_score}_{time_str}.json"
 
     with open(file_name, 'w') as f:
         for entry in res_list:

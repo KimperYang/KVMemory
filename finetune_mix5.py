@@ -88,7 +88,7 @@ def main():
 
     xsum_raw = load_from_disk("/mnt/data2/jingbo/kvmemory/data/maxlen4096/xsum_min5paragraphs")
     xsum = xsum_raw.map(
-        preprocessor.process_sftmem,
+        preprocessor.process_xsum,
         num_proc=32,
         remove_columns=["document", "summary", "id"],
         batched=False,

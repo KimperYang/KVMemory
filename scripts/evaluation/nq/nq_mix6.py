@@ -8,10 +8,14 @@ from typing import List
 from peft import PeftModel
 import regex
 
-jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_9.jsonl', lines=True)
-global_tokenizer = AutoTokenizer.from_pretrained("/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-10000")
+ckpt = 8000
+pos = 9
 
-global_model = AutoModelForCausalLM.from_pretrained("/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-10000", torch_dtype=torch.bfloat16)
+jsonObj = pd.read_json(path_or_buf=f'data/raw/nq/nq-open-10_{pos}.jsonl', lines=True)
+
+global_tokenizer = AutoTokenizer.from_pretrained(f"/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-{ckpt}")
+
+global_model = AutoModelForCausalLM.from_pretrained(f"/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
 
 # vocab_size = len(global_tokenizer)
 # base_model.resize_token_embeddings(vocab_size)
@@ -168,7 +172,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/11-3/nq/nq_llama3.2_1B_mix5_warmup0.1_decaycosine_10000steps_5e-6_full_at9_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/11-3/nq/nq_llama3.2_1B_mix5_warmup0.1_decaycosine_{ckpt}steps_5e-6_full_at{pos}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

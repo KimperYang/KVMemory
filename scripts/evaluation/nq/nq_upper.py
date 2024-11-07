@@ -11,10 +11,17 @@ import regex
 # jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
 # global_tokenizer = AutoTokenizer.from_pretrained("/mnt/data/jingbo/kv_dump_combine_baseline_5000steps/checkpoint-5000")
 # global_model = AutoModelForCausalLM.from_pretrained("/mnt/data/jingbo/kv_dump_combine_baseline_5000steps/checkpoint-5000", torch_dtype=torch.bfloat16, device_map="auto")
-jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
-global_tokenizer = AutoTokenizer.from_pretrained("/mnt/data/jingbo/kv_dump_combine_mix5_5000steps_5e-6_full/checkpoint-1000")
+ckpt = 30000
+pos = 0
 
-global_model = AutoModelForCausalLM.from_pretrained("/mnt/data/jingbo/kv_dump_combine_mix5_5000steps_5e-6_full/checkpoint-1000", torch_dtype=torch.bfloat16)
+jsonObj = pd.read_json(path_or_buf=f'data/raw/nq/nq-open-10_{pos}.jsonl', lines=True)
+# global_tokenizer = AutoTokenizer.from_pretrained(f"/mnt/data/jingbo/kv_dump_combine_baseline_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-{ckpt}")
+
+# global_model = AutoModelForCausalLM.from_pretrained(f"/mnt/data/jingbo/kv_dump_combine_baseline_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+
+global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16)
+
 
 # vocab_size = len(global_tokenizer)
 # base_model.resize_token_embeddings(vocab_size)
@@ -152,7 +159,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/10-28/nq/nq_llama3.21b_mix5(nomem)_1000steps_at0_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/11-3/nq/nq_llama3.2_1B_upper_warmup0.1_decaycosine_{ckpt}steps_at{pos}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
