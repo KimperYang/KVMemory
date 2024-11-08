@@ -37,7 +37,7 @@ def completion_with_backoff_mcopenai(**kwargs):
 #     return result
 
 
-file_path = "/home/jingbo/KVMemory/result/dialog/dialog_unfinetuned_noanswerdisabled_0.5231973231017353_20241009-230330.jsonl"
+file_path = "/home/jingbo/KVMemory/result/dialog/dialog_llama3.21B_5000steps_resume3000steps_0.5426433989213407_20241031-014705.jsonl"
 jsonObj = pd.read_json(path_or_buf=file_path, lines=True)
 
 total = len(jsonObj)
@@ -51,7 +51,7 @@ for i in range(total):
     generate_a = jsonObj["response"][i]
 
     messages=[
-        {"role": "system", "content": "You're an helpful assistant."},
+        {"role": "system", "content": "You're a helpful assistant."},
         {"role": "user", "content": f"Your task is to label an answer to a question as 'CORRECT' or 'WRONG'. You will be given the following data: (1) a question (posed by one user to another user), (2) a 'gold' (ground truth) answer, (3) a generated answer which you will score as CORRECT/WRONG. The point of the question is to ask about something one user should know about the other user based on their prior conversations. The gold answer will usually be a concise and short answer that includes the referenced topic, for example: Question: Do you remember what I got the last time I went to Hawaii? Gold answer: A shell necklace The generated answer might be much longer, but you should be generous with your grading - as long as it touches on the same topic as the gold answer, it should be counted as CORRECT. For example, the following answers would be considered CORRECT: Generated answer (CORRECT): Oh yeah, that was so fun! I got so much stuff there, including that shell necklace. Generated answer (CORRECT): I got a ton of stuff... that surfboard, the mug, the necklace, those coasters too.. Generated answer (CORRECT): That cute necklace The following answers would be considered WRONG: Generated answer (WRONG): Oh yeah, that was so fun! I got so much stuff there, including that mug. Generated answer (WRONG): I got a ton of stuff... that surfboard, the mug, those coasters too.. Generated answer (WRONG): I’m sorry, I don’t remember what you’re talking about. Now it’s time for the real question: Question: {q} Gold answer: {gold_a} Generated answer: {generate_a} First, provide a short (one sentence) explanation of your reasoning, then finish with CORRECT or WRONG. Do NOT include both CORRECT and WRONG in your response, or it will break the evaluation script."}
     ]
 
@@ -75,7 +75,7 @@ print("Total Num: ",total)
 current_time = datetime.datetime.now()
 time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-file_name = f"result/dialog/LLMJudge/MSCJudge_unfinetuned_noanswerdisabled_{time_str}.json"
+file_name = f"result/dialog/LLMJudge/MSCJudge_llama3.21B_5000resume3000_{time_str}.json"
 
 with open(file_name, 'w', encoding='utf-8') as file:
     json.dump(resdict, file, ensure_ascii=False, indent=4)

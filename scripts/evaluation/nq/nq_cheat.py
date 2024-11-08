@@ -9,8 +9,8 @@ from peft import PeftModel, PeftConfig
 import regex
 
 jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_9.jsonl', lines=True)
-global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
-global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16)
+global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16)
 
 # peft_config_path = "/mnt/data/jingbo/kv_dump_combine_special2"  # Path to the directory where LoRA weights are stored
 # lora_config = PeftConfig.from_pretrained(peft_config_path)
@@ -78,14 +78,14 @@ def append_kv(kv_list):
 
     return concatenated_past_key_values
 
-def inference(input_ids, past_key_values, model_name="meta-llama/Llama-2-7b-chat-hf", max_length=2000):
+def inference(input_ids, past_key_values, model_name="meta-llama/Llama-3.2-1B-Instruct", max_length=2000):
 
     tokenizer = global_tokenizer
     model = global_model
     
     model.eval()
 
-    max_length = input_ids.size(1) + 200
+    max_length = input_ids.size(1) + 100
 
     with torch.no_grad():
 
@@ -107,8 +107,7 @@ def main():
     global_model.to('cuda')
     # template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
 
-    template = "<s> [INST] Write a high-quality answer for the given question using only the provided search results (some of which might be irrelevant).\n\n"
-
+    template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a helpful, respectful and honest assistant.<|eot_id|><|start_header_id|>user<|end_header_id|>Write a high-quality answer for the given question using only the provided search results (some of which might be irrelevant)."
     total_num = len(jsonObj)
     correct_num = 0
     res_list = []
@@ -124,7 +123,7 @@ def main():
             text = jsonObj["ctxs"][i][j]["text"]
             memory_list.append(f"Document [{j+1}](Title: {title}) {text}"+"\n")
 
-        new_prompt = "\n\nQuestion: " + jsonObj["question"][i] + "\nAnswer:[/INST]"
+        new_prompt = "\n\nQuestion: " + jsonObj["question"][i] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
 
         kv_list = []
         id_list = []
@@ -149,7 +148,7 @@ def main():
 
         concat_id = torch.cat(id_list, dim=1).to(global_model.device)
         generated_seq = inference(concat_id, appended_kv)
-        response = generated_seq[0].split('[/INST]')[1]
+        response = generated_seq[0].split('assistant\n\n')[-1]
         print(response)
 
         score = best_subspan_em(response, jsonObj["answers"][i])
