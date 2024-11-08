@@ -20,7 +20,7 @@ def generate_kv_with_connect(model, input_ids):
     return past_key_values
 
 def generate_kv_with_position(model, input_ids, position_ids):
-    # print(type(model))
+    print(input_ids.shape, position_ids.shape)
     input_ids = input_ids.to(model.device)
     position_ids = position_ids.to(model.device)
 

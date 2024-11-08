@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import Dataset
 from datasets import load_dataset
-# from src.utils.cache import generate_kv_with_id, append_kv
+from src.utils.utils import pad_2d_list
 
 class CustomDataset(Dataset):
     def __init__(self, tokenizer, data):
@@ -258,4 +258,42 @@ def custom_collate_mix(batch):
         'max': max_length
     }
     
+def custom_collate_mix_batch(batch):
 
+    batch_size = len(batch)
+
+    # Pad input ids and labels
+    input_ids = [item['input_ids'][0] for item in batch]
+    labels = [item['labels'][0] for item in batch]
+
+    max_length = max([len(ids) for ids in input_ids])
+    padded_input_ids = torch.cat([torch.cat([torch.tensor([ids]), torch.zeros(max_length - len(ids), dtype=torch.int64).unsqueeze(0)], dim = 1) for ids in input_ids], dim = 0)
+    padded_labels = torch.cat([torch.cat([torch.tensor([label]), torch.tensor([-100] * (max_length - len(label)), dtype=torch.int64).unsqueeze(0)], dim = 1) for label in labels], dim = 0)
+
+    # Pad memory ids, positions, attention masks
+    pad_value = 99999
+    memory_nums = [item['memory_nums'] if item['memory_nums'] is not None else None for item in batch]
+    max_memory_num = max(memory_nums)
+
+    memory_length = [item['memory_length'] if item['memory_length'] is not None else None for item in batch]
+    max_memory_length = max(memory_length)
+
+    padded_memory_ids_list = [torch.tensor(pad_2d_list(item['split_memory_id'], max_memory_num, max_memory_length, pad_value)) if item['split_memory_id'] is not None else None for item in batch]
+    padded_memory_ids = torch.cat(padded_memory_ids_list, dim = 0)
+
+    padded_memory_positions_list = [torch.tensor(pad_2d_list(item['memory_position'], max_memory_num, max_memory_length, pad_value)) if item['memory_position'] is not None else None for item in batch]
+    padded_memory_positions = torch.cat(padded_memory_positions_list, dim = 0)
+
+    memory_attention_mask_batch_list = [torch.where(pos == pad_value, 0, 1) for pos in padded_memory_positions]
+    memory_attention_mask_batch = torch.cat(memory_attention_mask_batch_list, dim = 0)
+    memory_attention_mask_batch = memory_attention_mask_batch.reshape(batch_size, max_memory_num * max_memory_length)
+    input_attention_batch = torch.tensor([[1] * max_length] * batch_size)
+    attention_mask_batch = torch.cat([memory_attention_mask_batch, input_attention_batch], dim = 1)
+
+    return {
+        'batch_input_ids': padded_input_ids,
+        'labels_batch': padded_labels,
+        'split_memory_position_batch': padded_memory_positions,
+        'split_memory_ids_batch': padded_memory_ids,
+        'attention_mask_batch': attention_mask_batch
+    }

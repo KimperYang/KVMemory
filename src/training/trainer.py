@@ -618,3 +618,38 @@ class CustomTrainerMixBaseline(Trainer):
             #     loss = self.nqmem_loss(inputs["input_ids"][i].unsqueeze(0), inputs["labels"][i].unsqueeze(0), inputs["split_memory_id"][i], inputs["memory_position"][i], inputs["sys_id"][i])
             #     final_loss = final_loss.to(loss.device) + loss
         return final_loss / len(inputs["dataset_id"])
+    
+class CustomTrainerMixSpecial_Batch(Trainer):
+    def __init__(self, *args, data_loader, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.data_loader = data_loader
+        self.train_loss_history = []
+
+    def get_train_dataloader(self):
+        return self.data_loader
+    
+    def compute_loss(self, model, inputs, return_outputs=False):
+
+        # Get input ids
+        input_ids_batch = inputs['batch_input_ids']
+        batch_size = input_ids_batch.size(0)
+        input_length = input_ids_batch.size(1)
+
+        # Get labels
+        labels_batch = inputs['labels_batch']
+
+        # Get KV Cache
+        split_memory_ids_batch = inputs['split_memory_ids_batch']
+        split_memory_position_batch = inputs['split_memory_position_batch']
+        split_past_key_values = generate_kv_with_position(self.model, split_memory_ids_batch, position_ids = split_memory_position_batch)
+
+        num_memory_each_sample = split_memory_ids_batch.size(0) // batch_size
+        past_key_values_batch = concat_kv(split_past_key_values, num_memory_each_sample)
+
+        # Get Attention Masks
+        attention_mask_batch = inputs['attention_mask_batch']
+
+        # Get Loss
+        outputs = self.model(input_ids = input_ids_batch, attention_mask = attention_mask_batch, labels = labels_batch, past_key_values = past_key_values_batch, use_cache = True)
+        
+        return outputs.loss

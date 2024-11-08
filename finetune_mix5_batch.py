@@ -8,12 +8,12 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import LoraConfig, get_peft_model, TaskType
 from datasets import load_dataset, load_from_disk, interleave_datasets
 from accelerate import Accelerator
-from src.data.dataset import CustomDatasetCombine, custom_collate_mix
-from src.training.trainer import CustomTrainerMixSpecial
-from src.data.mapfunc import multi_kv_preprocessor
+from src.data.dataset import custom_collate_mix_batch
+from src.training.trainer import CustomTrainerMixSpecial_Batch
+from src.data.mapfunc import multi_kv_batch_preprocessor
 
 def main():
-    batch_size_per_device = 2
+    batch_size_per_device = 1
     # Prepare model and tokenizer
     
     global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
@@ -34,7 +34,7 @@ def main():
 
     # global_model = get_peft_model(global_model, config)
 
-    preprocessor = multi_kv_preprocessor(
+    preprocessor = multi_kv_batch_preprocessor(
         tokenizer=global_tokenizer,
         max_len=4096
     )
@@ -43,7 +43,7 @@ def main():
 
     text = text_raw.map(
         preprocessor.process_text,
-        num_proc=32,
+        num_proc=256,
         remove_columns=["text"],
         batched=False,
 #        load_from_cache_file=False
@@ -51,7 +51,7 @@ def main():
     
     textmem = text_raw.map(
         preprocessor.process_textmem,
-        num_proc=32,
+        num_proc=256,
         remove_columns=["text"],
         batched=False,
 #        load_from_cache_file=False
@@ -59,7 +59,7 @@ def main():
 
     textinst = text_raw.map(
         preprocessor.process_textinst,
-        num_proc=32,
+        num_proc=256,
         remove_columns=["text"],
         batched=False,
 #        load_from_cache_file=False
@@ -71,7 +71,7 @@ def main():
 
     sft = sft_raw.map(
         preprocessor.process_sft,
-        num_proc=32,
+        num_proc=256,
         remove_columns=["system", "mask", "dataset", "conversations"],
         batched=False,
 #        load_from_cache_file=False
@@ -81,7 +81,7 @@ def main():
 
     sftmem = sftmem_raw.map(
         preprocessor.process_sftmem,
-        num_proc=32,
+        num_proc=256,
         remove_columns=["system", "mask", "dataset", "conversations"],
         batched=False,
 #        load_from_cache_file=False
@@ -90,7 +90,7 @@ def main():
     xsum_raw = load_from_disk("/mnt/data2/jingbo/kvmemory/data/maxlen4096/xsum_min5paragraphs")
     xsum = xsum_raw.map(
         preprocessor.process_xsum,
-        num_proc=32,
+        num_proc=256,
         remove_columns=["document", "summary", "id"],
         batched=False,
 #        load_from_cache_file=False
@@ -108,21 +108,20 @@ def main():
     # dataset = interleave_datasets([sftmem, sft, textinst, text, textmem], probabilities=[0.25, 0.25, 0.2, 0.1, 0.2], seed=42, stopping_strategy="all_exhausted")
     dataset = interleave_datasets([sftmem, sft, textinst, text, textmem, xsum], probabilities=[0.2, 0.2, 0.2, 0.1, 0.15, 0.15], seed=42, stopping_strategy="all_exhausted")
 
-    data_loader = DataLoader(dataset, batch_size= batch_size_per_device, collate_fn=custom_collate_mix, pin_memory=False)
+    data_loader = DataLoader(dataset, batch_size = batch_size_per_device, collate_fn=custom_collate_mix_batch, pin_memory=False)
 
-    # set the wandb project where this run will be logged
-    os.environ["WANDB_PROJECT"]="kvmemory"
-    # os.environ["WANDB_LOG_MODEL"]="true"
-    os.environ["WANDB_WATCH"]="false"
+    # # set the wandb project where this run will be logged
+    # os.environ["WANDB_PROJECT"]="kvmemory"
+    # os.environ["WANDB_WATCH"]="false"
 
     # wandb.init(entity="jingboy-uc-santa-barbara",project="kvmemory", name = "kv_dump_combine_special", resume="allow")
 
     # Set training arguments
     training_args = TrainingArguments(
         output_dir="/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full",
-        report_to="wandb",
+        # report_to="wandb",
         run_name="mix5_30000_warmup0.1_decaycosine_5e-6_full",
-        per_device_train_batch_size= batch_size_per_device,
+        per_device_train_batch_size = batch_size_per_device,
         # num_train_epochs=2,
         max_steps=30000,
         logging_dir="/mnt/data/jingbo/logs",
@@ -140,7 +139,7 @@ def main():
 
     accelerator = Accelerator()
 
-    trainer = accelerator.prepare(CustomTrainerMixSpecial(
+    trainer = accelerator.prepare(CustomTrainerMixSpecial_Batch(
         model=global_model,
         tokenizer=global_tokenizer,
         args=training_args,
