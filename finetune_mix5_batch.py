@@ -13,7 +13,7 @@ from src.training.trainer import CustomTrainerMixSpecial_Batch
 from src.data.mapfunc import multi_kv_batch_preprocessor
 
 def main():
-    batch_size_per_device = 1
+    batch_size_per_device = 2
     # Prepare model and tokenizer
     
     global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
