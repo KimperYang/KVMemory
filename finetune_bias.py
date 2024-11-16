@@ -14,7 +14,7 @@ def main():
     # Prepare model and tokenizer
     
     global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
-    global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16, use_flash_attention_2=False)
+    global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16, attn_implementation='sdpa')
 
     new_token = ["<MEM_START>","<MEM_END>", "<MEM_SUM>"]
     global_tokenizer.add_tokens(new_token)

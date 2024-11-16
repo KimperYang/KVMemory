@@ -2,7 +2,7 @@ import random
 import torch
 from typing import Any, Dict, List
 from transformers import PreTrainedTokenizerBase
-from src.data.attention import construct_biased_attention_matrix, pad_attention_matrices
+from src.data.attention import construct_biased_attention_matrix
 class multi_kv_preprocessor():
     def __init__(
         self,

@@ -3,7 +3,7 @@ import time
 from torch.utils.data import Dataset
 from datasets import load_dataset
 from src.utils.utils import pad_2d_list
-from src.data.attention import construct_biased_attention_matrix, pad_attention_matrices
+from src.data.attention import construct_biased_attention_matrix
 
 class CustomDataset(Dataset):
     def __init__(self, tokenizer, data):
@@ -303,34 +303,34 @@ def custom_collate_mix_batch(batch):
 
 def custom_collate_bias(batch):
 
-    start_time = time.time()
+    # start_time = time.time()
 
     input_ids = []
     labels = []
-    attention_matrices = []
-    max_length = 0
+    biased_index = []
+    max_length = max([len(item['input_ids'][0]) for item in batch])
+    # attention_matrices = []
 
     for item in batch:
-        input_ids.append(item['input_ids'][0])
-        labels.append(item['labels'][0])
-        seq_len = len(item['input_ids'][0])
-        if seq_len > max_length:
-            max_length = seq_len
+        seq_length = len(item['input_ids'][0])
 
-        # attention_matrices.append(construct_biased_attention_matrix(seq_len, item['biased_index']))
+        input_ids.append(item['input_ids'][0] + [0] * (max_length - seq_length))
 
-    padded_input_ids = torch.cat([torch.cat([torch.tensor([ids]), torch.zeros(max_length - len(ids), dtype=torch.int64).unsqueeze(0)], dim = 1) for ids in input_ids], dim = 0)
-    padded_labels = torch.cat([torch.cat([torch.tensor([label]), torch.tensor([-100] * (max_length - len(label)), dtype=torch.int64).unsqueeze(0)], dim = 1) for label in labels], dim = 0)
-    padded_attention_matrix = torch.tensor([construct_biased_attention_matrix(len(item['input_ids'][0]), item['biased_index'], max_length) for item in batch])
+        labels.append(item['labels'][0] + [-100] * (max_length - seq_length))
+
+        biased_index.append(item['biased_index'])
+        # attention_matrices.append(construct_biased_attention_matrix(seq_length, item['biased_index'], max_length).unsqueeze(0))
     
-    end_time = time.time()
+    # end_time = time.time()
 
-    elapsed_time = end_time - start_time
+    # elapsed_time = end_time - start_time
 
-    print(f"Collate time: {elapsed_time} seconds")
+    # print(f"Collate time: {elapsed_time} seconds")
 
     return {
-        'input_ids': padded_input_ids,
-        'labels': padded_labels,
-        'attention_matrix': padded_attention_matrix
+        'input_ids': torch.LongTensor(input_ids),
+        'labels': torch.LongTensor(labels),
+        # 'attention_matrix': torch.stack(attention_matrices)
+        'biased_index': biased_index,
+        'max_length': max_length
     }

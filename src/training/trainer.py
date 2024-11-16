@@ -6,6 +6,7 @@ import time
 from transformers import Trainer
 from torch.nn import CrossEntropyLoss
 from src.utils.cache import generate_kv_with_id, concat_kv, append_kv, generate_kv_with_position
+from src.data.attention import construct_biased_attention_matrix
 # from transformers import LlamaModel
 class CustomTrainer(Trainer):
     def __init__(self, *args, data_loader, **kwargs):
@@ -666,15 +667,22 @@ class CustomTrainerBiasAttn(Trainer):
     
     def compute_loss(self, model, inputs, return_outputs=False):
 
-        start_time = time.time()
+        # start_time = time.time()
 
-        outputs = self.model(input_ids = inputs['input_ids'], attention_mask = inputs['attention_matrix'], labels = inputs['labels'])
+        attention_matrices = []
 
-        end_time = time.time()
+        for idx in range(len(inputs['input_ids'])):
+            attention_matrices.append(construct_biased_attention_matrix(len(inputs['input_ids'][idx]), 
+                                                                        inputs['biased_index'][idx],
+                                                                        inputs['max_length'],
+                                                                        inputs['input_ids'].device).unsqueeze(0))
 
-        elapsed_time = end_time - start_time
+        outputs = self.model(input_ids = inputs['input_ids'], attention_mask = torch.stack(attention_matrices), labels = inputs['labels'])
+        # end_time = time.time()
 
-        print(f"Forward time: {elapsed_time} seconds")
+        # elapsed_time = end_time - start_time
+
+        # print(f"Forward time: {elapsed_time} seconds")
         
         
         return outputs.loss
