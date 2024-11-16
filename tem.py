@@ -1,97 +1,104 @@
-# import seaborn as sns
-# import matplotlib.pyplot as plt
-# import numpy as np
-
-# # Example data
-# training_steps = list(range(2000, 32000, 2000))  # Training steps from 2000 to 30000 in every 2000 steps
-# accuracy_setting_1 = [0.336, 0.314, 0.28, 0.306, 0.388, 0.426, 0.388, 0.448, 0.446, 0.48, 0.454, 0.46, 0.46, 0.458, 0.47]
-# accuracy_setting_2 = [0.378, 0.34, 0.316, 0.336, 0.39, 0.414, 0.412, 0.44, 0.414, 0.452, 0.44, 0.444, 0.46, 0.448, 0.45]
-# accuracy_setting_3 = [0.35, 0.314, 0.29, 0.266, 0.316, 0.354, 0.41, 0.39, 0.4, 0.37, 0.358, 0.366, 0.366, 0.378, 0.384]
-
-# # Baseline accuracy
-# baseline_accuracy1 = 0.552
-# baseline_accuracy2 = 0.432
-# baseline_accuracy3 = 0.42
-
-# # Create a dictionary to hold the data for seaborn
-# data = {
-#     'Training Steps': training_steps * 3,
-#     'Accuracy': accuracy_setting_1 + accuracy_setting_2 + accuracy_setting_3,
-#     'Setting': ['0th'] * len(accuracy_setting_1) + ['4th'] * len(accuracy_setting_2) + ['9th'] * len(accuracy_setting_3)
-# }
-
-# # Convert data to DataFrame
-# import pandas as pd
-# df = pd.DataFrame(data)
-
-# # Plot using seaborn
-# sns.set(style="whitegrid")
-# plt.figure(figsize=(10, 6))
-# # Plot each setting separately to control color
-# sns.lineplot(x=training_steps, y=accuracy_setting_1, marker="o", color='red', label="0th")
-# sns.lineplot(x=training_steps, y=accuracy_setting_2, marker="o", color='blue', label="4th")
-# sns.lineplot(x=training_steps, y=accuracy_setting_3, marker="o", color='green', label="9th")
-
-# # Add baseline line
-# plt.axhline(y=baseline_accuracy1, color='red', linestyle='--', label='0th')
-# # Add baseline line
-# plt.axhline(y=baseline_accuracy2, color='blue', linestyle='--', label='4th')
-# # Add baseline line
-# plt.axhline(y=baseline_accuracy3, color='green', linestyle='--', label='9th')
-
-# # Add labels and legend
-# plt.title("Accuracy over Training Steps")
-# plt.xlabel("Training Steps")
-# plt.ylabel("Accuracy")
-# plt.legend()
-
-# # Save the figure
-# plt.savefig("accuracy_over_training_steps.png")
-
 # import torch
+# from transformers import AutoTokenizer, AutoModelForCausalLM
+# from torch.nn import CrossEntropyLoss
+# import pandas as pd    
+# import json
+# import datetime
+# from datasets import load_dataset
+# from peft import PeftModel, PeftConfig
+# from transformers import LlamaForCausalLM
 
-# # Example tensor of size (m, n)
-# m = 6
-# n = 4
-# k = 2  # k must divide m evenly
-# x = torch.arange(m * n).reshape(m, n)
+# model_name = "meta-llama/Llama-3.2-1B-Instruct"
+# tokenizer = AutoTokenizer.from_pretrained(model_name)
+# model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16, use_flash_attention_2=True)
+# model.to('cuda')
+# # sentences = ["Hello, how are you?", "I am fine, thank you!"]
+# # inputs = tokenizer(sentences, return_tensors='pt', padding=True)
+# # input_ids = inputs['input_ids']
+# # batch_size, seq_length = input_ids.shape
 
-# print("Original Tensor (size {}):\n{}".format(x.shape, x))
+# inputs = tokenizer("How are you", return_tensors='pt')
+# seq_len = inputs.input_ids.size(1)
+# # fullmask = torch.tensor([[[[0] * seq_len] * seq_len]])
+# fullmask = torch.tensor([
+#     [[[0.0, float('-inf'), float('-inf'), float('-inf')], [0.0, 0.0, float('-inf'), float('-inf')], [0.0, 0.0, 0.0, float('-inf')], [0.0, 0.0, 0.0, 0.0]]]
+#     ], dtype = torch.bfloat16)
+# # model(inputs.input_ids.to(model.device), fullmask.to(model.device))
+# model(inputs.input_ids.to(model.device), attention_mask = torch.tensor([[0,1,1,1]]).to(model.device))
+import numpy as np
 
-# # Reshape the tensor to size (m/k, n*k)
-# assert m % k == 0, "k must evenly divide m"
-# x_new = x.reshape(m // k, n * k)
+def construct_biased_attention_matrix(seq_len, biased_ranges):
+    
+    if biased_ranges is None:
+        biased_ranges = []
+    # Initialize attention matrix with zeros
+    attention_matrix = np.zeros((seq_len, seq_len))
 
-# print("\nReshaped Tensor (size {}):\n{}".format(x_new.shape, x_new))
+    # Create a mapping from position to biased range index
+    position_to_biased_range = [None] * seq_len
+    for idx, (start, end) in enumerate(biased_ranges):
+        for pos in range(start, end + 1):
+            position_to_biased_range[pos] = idx  # Assign biased range index
 
-# def transform_2d_list(input_list, target_value=-1):
-#     # Use nested list comprehension to create a copy with transformed values
-#     transformed_list = [
-#         [0 if item == target_value else 1 for item in row]
-#         for row in input_list
-#     ]
-#     return transformed_list
+    # Build the attention matrix
+    for i in range(seq_len):
+        biased_range_i = position_to_biased_range[i]
+        for j in range(seq_len):
+            if j > i:
+                attention_matrix[i, j] = float('-inf')  # Causal mask
+            else:
+                if biased_range_i is not None:
+                    # Token i is in a biased range
+                    if position_to_biased_range[j] != biased_range_i:
+                        attention_matrix[i, j] = float('-inf')  # Can't attend outside biased range
+                    # Else, can attend to tokens within the same biased range up to position i
+                else:
+                    # Token i is not in any biased range
+                    # Can attend to all preceding tokens (including those in biased ranges)
+                    pass  # No additional masking needed
 
-# # Example usage:
-# original_list = [
-#     [3, -1, 0],
-#     [-1, 2, -1],
-#     [7, 8, -1]
-# ]
+    return attention_matrix.tolist()
 
-# # Transform the list
-# new_list = transform_2d_list(original_list, target_value=-1)
+# Example usage:
+seq_len = 6
+biased_ranges = [[2, 3]]
+attention_matrix1 = construct_biased_attention_matrix(seq_len, biased_ranges)
+seq_len = 8
+biased_ranges = [[2, 3],[6, 7]]
+attention_matrix2 = construct_biased_attention_matrix(seq_len, biased_ranges)
+seq_len = 6
+biased_ranges = None
+attention_matrix3 = construct_biased_attention_matrix(seq_len, biased_ranges)
+print(attention_matrix3)
 
-# # Display the original and the new list
-# print("Original List:")
-# for row in original_list:
-#     print(row)
+attention_matrix_list = [attention_matrix1, attention_matrix2, attention_matrix3]
 
-# print("\nTransformed List:")
-# for row in new_list:
-#     print(row)
-from transformers import AutoTokenizer
+def pad_attention_matrices(attention_matrices):
+    """
+    Pads a list of attention matrices to the maximum sequence length in the batch.
 
-tokenize = AutoTokenizer.from_pretrained('meta-llama/Llama-3.2-1B-Instruct')
-print(tokenize("hello how are u", add_special_tokens=False).input_ids)
-print(list(range(7)))
+    Parameters:
+    - attention_matrices: List of numpy arrays, each representing an attention matrix for a sequence.
+
+    Returns:
+    - List of padded attention matrices.
+    """
+    # Find the maximum sequence length in the batch
+    max_seq_len = max(len(mat) for mat in attention_matrices)
+    
+    padded_matrices = []
+    for mat in attention_matrices:
+        mat = np.array(mat)
+        seq_len = mat.shape[0]
+        # Initialize a padded matrix filled with -inf
+        padded_mat = np.full((max_seq_len, max_seq_len), float('-inf'))
+        # Copy the original attention matrix into the top-left corner
+        padded_mat[:seq_len, :seq_len] = mat
+        padded_matrices.append([padded_mat.tolist()])
+    
+    return padded_matrices
+
+print(np.array(pad_attention_matrices(attention_matrix_list)).shape)
+# for mat in pad_attention_matrices(attention_matrix_list):
+#     print(mat) 
+#     print(type(mat))

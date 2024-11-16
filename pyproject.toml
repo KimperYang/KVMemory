@@ -1,0 +1,11 @@
+[tool.poetry]
+name = "KVMemory"
+version = "0.1.0"
+description = "KVM project"
+authors = ["Jingbo Yang <jingbo@ucsb.eud>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/KimperYang/KVMemory"
+packages = [
+    { include = "src" },
+]

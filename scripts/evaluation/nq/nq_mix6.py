@@ -8,14 +8,14 @@ from typing import List
 from peft import PeftModel
 import regex
 
-ckpt = 8000
+ckpt = 40000
 pos = 9
 
 jsonObj = pd.read_json(path_or_buf=f'data/raw/nq/nq-open-10_{pos}.jsonl', lines=True)
 
-global_tokenizer = AutoTokenizer.from_pretrained(f"/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-{ckpt}")
+global_tokenizer = AutoTokenizer.from_pretrained(f"/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_1e-5_full/checkpoint-{ckpt}")
 
-global_model = AutoModelForCausalLM.from_pretrained(f"/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+global_model = AutoModelForCausalLM.from_pretrained(f"/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_1e-5_full/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
 
 # vocab_size = len(global_tokenizer)
 # base_model.resize_token_embeddings(vocab_size)
@@ -139,15 +139,15 @@ def main():
 
         for st in memory_list:
             # print(st)
-            id = global_tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
-            position_id = torch.arange(idx, idx + id.size(1)).unsqueeze(0)
+            tem_id = global_tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
+            position_id = torch.arange(idx, idx + tem_id.size(1)).unsqueeze(0)
             # print(position_id[0])
-            # print(id.size(1))
-            kv = generate_kv_with_id(id.to(global_model.device), position_id.to(global_model.device))
-            id_list.append(id)
+            # print(tem_id.size(1))
+            kv = generate_kv_with_id(tem_id.to(global_model.device), position_id.to(global_model.device))
+            id_list.append(tem_id)
             kv_list.append(kv)
 
-            idx = idx + id.size(1)
+            idx = idx + tem_id.size(1)
 
         appended_kv = append_kv(kv_list)
 

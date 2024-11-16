@@ -7,9 +7,9 @@ from rouge_score import rouge_scorer
 from datasets import load_dataset
 from peft import PeftModel, PeftConfig
 
-global_tokenizer = AutoTokenizer.from_pretrained("/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-30000")
+global_tokenizer = AutoTokenizer.from_pretrained("/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_1e-5_full/checkpoint-40000")
 
-global_model = AutoModelForCausalLM.from_pretrained("/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-30000", torch_dtype=torch.bfloat16)
+global_model = AutoModelForCausalLM.from_pretrained("/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_1e-6_full/checkpoint-40000", torch_dtype=torch.bfloat16)
 
 # vocab_size = len(global_tokenizer)
 # base_model.resize_token_embeddings(vocab_size)

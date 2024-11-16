@@ -14,9 +14,9 @@ from src.data.mapfunc import baseline_preprocessor
 
 def main():
     # Prepare model and tokenizer
-    model_path = "/mnt/data/jingbo/kv_dump_combine_baseline_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-6000"
+    model_path = "meta-llama/Llama-3.2-1B-Instruct"
     global_tokenizer = AutoTokenizer.from_pretrained(model_path)
-    global_model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype=torch.bfloat16, use_flash_attention_2=True)
+    global_model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype=torch.bfloat16, use_flash_attention_2=False)
 
     # new_token = ["<MEM_START>","<MEM_END>", "<MEM_SUM>"]
     # global_tokenizer.add_tokens(new_token)
@@ -150,7 +150,7 @@ def main():
         # optimizers=(optimizer, scheduler)
     ))
 
-    trainer.train(resume_from_checkpoint=True)
+    trainer.train()
 
     trainer.save_model()
     # global_model.save_pretrained("/mnt/data/jingbo/kv_dump_combine_baseline_5000steps_5e-6_full")

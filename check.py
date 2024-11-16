@@ -1,63 +1,48 @@
-# from transformers import AutoModelForCausalLM, AutoTokenizer, PreTrainedModel
-# from peft import PeftModel, PeftConfig
-# from safetensors import safe_open
-# import torch
+import numpy as np
 
-# def load_lora_weights(adapter_path):
-#     tensors = {}
-#     with safe_open(adapter_path + '/adapter_model.safetensors', framework="pt", device="cpu") as f:
-#         for key in f.keys():
-#             tensors[key] = f.get_tensor(key)
-#     return tensors
+def construct_biased_attention_matrix(seq_len, biased_ranges, max_len):
+    """
+    Constructs a padded biased attention matrix.
 
-# def check_embedding_layer_length(model_name):
-#     # Load the tokenizer and the model
-#     tokenizer = AutoTokenizer.from_pretrained(model_name)
-#     model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+    Parameters:
+    - seq_len: The actual sequence length of the input.
+    - biased_ranges: List of [start, end] indices defining biased position ranges.
+    - max_len: The maximum sequence length for padding.
 
-#     embed_before_resize = model.state_dict()['model.embed_tokens.weight']
-#     # model = AutoModel.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
-#     # ref_model.resize_token_embeddings(len(tokenizer))
-#     # model = AutoModel.from_pretrained(model_name)
+    Returns:
+    - A numpy array representing the padded biased attention matrix.
+    """
+    # Initialize the attention matrix with -inf for masking
+    attention_matrix = np.full((max_len, max_len), float('-inf'))
 
-#     # print(torch.sum(ref_model.get_input_embeddings().weight - model.get_input_embeddings().weight))
-#     # import pdb
-#     # pdb.set_trace()
-#     peft_config_path = model_name  # Path to the directory where LoRA weights are stored
-#     vocab_size = len(tokenizer)
-#     model.resize_token_embeddings(vocab_size)
-#     embed_after_resize = model.state_dict()['model.embed_tokens.weight']
-#     print('resize_diff: ', torch.sum(embed_before_resize - embed_after_resize[:128256]))
-#     print(embed_before_resize.shape, embed_after_resize.shape)
-#     old_embedding = model.state_dict()['model.embed_tokens.weight']
+    # Create a mapping from position to biased range index
+    position_to_biased_range = [None] * seq_len
+    for idx, (start, end) in enumerate(biased_ranges):
+        for pos in range(start, end + 1):
+            position_to_biased_range[pos] = idx  # Assign biased range index
 
-#     model = PeftModel.from_pretrained(model, peft_config_path)
+    # Build the attention matrix for the valid sequence positions
+    for i in range(seq_len):
+        biased_range_i = position_to_biased_range[i]
+        for j in range(i + 1):  # Only consider j <= i for causal mask
+            if biased_range_i is not None:
+                # Token i is in a biased range
+                if position_to_biased_range[j] == biased_range_i:
+                    attention_matrix[i, j] = 0.0  # Can attend within biased range
+                else:
+                    attention_matrix[i, j] = float('-inf')  # Cannot attend outside biased range
+            else:
+                # Token i is not in any biased range
+                attention_matrix[i, j] = 0.0  # Can attend to all preceding tokens
 
-#     # print(load_lora_weights(model_name)['base_model.model.model.embed_tokens.modules_to_save.weight'][128258])
-#     # print(load_lora_weights(model_name)['base_model.model.model.embed_tokens.original_module.weight'][128258])
-#     # print(load_lora_weights(model_name)['base_model.model.model.embed_tokens.weight'][128258])
-#     lora_weights = load_lora_weights(model_name)
-#     # print(lora_weights.keys())
-#     print('lora_diff: ', torch.sum(lora_weights['base_model.model.model.embed_tokens.modules_to_save.weight'][:128256] - lora_weights['base_model.model.model.embed_tokens.original_module.weight'][:128256]))
-    
-#     # new_embedding = model.base_model.model.embed_tokens.modules_to_save.default.weight
-#     new_embeding = model.state_dict()['base_model.model.model.embed_tokens.modules_to_save.default.weight'][:128256]
-#     print('model_new_old_diff: ', torch.sum(new_embeding[:128256] - old_embedding[:128256]))
-#     print('model_lora_diff: ',torch.sum(lora_weights['base_model.model.model.embed_tokens.modules_to_save.weight'][:128256] - new_embeding[:128256]))
-#     print('model_lora_diff: ',torch.sum(lora_weights['base_model.model.model.embed_tokens.original_module.weight'][:128256] - old_embedding[:128256]))
-# # Example usage:
-# model_name = "/mnt/data/jingbo/kv_dump_combine_mix5_5000steps"  # Replace with your desired model
-# # model_name = "/mnt/data/jingbo/kv_dump_combine_special2"  # Replace with your desired model
-# check_embedding_layer_length(model_name)
+    # For positions beyond seq_len, they remain -inf (masked out)
+    return attention_matrix
 
-from datasets import load_dataset, load_from_disk
-from transformers import AutoTokenizer
+# Example usage:
+seq_len = 3
+biased_ranges = []
+max_len = 6  # Max sequence length for padding
 
-xsum = load_from_disk('/mnt/data2/jingbo/kvmemory/data/maxlen4096/xsum_min5paragraphs')
-print(xsum[10])
-# cnn = load_dataset('EdinburghNLP/xsum')
-# tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
-
-# for i in range(len(cnn['train']['document'])):
-#     print(len(tokenizer(cnn['train']['document'][i])['input_ids']))
-
+attention_matrix = construct_biased_attention_matrix(seq_len, biased_ranges, max_len)
+print("Padded Attention Matrix:")
+print(attention_matrix)

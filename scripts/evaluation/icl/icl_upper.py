@@ -5,6 +5,16 @@ from datasets import load_dataset
 
 data = load_dataset("CogComp/trec")
 label_dict = {0:'abbreviation', 1:'entity', 2:'description', 3:'human', 4:'location', 5:'numeric'}
+# Step 1: Load the Pretrained Model and Tokenizer
+model_name = "/mnt/data/jingbo/kv_dump_combine_baseline_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-30000"  # You can choose other models like 'gpt2-medium', 'gpt-neo-125M', etc.
+# model_name = "meta-llama/Llama-3.2-1B-Instruct"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
+model.eval()
+
+# Move model to GPU if available
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+model.to(device)
 
 def construct_examples(data):
     num_each_class = 2
@@ -50,20 +60,13 @@ def compute_log_likelihood(context, option):
 
 total_num = len(data['test'])
 correct_num = 0
+prefix = construct_examples(data)
+
 for idx in range(total_num):
     print(idx)
-    # Step 1: Load the Pretrained Model and Tokenizer
-    model_name = "meta-llama/Llama-3.2-1B-Instruct"  # You can choose other models like 'gpt2-medium', 'gpt-neo-125M', etc.
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
-    model.eval()
-
-    # Move model to GPU if available
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model.to(device)
 
     # Step 2: Prepare the Context and Options
-    context = construct_examples(data) + "Question: " + data['test'][idx]['text'] + "\nType: "
+    context = prefix + "Question: " + data['test'][idx]['text'] + "\nType: "
     options = label_dict.values()
 
     # Step 3: Compute Log-Likelihoods for Each Option

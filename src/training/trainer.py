@@ -2,6 +2,7 @@ import torch
 import matplotlib.pyplot as plt
 import json
 import random
+import time
 from transformers import Trainer
 from torch.nn import CrossEntropyLoss
 from src.utils.cache import generate_kv_with_id, concat_kv, append_kv, generate_kv_with_position
@@ -651,5 +652,29 @@ class CustomTrainerMixSpecial_Batch(Trainer):
 
         # Get Loss
         outputs = self.model(input_ids = input_ids_batch, attention_mask = attention_mask_batch, labels = labels_batch, past_key_values = past_key_values_batch, use_cache = True)
+        
+        return outputs.loss
+
+class CustomTrainerBiasAttn(Trainer):
+    def __init__(self, *args, data_loader, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.data_loader = data_loader
+        self.train_loss_history = []
+
+    def get_train_dataloader(self):
+        return self.data_loader
+    
+    def compute_loss(self, model, inputs, return_outputs=False):
+
+        start_time = time.time()
+
+        outputs = self.model(input_ids = inputs['input_ids'], attention_mask = inputs['attention_matrix'], labels = inputs['labels'])
+
+        end_time = time.time()
+
+        elapsed_time = end_time - start_time
+
+        print(f"Forward time: {elapsed_time} seconds")
+        
         
         return outputs.loss

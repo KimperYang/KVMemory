@@ -1,7 +1,9 @@
 import torch
+import time
 from torch.utils.data import Dataset
 from datasets import load_dataset
 from src.utils.utils import pad_2d_list
+from src.data.attention import construct_biased_attention_matrix, pad_attention_matrices
 
 class CustomDataset(Dataset):
     def __init__(self, tokenizer, data):
@@ -291,9 +293,44 @@ def custom_collate_mix_batch(batch):
     attention_mask_batch = torch.cat([memory_attention_mask_batch, input_attention_batch], dim = 1)
 
     return {
+        'batch_size': batch_size,
         'batch_input_ids': padded_input_ids,
         'labels_batch': padded_labels,
         'split_memory_position_batch': padded_memory_positions,
         'split_memory_ids_batch': padded_memory_ids,
         'attention_mask_batch': attention_mask_batch
+    }
+
+def custom_collate_bias(batch):
+
+    start_time = time.time()
+
+    input_ids = []
+    labels = []
+    attention_matrices = []
+    max_length = 0
+
+    for item in batch:
+        input_ids.append(item['input_ids'][0])
+        labels.append(item['labels'][0])
+        seq_len = len(item['input_ids'][0])
+        if seq_len > max_length:
+            max_length = seq_len
+
+        # attention_matrices.append(construct_biased_attention_matrix(seq_len, item['biased_index']))
+
+    padded_input_ids = torch.cat([torch.cat([torch.tensor([ids]), torch.zeros(max_length - len(ids), dtype=torch.int64).unsqueeze(0)], dim = 1) for ids in input_ids], dim = 0)
+    padded_labels = torch.cat([torch.cat([torch.tensor([label]), torch.tensor([-100] * (max_length - len(label)), dtype=torch.int64).unsqueeze(0)], dim = 1) for label in labels], dim = 0)
+    padded_attention_matrix = torch.tensor([construct_biased_attention_matrix(len(item['input_ids'][0]), item['biased_index'], max_length) for item in batch])
+    
+    end_time = time.time()
+
+    elapsed_time = end_time - start_time
+
+    print(f"Collate time: {elapsed_time} seconds")
+
+    return {
+        'input_ids': padded_input_ids,
+        'labels': padded_labels,
+        'attention_matrix': padded_attention_matrix
     }
