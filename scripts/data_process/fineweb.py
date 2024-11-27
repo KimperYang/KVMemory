@@ -7,7 +7,7 @@ FLAGS = flags.FLAGS
 def set_args():
     flags.DEFINE_integer(
         "num_samples",
-        default=10000,
+        default=10_000_000,
         help="number of samples to sample from the FineWeb.",
     )
 

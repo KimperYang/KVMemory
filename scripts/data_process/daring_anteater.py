@@ -81,8 +81,6 @@ def main(argv):
     sft.save_to_disk("data/processed/daringanteater/sft")
     print("sft:", len(sft))
 
-
-
     def process_sftmem(conversation):
         
         sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who answer the question with the knowledge provided in the prompt<|eot_id|>"
