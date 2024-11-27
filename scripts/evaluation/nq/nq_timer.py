@@ -98,11 +98,13 @@ def inference(input_ids):
     
     model.eval()
 
+    max_length = input_ids.size(1) + 1
+
     with torch.no_grad():
 
         outputs = model.generate(
             input_ids=input_ids,
-            max_new_tokens=1,
+            max_length=max_length,
             do_sample=False,
             temperature=None,
             top_p=1.0
@@ -134,19 +136,35 @@ def main():
             text = jsonObj["ctxs"][i][j]["text"]
             memory_list.append(f"Document [{j+1}](Title: {title}) {text}"+"\n")
 
-        prompt = "".join(memory_list)
-        new_prompt = "\n\nQuestion: " + jsonObj["question"][i] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
-        prompt += new_prompt
-        # prompt = template + new_prompt
+        memory = "".join(memory_list)
 
-        prompt_id = global_tokenizer(prompt, return_tensors="pt").input_ids
-        
+        mem_id = global_tokenizer(memory, add_special_tokens=False, return_tensors="pt").input_ids
+
+        new_prompt = "\n\nQuestion: " + jsonObj["question"][i] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        prompt_id = global_tokenizer(new_prompt, return_tensors="pt").input_ids
+        concat_id =torch.cat([mem_id, prompt_id], dim = 1)
+
         start_time = time.time()
-        generated_seq = inference(prompt_id.to(global_model.device))
+        print(mem_id.size(1))
+        with torch.no_grad():
+            outputs = global_model(input_ids = mem_id.to(global_model.device))
+            past_key_values = outputs.past_key_values
+
+            outputs = global_model.generate(
+                input_ids=concat_id.to(global_model.device),
+                max_new_tokens=1,
+                do_sample=False,
+                temperature=None,
+                top_p=1.0,
+                past_key_values=past_key_values,
+                use_cache=True
+            )
+
         end_time = time.time()
         if i >= 100:
             execution_time += end_time - start_time
-        print(f"Execution time: {execution_time} seconds")
+        generated_seq = global_tokenizer.batch_decode(outputs, skip_special_tokens=True)
+
         response = generated_seq[0].split('assistant\n\n')[-1]
         print(response)
 
@@ -159,6 +177,7 @@ def main():
         
     accuracy = correct_num / total_num
     print(accuracy)
+
     print(f"Average execution time: {execution_time / 400} seconds")
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")

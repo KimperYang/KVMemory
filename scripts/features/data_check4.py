@@ -17,7 +17,7 @@ tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
 max_length = 4096
 
 def process_conversation(conversation):
-    dataset_id = 'sftmem'
+    
     sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who answer the question with the knowledge provided in the prompt<|eot_id|>"
     sys_tokens = tokenizer(sys, add_special_tokens= False, return_tensors= "pt")['input_ids']
     sys_len = sys_tokens.size(1)

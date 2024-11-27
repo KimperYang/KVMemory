@@ -7,9 +7,9 @@ from rouge_score import rouge_scorer
 from datasets import load_dataset
 from src.data.attention import construct_biased_attention_matrix
 
-run_name = "kv_dump_bias_50000steps_bsz64_2e-5_full"
+run_name = "kv_dump_bias_30000steps_bsz256_5e-6_full"
 
-ckpt = 50000
+ckpt = 30000
 
 global_tokenizer = AutoTokenizer.from_pretrained(f"/mnt/data/jingbo/{run_name}/checkpoint-{ckpt}")
 
@@ -223,7 +223,7 @@ def main():
 
     final_score = sum(score_list) / len(score_list)
 
-    file_name = f"result/11-18/dialog/{run_name}_ckpt{ckpt}_{final_score}_{time_str}.jsonl"
+    file_name = f"result/11-26/dialog/{run_name}_ckpt{ckpt}_{final_score}_{time_str}.jsonl"
 
     with open(file_name, 'w') as f:
         for entry in res_list:

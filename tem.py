@@ -2,6 +2,7 @@ import torch
 import pandas as pd
 import string
 import regex
+import time
 from typing import List
 from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig, DynamicCache, StaticCache
 from transformers.models.llama.modeling_llama import LlamaRotaryEmbedding
@@ -95,7 +96,7 @@ def apply_rerotary_position_embeddings(pkv, emb):
     position_ids = torch.arange(start=0, end=pkv.key_cache[0].size(-2), dtype=torch.int64, device=device)
     position_ids = position_ids.unsqueeze(dim=0).repeat(repeats=[pkv.key_cache[0].size(0), 1])
     cos, sin = emb(x=pkv.key_cache[0].to(dtype=torch.float32), position_ids=position_ids)
-    print(position_ids)
+    # print(position_ids)
 
     for i in range(0, len(pkv.key_cache)):
         pkv.key_cache[i] = apply_rotary_pos_emb(
@@ -144,10 +145,10 @@ def rotate_and_merge(kv_list, start_position, emb):
 
 
 def main():
-    pos = 0
-    ckpt = 30000
+    pos = 9
+    ckpt = 16000
     # model_id = "meta-llama/Llama-3.2-1B-Instruct"
-    model_id = f"/mnt/data/jingbo/kv_dump_bias_30000steps_bsz64_5e-6_full/checkpoint-{ckpt}"
+    model_id = f"/mnt/data/jingbo/kv_dump_bias_30000steps_bsz256_5e-6_full/checkpoint-{ckpt}"
 
     config = AutoConfig.from_pretrained(pretrained_model_name_or_path=model_id)
 
@@ -166,14 +167,14 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(model_id)
 
     jsonObj = pd.read_json(path_or_buf=f'data/raw/nq/nq-open-10_{pos}.jsonl', lines=True)
-    total_num = 1
+    total_num = 500
     correct_num = 0
     res_list = []
-    
+    execution_time = 0
     sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a helpful, respectful and honest assistant.<|eot_id|>"
 
     for i in range(total_num):
-
+        print(i)
         memory_list = [sys] 
 
         for j in range(0,10):
@@ -188,6 +189,13 @@ def main():
         # start_position = sys_id.size(1)
 
         # Set timer
+
+        new_prompt = "<MEM_SUM><|start_header_id|>user<|end_header_id|>\n\nWrite a high-quality answer for the given question using only the provided search results (some of which might be irrelevant). Question: " + jsonObj["question"][i] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        prompt_id = tokenizer(new_prompt, return_tensors="pt", add_special_tokens=False).input_ids.to(model.device)
+
+        concat_id = torch.cat(mem_id_list + [prompt_id], dim=1).to(model.device)
+
+        start_time = time.time()
         rotated_mem_kv = rotate_and_merge(raw_kv_list, 0, emb)
 
         # sys_cache = model(input_ids = sys_id, use_cache=True, past_key_values=DynamicCache()).past_key_values
@@ -197,22 +205,21 @@ def main():
         for l_idx in range(len(concat_cache.key_cache)):
             concat_cache.key_cache[l_idx] = concat_cache.key_cache[l_idx].to(dtype=torch.bfloat16)
 
-        new_prompt = "<MEM_SUM><|start_header_id|>user<|end_header_id|>\n\nWrite a high-quality answer for the given question using only the provided search results (some of which might be irrelevant). Question: " + jsonObj["question"][i] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
-        prompt_id = tokenizer(new_prompt, return_tensors="pt", add_special_tokens=False).input_ids.to(model.device)
-
-        concat_id = torch.cat(mem_id_list + [prompt_id], dim=1).to(model.device)
-
         with torch.no_grad():
 
             outputs = model.generate(
                 input_ids=concat_id,
-                max_new_tokens=200,
+                max_new_tokens=1,
                 do_sample=False,
                 temperature=None,
                 top_p=1.0,
                 past_key_values=concat_cache,
                 use_cache=True
             )
+        end_time = time.time()
+        if i >= 100:
+            execution_time += end_time - start_time
+        # print(f"Execution time: {execution_time} seconds")
         generated_seq = tokenizer.batch_decode(outputs, skip_special_tokens=True)
     
         response = generated_seq[0].split('assistant\n\n')[-1]
@@ -225,6 +232,7 @@ def main():
         res_list.append({"id": str(i),"question": jsonObj["question"][i], "response": response, "gold_answer": jsonObj["answers"][i], "Score": score})
         print("Correct progress", correct_num)
 
+    print(f"Average execution time: {execution_time / 400} seconds")
 if __name__ == "__main__":
     main()
 

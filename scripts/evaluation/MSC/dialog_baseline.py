@@ -6,8 +6,11 @@ import datetime
 from rouge_score import rouge_scorer
 from datasets import load_dataset
 
-global_tokenizer = AutoTokenizer.from_pretrained("/mnt/data/jingbo/kv_dump_combine_baseline_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-30000")
-global_model = AutoModelForCausalLM.from_pretrained("/mnt/data/jingbo/kv_dump_combine_baseline_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-30000", torch_dtype=torch.bfloat16, device_map="auto")
+run_name = "kv_dump_bias_30000steps_bsz256_5e-6_full"
+ckpt = 30000
+
+global_tokenizer = AutoTokenizer.from_pretrained(f"/mnt/data/jingbo/{run_name}/checkpoint-{ckpt}")
+global_model = AutoModelForCausalLM.from_pretrained(f"/mnt/data/jingbo/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16, device_map="auto")
 
 def generate_kv(prompt):
 
@@ -182,7 +185,7 @@ def main():
 
     final_score = sum(score_list) / len(score_list)
 
-    file_name = f"result/dialog/dialog_llama3.21b_finetuned_30000_{final_score}_{time_str}.json"
+    file_name = f"result/11-26/dialog/{run_name}_ckpt{ckpt}_{final_score}_{time_str}.json"
 
     with open(file_name, 'w') as f:
         for entry in res_list:
