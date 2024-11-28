@@ -1,79 +1,68 @@
-import torch
+# import random
 
-def rotate_half(x):
-    """
-    transformers.models.llama.modeling_llama.rotate_half
-    Rotates half the hidden dims of the input.
-    """
-    x1 = x[..., : x.shape[-1] // 2]
-    x2 = x[..., x.shape[-1] // 2:]
-    return torch.cat((-x2, x1), dim=-1)
+# def split_list_randomly(lst, k):
+#     N = len(lst)
+#     if k <= 0 or k > N:
+#         raise ValueError("k must be between 1 and the length of the list")
+#     # Generate k-1 unique random breakpoints between 1 and N-1
+#     breaks = sorted(random.sample(range(1, N), k - 1))
+#     # Add the start and end points
+#     breaks = [0] + breaks + [N]
+#     # Compute the sizes of each sublist
+#     sizes = [breaks[i+1] - breaks[i] for i in range(k)]
 
-def apply_rotary_pos_emb(k, cos, sin, position_ids, unsqueeze_dim=1):
-    """
-    transformers.models.llama.modeling_llama.apply_rotary_pos_emb
-    Applies Rotary Position Embedding to the query and key tensors.
+#     print(sizes)
+#     # Split the list according to the sizes
+#     result = []
+#     index = 0
+#     for size in sizes:
+#         result.append(lst[index:index + size])
+#         index += size
+#     return result
 
-    Args:
-        k (`torch.Tensor`): The key tensor.
-        cos (`torch.Tensor`): The cosine part of the rotary embedding.
-        sin (`torch.Tensor`): The sine part of the rotary embedding.
-        position_ids (`torch.Tensor`):
-            The position indices of the tokens corresponding to the query and key tensors. For example, this can be
-            used to pass offsetted position ids when working with a KV-cache.
-        unsqueeze_dim (`int`, *optional*, defaults to 1):
-            The 'unsqueeze_dim' argument specifies the dimension along which to unsqueeze cos[position_ids] and
-            sin[position_ids] so that they can be properly broadcasted to the dimensions of q and k. For example, note
-            that cos[position_ids] and sin[position_ids] have the shape [batch_size, seq_len, head_dim]. Then, if q and
-            k have the shape [batch_size, heads, seq_len, head_dim], then setting unsqueeze_dim=1 makes
-            cos[position_ids] and sin[position_ids] broadcastable to the shapes of q and k. Similarly, if q and k have
-            the shape [batch_size, seq_len, heads, head_dim], then set unsqueeze_dim=2.
-    Returns:
-        `tuple(torch.Tensor)` comprising of the query and key tensors rotated using the Rotary Position Embedding.
-    """
-    cos = cos.unsqueeze(unsqueeze_dim)
-    sin = sin.unsqueeze(unsqueeze_dim)
-    k_embed = (k * cos) + (rotate_half(k) * sin)
-    return k_embed
-
-def unrotate_half(x):
-    """
-    Inverts the rotate_half operation.
-    """
-    x1 = x[..., : x.shape[-1] // 2]
-    x2 = x[..., x.shape[-1] // 2:]
-    return torch.cat((x2, -x1), dim=-1)
-
-def unapply_rotary_pos_emb(k_embed, cos, sin, unsqueeze_dim=1):
-    """
-    Reverses the Rotary Position Embedding applied to a tensor.
-
-    Args:
-        k_embed (`torch.Tensor`): The tensor after RoPE was applied.
-        cos (`torch.Tensor`): The cosine part of the rotary embedding.
-        sin (`torch.Tensor`): The sine part of the rotary embedding.
-        unsqueeze_dim (`int`, *optional*, defaults to 1): 
-            The same unsqueeze_dim used in apply_rotary_pos_emb.
-    Returns:
-        `torch.Tensor`: The original tensor before RoPE was applied.
-    """
-    cos = cos.unsqueeze(unsqueeze_dim)
-    sin = sin.unsqueeze(unsqueeze_dim)
-    # Reverse the RoPE operation
-    k = (k_embed * cos) - (unrotate_half(k_embed) * sin)
-    return k
+# # Example usage:
+# lst = list(range(1, 21))  # A list with 20 items
+# k = 5  # Number of sublists
+# random_sublists = split_list_randomly(lst, k)
+# print(random_sublists)
 
 
-k = torch.randn(1, 4, 15, 64)  # Example tensor
-cos = torch.randn(1, 15, 64)
-sin = torch.randn(1, 15, 64)
+#         text = example["text"]
+#         input_ids = self.tokenizer(text, add_special_tokens= False, return_tensors= "pt")["input_ids"]
+    
+#         input_ids = input_ids[:, :self.max_len - 2] #make space for <begin of text> and <MEM_SUM>
+        
+#         num_memory = random.randint(1, 10)
+#         each_mem_len = random.randint(50, 150)
+#         mem_len = num_memory * each_mem_len
 
-# Apply RoPE
-k_rotated = apply_rotary_pos_emb(k, cos, sin, position_ids=None, unsqueeze_dim=1)
+#         # allocate space for special tokens
+#         input_len = input_ids.size(1)
+#         input_ids = input_ids[:, :input_len - 2 * num_memory] 
 
-# Reverse RoPE
-k_original = apply_rotary_pos_emb(k_rotated, cos, -sin, position_ids=None, unsqueeze_dim=1)
+#         memory_ids = input_ids[:, :mem_len]
+#         remaining_ids = input_ids[:, mem_len:]
+ 
+#         split_input_ids = memory_ids.reshape(-1, each_mem_len)
+#         split_input_ids = torch.cat([torch.tensor([[128256]] * split_input_ids.size(0)), split_input_ids, torch.tensor([[128257]] * split_input_ids.size(0))], dim=1)
 
-print(torch.mean(torch.abs(k-k_rotated)))
-# Check if they match
-print(torch.allclose(k, k_original, atol=1e-3))  # Should print True
+#         mem_len = mem_len + 2 * num_memory
+#         each_mem_len = each_mem_len + 2
+        
+#         concat_memory_ids = split_input_ids.reshape(1, mem_len)
+        
+#         biased_index = []
+#         bias_position = 1
+#         for _ in range(num_memory):
+#             biased_index.append([bias_position, bias_position + each_mem_len])
+#             bias_position = bias_position + each_mem_len
+
+#         concat_ids = torch.cat([torch.tensor([[128000]]), concat_memory_ids, torch.tensor([[128258]]), remaining_ids], dim = 1)
+
+#         labels = torch.cat([torch.tensor([[-100] * (mem_len + 2)]), remaining_ids], dim = 1)
+
+from transformers import AutoTokenizer
+
+t = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+
+print(t("Hello world", add_special_tokens= False)['input_ids'][:50])

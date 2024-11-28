@@ -25,7 +25,7 @@ def main():
         max_len=4096
     )
 
-    text_raw = load_from_disk("/mnt/data2/jingbo/kvmemory/data/maxlen4096/text_min_2048")
+    text_raw = load_from_disk("data/processed/fineweb/text")
 
     text = text_raw.map(
         preprocessor.process_text,
@@ -35,7 +35,8 @@ def main():
 #        load_from_cache_file=False
     )
     
-    textmem = text_raw.map(
+    text_mem_raw = load_from_disk("data/processed/fineweb/text_mem")
+    textmem = text_mem_raw.map(
         preprocessor.process_textmem,
         num_proc=256,
         remove_columns=["text"],
@@ -43,7 +44,8 @@ def main():
 #        load_from_cache_file=False
     )
 
-    textinst = text_raw.map(
+    text_inst_raw = load_from_disk("data/processed/fineweb/text_inst")
+    textinst = text_inst_raw.map(
         preprocessor.process_textinst,
         num_proc=256,
         remove_columns=["text"],
@@ -53,7 +55,7 @@ def main():
     # print(len(data1[0]['input_ids'][0]), len(data1[0]['labels'][0]), data1[0]['labels'][0].count(-100), len(data1[0]['memory_position_batch']), len(data1[0]['memory_position_batch'][0]))
     # print(data1[0]['labels'][0].count(-100)-(len(data1[0]['memory_position_batch']) * len(data1[0]['memory_position_batch'][0])))
     # print(data1[1]['labels'][0].count(-100)-(len(data1[1]['memory_position_batch']) * len(data1[1]['memory_position_batch'][0])))
-    sft_raw = load_from_disk("/mnt/data2/jingbo/kvmemory/data/maxlen4096/sft")
+    sft_raw = load_from_disk("data/processed/daringanteater/sft")
 
     sft = sft_raw.map(
         preprocessor.process_sft,
@@ -63,7 +65,7 @@ def main():
 #        load_from_cache_file=False
     )
 
-    sftmem_raw = load_from_disk("/mnt/data2/jingbo/kvmemory/data/maxlen4096/sftmem_new")
+    sftmem_raw = load_from_disk("data/processed/daringanteater/sft_mem")
 
     sftmem = sftmem_raw.map(
         preprocessor.process_sftmem,
@@ -104,7 +106,7 @@ def main():
     training_args = TrainingArguments(
         output_dir="/mnt/data/jingbo/kv_dump_bias_30000steps_warmup0.1_decaycosine_5e-6_full",
         # report_to="wandb",
-        run_name="bias_30000steps_warmup0.1_decaycosine_5e-6_full",
+        run_name=f"bias_30000steps_bsz{batch_size_per_device}_5e-6_full",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
         max_steps=30000,

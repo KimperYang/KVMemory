@@ -1181,53 +1181,57 @@ class bias_attention_preprocessor():
         example: Dict[str, str],
     ):
         sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who will complete the sentence after the text chunks given below<|eot_id|>"
-        sys_tokens = self.tokenizer(sys, add_special_tokens= False, return_tensors= "pt")['input_ids']
-        sys_len = sys_tokens.size(1)
+        sys_tokens = self.tokenizer(sys, add_special_tokens= False)['input_ids']
+        sys_len = len(sys_tokens)
 
         user = "<|start_header_id|>user<|end_header_id|>\n\nPlease complete the sentence<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
-        user_tokens = self.tokenizer(user, add_special_tokens= False, return_tensors= "pt")['input_ids']
-        user_tokens = torch.cat([torch.tensor([[128258]]), user_tokens], dim = 1)
-        user_len = user_tokens.size(1)
+        user_tokens = self.tokenizer(user, add_special_tokens= False)['input_ids']
+        user_tokens = [128258] + user_tokens
+        user_len = len(user_tokens)
 
         text = example["text"]
-        tokenized = self.tokenizer(text, add_special_tokens= False, return_tensors= "pt")
-        input_ids = tokenized.input_ids
+        input_ids = self.tokenizer(text, add_special_tokens= False)['input_ids']
 
-        # allocate space for "<MEM_SUM><|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n". [128009, 128006, 78191, 128007, 271]
-        input_ids = input_ids[:, :self.max_len - user_len - sys_len] 
+        input_ids = input_ids[:self.max_len - user_len - sys_len] 
         
-        num_memory = random.randint(1, 10)
-        each_mem_len = random.randint(50, 150)
-        mem_len = num_memory * each_mem_len
+        mem_len = random.randint(500, 1500)
+        mem_num = random.randint(5,40)
+
+        breaks = sorted(random.sample(range(1, mem_len), mem_num - 1))
+        breaks = [0] + breaks + [mem_len]
+        each_mem_len = [breaks[i+1] - breaks[i] for i in range(mem_num)]
 
         # allocate space for special tokens
-        input_len = input_ids.size(1)
-        input_ids = input_ids[:, :input_len - 2 * num_memory] 
+        input_len = len(input_ids)
+        input_ids = input_ids[:input_len - 2 * mem_num] 
 
-        memory_ids = input_ids[:, :mem_len]
-        remaining_ids = input_ids[:, mem_len:]
-        ans_len = remaining_ids.size(1)
-        split_input_ids = memory_ids.reshape(-1, each_mem_len)
-        split_input_ids = torch.cat([torch.tensor([[128256]] * split_input_ids.size(0)), split_input_ids, torch.tensor([[128257]] * split_input_ids.size(0))], dim=1)
+        memory_ids = input_ids[:mem_len]
+        remaining_ids = input_ids[mem_len:]
 
-        mem_len = mem_len + 2 * num_memory
-        each_mem_len = each_mem_len + 2
-        concat_memory_ids = split_input_ids.reshape(1, mem_len)
+        concat_ids = sys_tokens
 
-        concat_ids = torch.cat([sys_tokens, concat_memory_ids, user_tokens, remaining_ids], dim = 1)
-        labels = torch.cat([torch.tensor([[-100] * (sys_len + mem_len + user_len)]), remaining_ids], dim = 1)
+        split_memory_ids = []
+        index = 0
+        for size in each_mem_len:
+            split_memory_ids.append(memory_ids[index:index + size])
+            index += size
 
         biased_index = []
         bias_position = sys_len
-        for _ in range(num_memory):
-            biased_index.append([bias_position, bias_position + each_mem_len])
-            bias_position = bias_position + each_mem_len
 
-        # attention_matrix = construct_biased_attention_matrix(concat_ids.size(1), biased_index)
+        for i in range(mem_num):
+            tem_mem_id = [128256] + split_memory_ids[i] + [128257]
+            concat_ids += tem_mem_id
+
+            biased_index.append([bias_position, bias_position + len(tem_mem_id)])
+            bias_position = bias_position + len(tem_mem_id)
+
+        concat_ids = concat_ids + user_tokens + remaining_ids
+        labels = torch.cat([torch.tensor([[-100] * (sys_len + mem_len + user_len)]), remaining_ids], dim = 1)
 
         return {
-            'input_ids': concat_ids,
-            'labels': labels,
+            'input_ids': [concat_ids],
+            'labels': [labels],
             'biased_index': biased_index
             # 'attention_matrix': attention_matrix
         }
@@ -1251,47 +1255,91 @@ class bias_attention_preprocessor():
         self,
         example: Dict[str, str],
     ):
-        text = example["text"]
-        input_ids = self.tokenizer(text, add_special_tokens= False, return_tensors= "pt")["input_ids"]
-    
-        input_ids = input_ids[:, :self.max_len - 2] #make space for <begin of text> and <MEM_SUM>
         
-        num_memory = random.randint(1, 10)
-        each_mem_len = random.randint(50, 150)
-        mem_len = num_memory * each_mem_len
+        sys = "<|begin_of_text|>"
+        sys_tokens = self.tokenizer(sys, add_special_tokens= False)['input_ids']
+        sys_len = len(sys_tokens)
+
+        user_tokens = [128258]
+        user_len = len(user_tokens)
+
+        text = example["text"]
+        input_ids = self.tokenizer(text, add_special_tokens= False)['input_ids']
+
+        input_ids = input_ids[:self.max_len - user_len - sys_len] 
+        
+        mem_len = random.randint(500, 2000)
+        mem_num = random.randint(5,40)
+
+        breaks = sorted(random.sample(range(1, mem_len), mem_num - 1))
+        breaks = [0] + breaks + [mem_len]
+        each_mem_len = [breaks[i+1] - breaks[i] for i in range(mem_num)]
 
         # allocate space for special tokens
-        input_len = input_ids.size(1)
-        input_ids = input_ids[:, :input_len - 2 * num_memory] 
+        input_len = len(input_ids)
+        input_ids = input_ids[:input_len - 2 * mem_num] 
 
-        memory_ids = input_ids[:, :mem_len]
-        remaining_ids = input_ids[:, mem_len:]
+        memory_ids = input_ids[:mem_len]
+        remaining_ids = input_ids[mem_len:]
 
-        # add <|eot_id|>
-        # remaining_ids = torch.cat([remaining_ids, torch.tensor([[128009]]).to(remaining_ids.device)], dim=1)
- 
-        split_input_ids = memory_ids.reshape(-1, each_mem_len)
-        split_input_ids = torch.cat([torch.tensor([[128256]] * split_input_ids.size(0)), split_input_ids, torch.tensor([[128257]] * split_input_ids.size(0))], dim=1)
+        concat_ids = sys_tokens
 
-        mem_len = mem_len + 2 * num_memory
-        each_mem_len = each_mem_len + 2
-        
-        concat_memory_ids = split_input_ids.reshape(1, mem_len)
-        
+        split_memory_ids = []
+        index = 0
+        for size in each_mem_len:
+            split_memory_ids.append(memory_ids[index:index + size])
+            index += size
+
         biased_index = []
-        bias_position = 1
-        for _ in range(num_memory):
-            biased_index.append([bias_position, bias_position + each_mem_len])
-            bias_position = bias_position + each_mem_len
+        bias_position = sys_len
 
-        concat_ids = torch.cat([torch.tensor([[128000]]), concat_memory_ids, torch.tensor([[128258]]), remaining_ids], dim = 1)
+        for i in range(mem_num):
+            tem_mem_id = [128256] + split_memory_ids[i] + [128257]
+            concat_ids += tem_mem_id
 
-        labels = torch.cat([torch.tensor([[-100] * (mem_len + 2)]), remaining_ids], dim = 1)
-        
-        # attention_matrix = construct_biased_attention_matrix(concat_ids.size(1), biased_index)
+            biased_index.append([bias_position, bias_position + len(tem_mem_id)])
+            bias_position = bias_position + len(tem_mem_id)
+
+        concat_ids = concat_ids + user_tokens + remaining_ids
+        labels = torch.cat([torch.tensor([[-100] * (sys_len + mem_len + user_len)]), remaining_ids], dim = 1)
+        # text = example["text"]
+        # input_ids = self.tokenizer(text)["input_ids"]
+
+        # input_ids = input_ids[:self.max_len - 1]
+
+        # mem_len = random.randint(500, 2000)
+        # mem_num = random.randint(5,40)
+
+        # breaks = sorted(random.sample(range(1, mem_len), mem_num - 1))
+        # breaks = [0] + breaks + [mem_len]
+        # each_mem_len = [breaks[i+1] - breaks[i] for i in range(mem_num)]
+
+        # input_len = len(input_ids)
+        # input_ids = input_ids[:input_len - 2 * mem_num]          # allocate space for special tokens
+
+        # sys_len = 1
+
+        # memory_ids = input_ids[:mem_len + sys_len]
+        # remaining_ids = input_ids[mem_len + sys_len:]
+
+        # current_idx = 1
+        # concat_ids = [128000]
+        # biased_index = []
+        # for i in range(mem_num):
+        #     mem_len = each_mem_len[i]
+        #     tem_mem_id = memory_ids[current_idx: current_idx + each_mem_len[i]]
+        #     tem_mem_id = [128256] + tem_mem_id + [128257]
+        #     concat_ids += tem_mem_id
+
+        #     biased_index.append([current_idx, current_idx + len(tem_mem_id)])
+        #     current_idx += current_idx + len(tem_mem_id)
+
+        # concat_ids = concat_ids + [128258] + remaining_ids
+        # labels = [-100] * (len(concat_ids) + 1) + remaining_ids
+
         return {
-            'input_ids': concat_ids,
-            'labels': labels,
+            'input_ids': [concat_ids],
+            'labels': [labels],
             'biased_index': biased_index
             # 'attention_matrix': attention_matrix
         }
