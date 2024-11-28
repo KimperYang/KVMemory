@@ -657,14 +657,21 @@ class CustomTrainerMixSpecial_Batch(Trainer):
         return outputs.loss
 
 class CustomTrainerBiasAttn(Trainer):
-    def __init__(self, *args, data_loader, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.data_loader = data_loader
+        # self.data_loader = data_loader
+        # self.eval_data_loader = eval_data_loader
         self.train_loss_history = []
 
-    def get_train_dataloader(self):
-        return self.data_loader
+    # def get_train_dataloader(self):
+    #     return self.data_loader
     
+    # def get_eval_dataloader(self, eval_dataset=None):
+    #     if self.eval_data_loader is not None:
+    #         return self.eval_data_loader
+    #     else:
+    #         return super().get_eval_dataloader(eval_dataset)
+
     def compute_loss(self, model, inputs, return_outputs=False):
 
         # start_time = time.time()
