@@ -1,12 +1,13 @@
 import os
 import torch
-from transformers import TrainingArguments, Trainer
+from transformers import TrainingArguments
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from datasets import DatasetDict, load_from_disk, interleave_datasets
 from accelerate import Accelerator
-from src.data.dataset import custom_collate_baseline
-from src.data.mapfunc import baseline_preprocessor, bias_attention_preprocessor
+from src.data.dataset import custom_collate_bias
+from src.training.trainer import CustomTrainerBiasAttn
+from src.data.mapfunc import bias_attention_preprocessor, bias_reencode_preprocessor
 
 def main():
     batch_size_per_device = 4
@@ -14,18 +15,21 @@ def main():
     # Prepare model and tokenizer
     
     global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
-    global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16, attn_implementation="flash_attention_2")
+    global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16, attn_implementation='sdpa')
+
+    new_token = ["<MEM_START>","<MEM_END>", "<MEM_SUM>"]
+    global_tokenizer.add_tokens(new_token)
+    global_model.resize_token_embeddings(len(global_tokenizer))
 
     preprocessor = bias_attention_preprocessor(
         tokenizer=global_tokenizer,
         max_len=4096
     )
 
-    preprocessor_baseline = baseline_preprocessor(
+    preprocessor_reencode = bias_reencode_preprocessor(
         tokenizer=global_tokenizer,
         max_len=4096
     )
-
 
     text_raw = load_from_disk("data/processed/fineweb/text")
     text_raw = text_raw.select(range(0, len(text_raw) // 2))
@@ -45,7 +49,7 @@ def main():
 
     text_mem_raw = load_from_disk("data/processed/fineweb/text_mem")
     textmem = text_mem_raw.map(
-        preprocessor_baseline.process_textmem,
+        preprocessor_reencode.process_textmem,
         num_proc=16,
         remove_columns=["text", "id", "dump", "url", "date", "file_path", "language", "language_score", "token_count"],
         batched=False,
@@ -60,7 +64,7 @@ def main():
 
     text_inst_raw = load_from_disk("data/processed/fineweb/text_inst")
     textinst = text_inst_raw.map(
-        preprocessor_baseline.process_textinst,
+        preprocessor_reencode.process_textinst,
         num_proc=16,
         remove_columns=["text", "id", "dump", "url", "date", "file_path", "language", "language_score", "token_count"],
         batched=False,
@@ -80,7 +84,7 @@ def main():
         num_proc=64,
         remove_columns=["system", "mask", "dataset", "conversations"],
         batched=False,
-        load_from_cache_file=True
+#        load_from_cache_file=False
     )
     num_sft = len(sft)
     sft_train = sft.select(range(0, int(num_sft - eval_num_each_set)))
@@ -91,7 +95,7 @@ def main():
     sftmem_raw = load_from_disk("data/processed/daringanteater/sft_mem")
 
     sftmem = sftmem_raw.map(
-        preprocessor_baseline.process_sftmem,
+        preprocessor_reencode.process_sftmem,
         num_proc=16,
         remove_columns=["system", "mask", "dataset", "conversations"],
         batched=False,
@@ -125,9 +129,9 @@ def main():
 
     # Set training arguments
     training_args = TrainingArguments(
-        output_dir="training_res/baseline_30000steps_warmup0.1_decaycosine_5e-6_full",
+        output_dir="training_res/reencode_30000steps_warmup0.1_decaycosine_5e-6_full",
         report_to="wandb",
-        run_name=f"baseline_30000steps_bsz{batch_size_per_device}_5e-6_full",
+        run_name=f"reencode_30000steps_bsz{batch_size_per_device}_5e-6_full",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
         max_steps=30000,
@@ -143,20 +147,20 @@ def main():
         per_device_eval_batch_size = batch_size_per_device,
         evaluation_strategy="steps",  # Add this line
         eval_steps=1000, 
-        remove_unused_columns=True
+        remove_unused_columns=False
         # save_total_limit=3,
         # overwrite_output_dir = False
     )
 
     # accelerator = Accelerator()
 
-    trainer = Trainer(
+    trainer = CustomTrainerBiasAttn(
         model=global_model,
         tokenizer=global_tokenizer,
         args=training_args,
         train_dataset = train_dataset,
         eval_dataset = eval_dataset,
-        data_collator = custom_collate_baseline
+        data_collator = custom_collate_bias
         # data_loader = data_loader,
         # eval_data_loader = eval_data_loader
     )

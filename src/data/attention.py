@@ -25,6 +25,10 @@ def construct_biased_attention_matrix(seq_len, biased_ranges, max_len, device):
     attention_matrix[seq_len :, :] = float('-inf')
     attention_matrix[: ,seq_len :] = float('-inf')
 
+    if  attention_matrix.max() != 0:
+        print("wrong", seq_len, biased_ranges, max_len)
+        print(attention_matrix)
+
     return attention_matrix
 
 # def construct_biased_attention_matrix(seq_len, biased_ranges):

@@ -308,7 +308,10 @@ def custom_collate_bias(batch):
     input_ids = []
     labels = []
     biased_index = []
-    max_length = max([len(item['input_ids'][0]) for item in batch])
+    input_len = []
+    for item in batch:
+        input_len.append(len(item['input_ids'][0]))
+    max_length = max(input_len)
     # attention_matrices = []
 
     for item in batch:
@@ -332,5 +335,27 @@ def custom_collate_bias(batch):
         'labels': torch.LongTensor(labels),
         # 'attention_matrix': torch.stack(attention_matrices)
         'biased_index': biased_index,
+        'input_length': torch.LongTensor(input_len),
         'max_length': max_length
+    }
+
+def custom_collate_baseline(batch):
+
+    input_ids = []
+    labels = []
+    input_len = []
+    for item in batch:
+        input_len.append(len(item['input_ids'][0]))
+    max_length = max(input_len)
+
+    for item in batch:
+        seq_length = len(item['input_ids'][0])
+
+        input_ids.append(item['input_ids'][0] + [0] * (max_length - seq_length))
+
+        labels.append(item['labels'][0] + [-100] * (max_length - seq_length))
+
+    return {
+        'input_ids': torch.LongTensor(input_ids),
+        'labels': torch.LongTensor(labels)
     }

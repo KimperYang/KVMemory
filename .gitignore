@@ -2,3 +2,5 @@ wandb/
 *pyc
 KVMemory.egg-info/
 data/processed/
+result/
+training_res/
