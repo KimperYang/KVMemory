@@ -1,4 +1,9 @@
+data/
+result/
 wandb/
+.vscode/
 *pyc
 KVMemory.egg-info/
 data/processed/
+*test.py
+

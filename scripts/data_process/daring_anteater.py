@@ -1,8 +1,14 @@
-import os
+"""
+Generate the SFT subsets with and without memory
+
+```
+python scripts/data_process/daring_anteater.py --max_length=4096 --validation_size=2000
+```
+"""
 import torch
-from transformers import AutoTokenizer
-from datasets import load_dataset
 from absl import app, flags
+from datasets import load_dataset
+from transformers import AutoTokenizer
 
 FLAGS = flags.FLAGS
 
@@ -12,6 +18,12 @@ def set_args():
         default=4096,
         help="Max token length for daring anteater",
     )
+    flags.DEFINE_integer(
+        "validation_size",
+        default=2_000,
+        help="number of samples to sample from the FineWeb.",
+    )
+
 
 def main(argv):
 
@@ -30,7 +42,6 @@ def main(argv):
         labels = [-100] * len(system_input_ids)
 
         for i in range(len(conversation)):
-            
             if conversation[i]["from"] == "User":
                 if i==0:
                     t = conversation[i]["value"] + "<|eot_id|>"
@@ -48,7 +59,6 @@ def main(argv):
 
             elif conversation[i]["from"] == "Assistant":
                 t = "<|start_header_id|>assistant<|end_header_id|>\n\n" + conversation[i]["value"]
-                
                 tokenized = tokenizer(t)
 
                 input_ids = tokenized.input_ids[1:]
@@ -60,29 +70,26 @@ def main(argv):
                 labels.extend(input_ids)
 
                 input_ids_list += input_ids
-        
         return {
             'input_ids': input_ids_list,
             'labels': labels
         }
 
     def sft_filter(sample):
-
         labels = torch.tensor(process_sft(sample['conversations'])['labels'])
         all_zeros = (labels == -100).all()
-        # print(all_zeros.item())
-        if all_zeros.item(): 
+        if all_zeros.item():
             return False
         else:
             return True
 
-    sft = dataset.filter(sft_filter)
+    sft = dataset.filter(sft_filter, num_proc=96)
+    sft = sft.train_test_split(test_size=FLAGS.validation_size)
 
     sft.save_to_disk("data/processed/daringanteater/sft")
-    print("sft:", len(sft))
+    print("sft:", sft)
 
     def process_sftmem(conversation):
-        
         sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who answer the question with the knowledge provided in the prompt<|eot_id|>"
         sys_tokens = tokenizer(sys, add_special_tokens= False, return_tensors= "pt")['input_ids']
         sys_len = sys_tokens.size(1)
@@ -94,7 +101,6 @@ def main(argv):
                 conversation = conversation[:-1]
             else:
                 conversation = conversation[:-1]
-        
         memory_ids = []
         memory_positions = []
         current_position = sys_len
@@ -131,16 +137,14 @@ def main(argv):
     def filter_sftmem(sample):
         if(len(sample['conversations']) <= 2 or len(sample['conversations']) % 2 == 1):
             return False
-        
         return process_sftmem(sample['conversations'])
 
-    sft_mem = dataset.filter(filter_sftmem)
+    sft_mem = dataset.filter(filter_sftmem, num_proc=96)
+    sft_mem = sft_mem.train_test_split(test_size=FLAGS.validation_size)
 
-    # Save the filtered dataset to the specified path
     sft_mem.save_to_disk("data/processed/daringanteater/sft_mem")
-    print("sft_mem:", len(sft_mem))
+    print("sft_mem:", sft_mem)
 
 if __name__ == "__main__":
     set_args()
     app.run(main)
-      
