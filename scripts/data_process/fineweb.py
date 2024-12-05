@@ -77,9 +77,9 @@ def main(argv):
 
     # print("text:", len(text), "textmem:", len(text_mem), "text:", len(text_inst),)
     print("text:", text, "textmem:", text_mem, "text inst:", text_inst,)
-    text.save_to_disk("data/processed/fineweb/text")
-    text_mem.save_to_disk("data/processed/fineweb/text_mem")
-    text_inst.save_to_disk("data/processed/fineweb/text_inst")
+    text.save_to_disk("dataset_cache/processed/fineweb/text")
+    text_mem.save_to_disk("dataset_cache/processed/fineweb/text_mem")
+    text_inst.save_to_disk("dataset_cache/processed/fineweb/text_inst")
 
 if __name__ == "__main__":
     set_args()

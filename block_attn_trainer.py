@@ -22,7 +22,7 @@ def load_from_disk_then_process(
     load the downloaded data from disk and then pair it with the preprocessor
     """
     if data_component_name in ["text", "text_mem", "text_inst"]:
-        data_path = f"data/processed/fineweb/{data_component_name}"
+        data_path = f"dataset_cache/processed/fineweb/{data_component_name}"
         if data_component_name == "text":
             preprocessor_fn = preprocessor.process_text
         elif data_component_name == "text_mem":
@@ -34,7 +34,7 @@ def load_from_disk_then_process(
         remove_columns = ["text"]
         num_shards = 512
     elif data_component_name in ["sft", "sft_mem"]:
-        data_path = f"data/processed/fineweb/{data_component_name}"
+        data_path = f"dataset_cache/processed/daringanteater/{data_component_name}"
         if data_component_name == "sft":
             preprocessor_fn = preprocessor.process_sft
         elif data_component_name == "sft_mem":
@@ -63,6 +63,19 @@ def load_from_disk_then_process(
 
     return training_data, eval_data
 
+from typing import Tuple, Dict, Optional
+import pyarrow as pa
+def _infer_features_from_batch(
+        batch: Dict[str, list],
+        try_features: Optional[datasets.features.Features] = None
+    ) -> datasets.features.Features:
+    pa_table = pa.Table.from_pydict(batch)
+    if try_features is not None:
+        try:
+            pa_table = datasets.table.table_cast(pa_table, pa.schema(try_features.type))
+        except (TypeError, pa.ArrowInvalid, pa.ArrowNotImplementedError):
+            pass
+    return datasets.features.Features.from_arrow_schema(pa_table.schema)
 
 
 def main():
@@ -86,6 +99,14 @@ def main():
     sft_train, sft_eval = load_from_disk_then_process("sft", preprocessor)
     sft_mem_train, sft_mem_eval = load_from_disk_then_process("sft_mem", preprocessor)
 
+
+    features = _infer_features_from_batch(ptr_train.with_format(None)._head())
+    print(features)
+    print(ptr_train.info)
+    print(ptr_mem_train.info)
+    print(ptr_inst_train.info)
+    print(sft_train.info)
+    print(sft_mem_train.info)
 
     train_dataset = datasets.interleave_datasets(
         [sft_mem_train, sft_train, ptr_inst_train, ptr_train, ptr_mem_train],
