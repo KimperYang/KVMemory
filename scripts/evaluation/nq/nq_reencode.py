@@ -8,14 +8,14 @@ from typing import List
 from src.data.attention import construct_biased_attention_matrix
 import regex
 
-ckpt = 16000
-pos = 0
-run_name = "kv_dump_reencode_30000steps_bsz256_5e-6_full"
+ckpt = 4000
+pos = 9
+run_name = "reencode_30000steps_warmup0.1_decaycosine_5e-6_full"
 jsonObj = pd.read_json(path_or_buf=f'data/raw/nq/nq-open-10_{pos}.jsonl', lines=True)
 
-global_tokenizer = AutoTokenizer.from_pretrained(f"/mnt/data/jingbo/{run_name}/checkpoint-{ckpt}")
+global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
 
-global_model = AutoModelForCausalLM.from_pretrained(f"/mnt/data/jingbo/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
 
 # vocab_size = len(global_tokenizer)
 # base_model.resize_token_embeddings(vocab_size)
@@ -69,7 +69,7 @@ def main():
     for i in range(total_num):
 
         print("Processing sample:", str(i))
-        memory_list = []
+        memory_list = [template]
 
         
         for j in range(0,10):
@@ -78,14 +78,18 @@ def main():
             memory_list.append("<MEM_START>" + f"Document [{j+1}](Title: {title}) {text}" + "\n<MEM_END><MEM_SUM>")
 
         biased_index = []
-        id_list = [global_tokenizer(template, return_tensors="pt", add_special_tokens=False).input_ids]
+        id_list = []
 
         idx = 0
 
         for st in memory_list:
-
+            
             tem_id = global_tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
-            biased_index.append([idx, idx + tem_id.size(1) - 1])
+            
+            if "<MEM_START>" in st:
+                biased_index.append([idx, idx + tem_id.size(1) - 1])
+            else:
+                biased_index.append([idx, idx + tem_id.size(1)])
 
             id_list.append(tem_id)
 
@@ -135,7 +139,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/11-26/nq/{run_name}_{ckpt}steps_5e-6_full_at{pos}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/12-04/NQ_{run_name}_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

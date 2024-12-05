@@ -6,19 +6,18 @@ import datetime
 import string
 import time
 from typing import List
-from peft import PeftModel, PeftConfig
 import regex
 
 # jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
 # global_tokenizer = AutoTokenizer.from_pretrained("/mnt/data/jingbo/kv_dump_combine_baseline_5000steps/checkpoint-5000")
 # global_model = AutoModelForCausalLM.from_pretrained("/mnt/data/jingbo/kv_dump_combine_baseline_5000steps/checkpoint-5000", torch_dtype=torch.bfloat16, device_map="auto")
-ckpt = 16000
+ckpt = 4000
 pos = 9
-run_name = "baseline_30000steps_bsz256_5e-6_full"
+run_name = "baseline_30000steps_warmup0.1_decaycosine_5e-6_full"
 jsonObj = pd.read_json(path_or_buf=f'data/raw/nq/nq-open-10_{pos}.jsonl', lines=True)
-global_tokenizer = AutoTokenizer.from_pretrained(f"/mnt/data/jingbo/{run_name}/checkpoint-{ckpt}")
+global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
 
-global_model = AutoModelForCausalLM.from_pretrained(f"/mnt/data/jingbo/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
 # global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
 
 # global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16)
@@ -102,7 +101,7 @@ def inference(input_ids):
 
         outputs = model.generate(
             input_ids=input_ids,
-            max_new_tokens=1,
+            max_new_tokens=200,
             do_sample=False,
             temperature=None,
             top_p=1.0
@@ -141,12 +140,12 @@ def main():
 
         prompt_id = global_tokenizer(prompt, return_tensors="pt").input_ids
         
-        start_time = time.time()
+        # start_time = time.time()
         generated_seq = inference(prompt_id.to(global_model.device))
-        end_time = time.time()
-        if i >= 100:
-            execution_time += end_time - start_time
-        print(f"Execution time: {execution_time} seconds")
+        # end_time = time.time()
+        # if i >= 100:
+        #     execution_time += end_time - start_time
+        # print(f"Execution time: {execution_time} seconds")
         response = generated_seq[0].split('assistant\n\n')[-1]
         print(response)
 
@@ -163,7 +162,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/11-26/nq/{run_name}_{ckpt}steps_at{pos}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/12-04/NQ_{run_name}_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
