@@ -13,7 +13,7 @@ def main():
     batch_size_per_device = 4
     eval_num_each_set = 400
     # Prepare model and tokenizer
-    
+
     global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
     global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16, attn_implementation='sdpa')
 
@@ -133,7 +133,7 @@ def main():
         logging_dir="training_res/logs",
         logging_steps=10,
         save_steps=2000,
-        gradient_accumulation_steps=8,
+        gradient_accumulation_steps=4,
         warmup_ratio=0.1,
         lr_scheduler_type='cosine',
         bf16=True,
