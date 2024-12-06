@@ -957,10 +957,10 @@ class multi_kv_batch_preprocessor():
         split_memory_ids_batch = [[128000]] + memory_ids_list
         memory_position_list = memory_position.tolist()
         memory_position_batch = [[0]] + memory_position_list
-        
+
         labels = torch.cat([torch.tensor([[-100]]), remaining_ids], dim = 1)
         remaining_ids = torch.cat([torch.tensor([[128258]]), remaining_ids], dim = 1)
-        
+
         return {
             'input_ids': remaining_ids,
             'labels': labels,
@@ -974,13 +974,12 @@ class multi_kv_batch_preprocessor():
         self,
         example: Dict[str, str],
     ):
-        dataset_id = 'xsum'
         memory_text = example['document'].split('\n')
 
         sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who helps to summarize the following passages.<|eot_id|>"
         sys_tokens = self.tokenizer(sys, add_special_tokens= False, return_tensors= "pt")['input_ids']
         sys_len = sys_tokens.size(1)
-        
+
         memory_ids = [sys_tokens[0]]
         memory_positions = [torch.arange(0,sys_len)]
         current_position = sys_len
@@ -1017,7 +1016,7 @@ class multi_kv_batch_preprocessor():
             'split_memory_id': memory_ids,
             'memory_nums': len(memory_text) + 1
             }
-    
+
 class bias_attention_preprocessor():
     '''
     Apply one piece of memory to non-memory use samples to enable batch forward pass for calculating KV.
@@ -1055,7 +1054,7 @@ class bias_attention_preprocessor():
                 conversation = conversation[:-1]
             else:
                 conversation = conversation[:-1]
-        
+
         current_position = sys_len
         id_list = [sys_tokens]
         biased_index = []
@@ -1092,11 +1091,11 @@ class bias_attention_preprocessor():
 
         # attention_matrix = construct_biased_attention_matrix(seq_len, biased_index)
         return {
-                'input_ids': concat_ids,
-                'labels': labels,
-                'biased_index': biased_index
-                # 'attention_matrix': attention_matrix
-            }    
+            'input_ids': concat_ids,
+            'labels': labels,
+            'biased_index': biased_index
+            # 'attention_matrix': attention_matrix
+        }
 
     def process_sft(
         self,
@@ -1112,13 +1111,13 @@ class bias_attention_preprocessor():
         input_ids_list = system_input_ids
         labels = [-100] * sys_len
         for i in range(len(conversation)):
-            
+
             if conversation[i]["from"] == "User":
                 if i==0:
                     t = conversation[i]["value"] + "<|eot_id|>"
                 else:
                     t = "<|start_header_id|>user<|end_header_id|>\n\n" + conversation[i]["value"]  + "<|eot_id|>" 
-                
+
                 tokenized = self.tokenizer(t)
 
                 input_ids = tokenized.input_ids[1:]
@@ -1142,7 +1141,7 @@ class bias_attention_preprocessor():
                 labels.extend(input_ids)
 
                 input_ids_list += input_ids
-        
+
         # attention_matrix = construct_biased_attention_matrix(len(input_ids_list), [])
         return {
             'input_ids': [input_ids_list],
@@ -1150,7 +1149,7 @@ class bias_attention_preprocessor():
             'biased_index': None
             # 'attention_matrix': attention_matrix
         }
-    
+
     def process_textinst(
         self,
         example: Dict[str, str],
@@ -1168,7 +1167,7 @@ class bias_attention_preprocessor():
         input_ids = self.tokenizer(text, add_special_tokens= False)['input_ids']
 
         input_ids = input_ids[:self.max_len - user_len - sys_len] 
-        
+
         mem_len = random.randint(500, 1500)
         mem_num = random.randint(5,40)
 
@@ -1221,7 +1220,7 @@ class bias_attention_preprocessor():
             'biased_index': biased_index
             # 'attention_matrix': attention_matrix
         }
-     
+
     def process_text(
         self,
         example: Dict[str, str],
@@ -1236,12 +1235,12 @@ class bias_attention_preprocessor():
             'biased_index': None
             # 'attention_matrix': attention_matrix
         }
-    
+
     def process_textmem(
         self,
         example: Dict[str, str],
     ):
-        
+
         sys = "<|begin_of_text|>"
         sys_tokens = self.tokenizer(sys, add_special_tokens= False)['input_ids']
         sys_len = len(sys_tokens)
@@ -1252,8 +1251,8 @@ class bias_attention_preprocessor():
         text = example["text"]
         input_ids = self.tokenizer(text, add_special_tokens= False)['input_ids']
 
-        input_ids = input_ids[:self.max_len - user_len - sys_len] 
-        
+        input_ids = input_ids[:self.max_len - user_len - sys_len]
+
         mem_len = random.randint(500, 1500)
         mem_num = random.randint(5,40)
 
@@ -1394,7 +1393,7 @@ class bias_attention_preprocessor():
             'split_memory_id': memory_ids,
             'memory_nums': len(memory_text) + 1
             }
-    
+
 class bias_reencode_preprocessor():
     '''
     Apply one piece of memory to non-memory use samples to enable batch forward pass for calculating KV.
@@ -1432,7 +1431,7 @@ class bias_reencode_preprocessor():
                 conversation = conversation[:-1]
             else:
                 conversation = conversation[:-1]
-        
+
         current_position = sys_len
         id_list = [sys_tokens]
         biased_index = []
@@ -1472,7 +1471,7 @@ class bias_reencode_preprocessor():
                 'labels': labels,
                 'biased_index': biased_index
                 # 'attention_matrix': attention_matrix
-            }    
+        }
 
     def process_sft(
         self,
@@ -1488,7 +1487,7 @@ class bias_reencode_preprocessor():
         input_ids_list = system_input_ids
         labels = [-100] * sys_len
         for i in range(len(conversation)):
-            
+
             if conversation[i]["from"] == "User":
                 if i==0:
                     t = conversation[i]["value"] + "<|eot_id|>"
@@ -1518,7 +1517,7 @@ class bias_reencode_preprocessor():
                 labels.extend(input_ids)
 
                 input_ids_list += input_ids
-        
+
         # attention_matrix = construct_biased_attention_matrix(len(input_ids_list), [])
         return {
             'input_ids': [input_ids_list],
@@ -1526,7 +1525,7 @@ class bias_reencode_preprocessor():
             'biased_index': None
             # 'attention_matrix': attention_matrix
         }
-    
+
     def process_textinst(
         self,
         example: Dict[str, str],
@@ -1543,7 +1542,7 @@ class bias_reencode_preprocessor():
         input_ids = self.tokenizer(text, add_special_tokens= False)['input_ids']
 
         input_ids = input_ids[:self.max_len - user_len - sys_len] 
-        
+
         mem_len = random.randint(500, 1500)
         mem_num = random.randint(5,40)
 
@@ -1596,7 +1595,7 @@ class bias_reencode_preprocessor():
             'biased_index': biased_index
             # 'attention_matrix': attention_matrix
         }
-     
+
     def process_text(
         self,
         example: Dict[str, str],
@@ -1611,12 +1610,12 @@ class bias_reencode_preprocessor():
             'biased_index': None
             # 'attention_matrix': attention_matrix
         }
-    
+
     def process_textmem(
         self,
         example: Dict[str, str],
     ):
-        
+
         sys = "<|begin_of_text|>"
         sys_tokens = self.tokenizer(sys, add_special_tokens= False)['input_ids']
         sys_len = len(sys_tokens)
@@ -1625,7 +1624,7 @@ class bias_reencode_preprocessor():
         input_ids = self.tokenizer(text, add_special_tokens= False)['input_ids']
 
         input_ids = input_ids[:self.max_len - sys_len] 
-        
+
         mem_len = random.randint(500, 1500)
         mem_num = random.randint(5,40)
 
@@ -1723,13 +1722,12 @@ class bias_reencode_preprocessor():
         self,
         example: Dict[str, str],
     ):
-        dataset_id = 'xsum'
         memory_text = example['document'].split('\n')
 
         sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who helps to summarize the following passages.<|eot_id|>"
         sys_tokens = self.tokenizer(sys, add_special_tokens= False, return_tensors= "pt")['input_ids']
         sys_len = sys_tokens.size(1)
-        
+
         memory_ids = [sys_tokens[0]]
         memory_positions = [torch.arange(0,sys_len)]
         current_position = sys_len
@@ -1765,4 +1763,5 @@ class bias_reencode_preprocessor():
             'memory_position': memory_positions,
             'split_memory_id': memory_ids,
             'memory_nums': len(memory_text) + 1
-            }
+        }
+
