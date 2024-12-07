@@ -653,43 +653,28 @@ class CustomTrainerMixSpecial_Batch(Trainer):
 
         # Get Loss
         outputs = self.model(input_ids = input_ids_batch, attention_mask = attention_mask_batch, labels = labels_batch, past_key_values = past_key_values_batch, use_cache = True)
-        
+
         return outputs.loss
 
 class CustomTrainerBiasAttn(Trainer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # self.data_loader = data_loader
-        # self.eval_data_loader = eval_data_loader
-        self.train_loss_history = []
 
-    # def get_train_dataloader(self):
-    #     return self.data_loader
-    
-    # def get_eval_dataloader(self, eval_dataset=None):
-    #     if self.eval_data_loader is not None:
-    #         return self.eval_data_loader
-    #     else:
-    #         return super().get_eval_dataloader(eval_dataset)
-
-    def compute_loss(self, model, inputs, return_outputs=False):
-
-        # start_time = time.time()
+    def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
 
         attention_matrices = []
-
+        max_length = max(inputs['input_length'])
         for idx in range(len(inputs['input_ids'])):
-            attention_matrices.append(construct_biased_attention_matrix(len(inputs['input_ids'][idx]), 
-                                                                        inputs['biased_index'][idx],
-                                                                        inputs['max_length'],
-                                                                        inputs['input_ids'].device).unsqueeze(0))
+            mem_num = inputs['mem_num'][idx]
+            attention_matrices.append(
+                construct_biased_attention_matrix(
+                    inputs['input_length'][idx],
+                    inputs['biased_index'][idx][:mem_num],
+                    max_length,
+                    inputs['input_ids'].device
+                ).unsqueeze(0)
+            )
 
-        outputs = self.model(input_ids = inputs['input_ids'], attention_mask = torch.stack(attention_matrices), labels = inputs['labels'])
-        # end_time = time.time()
+        outputs = model(input_ids = inputs['input_ids'], attention_mask = torch.stack(attention_matrices), labels = inputs['labels'])
 
-        # elapsed_time = end_time - start_time
-
-        # print(f"Forward time: {elapsed_time} seconds")
-        
-        
-        return outputs.loss
+        return (outputs.loss, outputs) if return_outputs else outputs.loss

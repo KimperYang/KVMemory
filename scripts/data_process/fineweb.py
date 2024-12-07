@@ -63,6 +63,7 @@ def main(argv):
         token_counts = examples["num_tokens"]
         return [x > FLAGS.min_length_for_memory for x in token_counts]
     filtered_dataset = dataset_with_token_num.filter(filter_fn, batched=True, num_proc=192)
+    filtered_dataset = filtered_dataset.remove_columns("num_tokens")
 
     text_mem = filtered_dataset.select(range(0, len(filtered_dataset) // 2))
     text_inst = filtered_dataset.select(range(len(filtered_dataset) // 2, len(filtered_dataset)))

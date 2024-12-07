@@ -1,5 +1,6 @@
 import torch
 
+
 def construct_biased_attention_matrix(seq_len, biased_ranges, max_len, device):
     """
     Constructs a padded biased attention matrix.
@@ -21,7 +22,7 @@ def construct_biased_attention_matrix(seq_len, biased_ranges, max_len, device):
             j = range[1]
 
             attention_matrix[i : j, 0 : i] = float('-inf')
-    
+
     attention_matrix[seq_len :, :] = float('-inf')
     attention_matrix[: ,seq_len :] = float('-inf')
 
