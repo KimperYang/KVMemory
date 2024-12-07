@@ -1,6 +1,12 @@
 """
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5 accelerate launch --config_file configs/h100x6_config.yaml \
-    --main_process_port 25678 finetune_bias.py
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch --config_file configs/h100_config.yaml \
+    --main_process_port 25678 block_attn_trainer.py
+
+CUDA_VISIBLE_DEVICES=0 accelerate launch --config_file configs/single_gpu.yaml \
+    --main_process_port 25678 block_attn_trainer.py
+
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch --config_file configs/fsdp.yaml \
+    --main_process_port 25678 block_attn_trainer.py
 """
 
 from typing import Tuple
@@ -9,9 +15,8 @@ import datasets
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
 
-from src.data.dataset import custom_collate_bias
-from src.data.mapfunc import bias_attention_preprocessor
-from src.training.trainer import CustomTrainerBiasAttn
+from src.data.input_preprocessor import bias_attention_preprocessor, custom_collate_bias
+from src.training.custom_trainer import CustomTrainerBiasAttn
 
 
 def load_from_disk_then_process(
@@ -31,8 +36,13 @@ def load_from_disk_then_process(
             preprocessor_fn = preprocessor.process_textinst
         else:
             raise NotImplementedError()
-        remove_columns = ["text"]
+        remove_columns = [
+            "text", "id", "dump", "url", "date",
+            "file_path", "language", "language_score", "token_count",
+        ]
         num_shards = 512
+        if data_component_name in ["text_mem", "text_inst"]:
+            remove_columns.append("num_tokens")
     elif data_component_name in ["sft", "sft_mem"]:
         data_path = f"dataset_cache/processed/daringanteater/{data_component_name}"
         if data_component_name == "sft":
@@ -46,14 +56,16 @@ def load_from_disk_then_process(
     else:
         raise NotImplementedError()
     data_component: datasets.DatasetDict = datasets.load_from_disk(data_path)
-    streaming_train_dataset = data_component["train"].to_iterable_dataset(num_shards=num_shards)
-    eval_dataset = data_component["test"]
+    # print(data_component.cleanup_cache_files())
 
+    streaming_train_dataset = data_component["train"].to_iterable_dataset(num_shards=num_shards)
     training_data = streaming_train_dataset.map(
         preprocessor_fn,
         remove_columns=remove_columns,
         batched=False,
     )
+
+    eval_dataset = data_component["test"]
     eval_data = eval_dataset.map(
         preprocessor_fn,
         remove_columns=remove_columns,
@@ -63,26 +75,17 @@ def load_from_disk_then_process(
 
     return training_data, eval_data
 
-from typing import Tuple, Dict, Optional
-import pyarrow as pa
-def _infer_features_from_batch(
-        batch: Dict[str, list],
-        try_features: Optional[datasets.features.Features] = None
-    ) -> datasets.features.Features:
-    pa_table = pa.Table.from_pydict(batch)
-    if try_features is not None:
-        try:
-            pa_table = datasets.table.table_cast(pa_table, pa.schema(try_features.type))
-        except (TypeError, pa.ArrowInvalid, pa.ArrowNotImplementedError):
-            pass
-    return datasets.features.Features.from_arrow_schema(pa_table.schema)
-
 
 def main():
     batch_size_per_device = 2
 
     global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
-    global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16, attn_implementation='sdpa')
+    global_model = AutoModelForCausalLM.from_pretrained(
+        "meta-llama/Llama-3.2-1B-Instruct",
+        torch_dtype=torch.bfloat16,
+        attn_implementation='sdpa',
+        # use_flash_attention_2=True,
+    )
 
     new_token = ["<MEM_START>","<MEM_END>", "<MEM_SUM>"]
     global_tokenizer.add_tokens(new_token)
@@ -98,15 +101,6 @@ def main():
     ptr_inst_train, ptr_inst_eval = load_from_disk_then_process("text_inst", preprocessor)
     sft_train, sft_eval = load_from_disk_then_process("sft", preprocessor)
     sft_mem_train, sft_mem_eval = load_from_disk_then_process("sft_mem", preprocessor)
-
-
-    features = _infer_features_from_batch(ptr_train.with_format(None)._head())
-    print(features)
-    print(ptr_train.info)
-    print(ptr_mem_train.info)
-    print(ptr_inst_train.info)
-    print(sft_train.info)
-    print(sft_mem_train.info)
 
     train_dataset = datasets.interleave_datasets(
         [sft_mem_train, sft_train, ptr_inst_train, ptr_train, ptr_mem_train],
@@ -132,7 +126,8 @@ def main():
         logging_dir="training_res/logs",
         logging_steps=10,
         save_steps=2000,
-        gradient_accumulation_steps=8,
+        # gradient_accumulation_steps=4,
+        gradient_accumulation_steps=1,
         warmup_ratio=0.1,
         lr_scheduler_type='cosine',
         bf16=True,
@@ -143,6 +138,9 @@ def main():
         eval_steps=1000,
         save_total_limit=3,
         # overwrite_output_dir = False
+        remove_unused_columns=False,
+        # split_batches=True,
+        dispatch_batches=False,
     )
 
     trainer = CustomTrainerBiasAttn(
