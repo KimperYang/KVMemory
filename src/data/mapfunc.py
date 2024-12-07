@@ -1166,7 +1166,7 @@ class bias_attention_preprocessor():
         text = example["text"]
         input_ids = self.tokenizer(text, add_special_tokens= False)['input_ids']
 
-        input_ids = input_ids[:self.max_len - user_len - sys_len] 
+        input_ids = input_ids[:self.max_len - user_len - sys_len]
 
         mem_len = random.randint(500, 1500)
         mem_num = random.randint(5,40)
@@ -1225,15 +1225,14 @@ class bias_attention_preprocessor():
         self,
         example: Dict[str, str],
     ):
-        text_tokens = self.tokenizer(example["text"], return_tensors= "pt")['input_ids']
+        # text_tokens = self.tokenizer(example["text"], return_tensors= "pt")['input_ids']
+        text_tokens = self.tokenizer(example["text"])['input_ids']
         text_tokens = text_tokens[:, :self.max_len]
         labels = text_tokens
-        # attention_matrix = construct_biased_attention_matrix(text_tokens.size(1) ,[])
         return {
             'input_ids': text_tokens,
             'labels': labels,
             'biased_index': None
-            # 'attention_matrix': attention_matrix
         }
 
     def process_textmem(
@@ -1262,7 +1261,7 @@ class bias_attention_preprocessor():
 
         # allocate space for special tokens
         input_len = len(input_ids)
-        input_ids = input_ids[:input_len - 2 * mem_num] 
+        input_ids = input_ids[:input_len - 2 * mem_num]
 
         memory_ids = input_ids[:mem_len]
         remaining_ids = input_ids[mem_len:]
@@ -1346,53 +1345,6 @@ class bias_attention_preprocessor():
             # 'attention_matrix': attention_matrix
         }
 
-    def process_xsum(
-        self,
-        example: Dict[str, str],
-    ):
-        dataset_id = 'xsum'
-        memory_text = example['document'].split('\n')
-
-        sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who helps to summarize the following passages.<|eot_id|>"
-        sys_tokens = self.tokenizer(sys, add_special_tokens= False, return_tensors= "pt")['input_ids']
-        sys_len = sys_tokens.size(1)
-        
-        memory_ids = [sys_tokens[0]]
-        memory_positions = [torch.arange(0,sys_len)]
-        current_position = sys_len
-
-        max_memory_length = sys_len
-        for idx in range(len(memory_text)):
-            text = memory_text[idx]
-            memory_tokens = self.tokenizer(text, add_special_tokens= False, return_tensors= "pt")['input_ids']
-            memory_tokens = torch.cat([torch.tensor([[128256]]).to(memory_tokens.device), memory_tokens, torch.tensor([[128257]]).to(memory_tokens.device)], dim = 1)
-            memory_ids.append(memory_tokens[0])
-
-            mem_len = memory_tokens.size(1)
-            memory_positions.append(torch.arange(current_position, current_position + mem_len))
-            current_position += mem_len
-
-            if mem_len > max_memory_length:
-                max_memory_length = mem_len
-
-        last_q = "<|start_header_id|>user<|end_header_id|>\n\nSummarize the text provided above.<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
-        remaining_ids = self.tokenizer(last_q, add_special_tokens= False, return_tensors= "pt")['input_ids']
-        remaining_ids = torch.cat([torch.tensor([[128258]]), remaining_ids], dim = 1)
-        labels = torch.tensor([[-100] * remaining_ids.size(1)])
-
-        last_a = example['summary'] + "<|eot_id|>"
-        answer_tokens = self.tokenizer(last_a, add_special_tokens= False, return_tensors= "pt")['input_ids']
-        remaining_ids = torch.cat([remaining_ids, answer_tokens], dim = 1)
-        labels = torch.cat([labels, answer_tokens], dim = 1)
-
-        return {
-            'input_ids': remaining_ids,
-            'labels': labels,
-            'memory_length': max_memory_length,
-            'memory_position': memory_positions,
-            'split_memory_id': memory_ids,
-            'memory_nums': len(memory_text) + 1
-            }
 
 class bias_reencode_preprocessor():
     '''
