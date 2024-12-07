@@ -26,7 +26,7 @@ def set_args():
 
 
 def main(argv):
-
+    shards = {'train': 128, 'test': 4}
     dataset = load_dataset("nvidia/Daring-Anteater", split="train")
 
     tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
@@ -86,7 +86,7 @@ def main(argv):
     sft = dataset.filter(sft_filter, num_proc=96)
     sft = sft.train_test_split(test_size=FLAGS.validation_size)
 
-    sft.save_to_disk("dataset_cache/processed/daringanteater/sft")
+    sft.save_to_disk("dataset_cache/processed/daringanteater/sft", num_shards=shards, num_proc=128)
     print("sft:", sft)
 
     def process_sftmem(conversation):
@@ -142,7 +142,7 @@ def main(argv):
     sft_mem = dataset.filter(filter_sftmem, num_proc=96)
     sft_mem = sft_mem.train_test_split(test_size=FLAGS.validation_size)
 
-    sft_mem.save_to_disk("dataset_cache/processed/daringanteater/sft_mem")
+    sft_mem.save_to_disk("dataset_cache/processed/daringanteater/sft_mem", num_shards=shards, num_proc=128)
     print("sft_mem:", sft_mem)
 
 if __name__ == "__main__":

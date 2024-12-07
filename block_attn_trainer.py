@@ -123,16 +123,16 @@ def main():
     })
 
     training_args = TrainingArguments(
-        output_dir="training_res/bias_30000steps_warmup0.1_decaycosine_5e-6_full",
+        output_dir="training_res/tem",
         # report_to="wandb",
-        run_name=f"bias_30000steps_bsz{batch_size_per_device}_5e-6_full",
+        run_name=f"multinode_bsz{batch_size_per_device}_5e-6_full",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
         max_steps=30000,
         logging_dir="training_res/logs",
         logging_steps=10,
         save_steps=2000,
-        gradient_accumulation_steps=8,
+        gradient_accumulation_steps=4,
         warmup_ratio=0.1,
         lr_scheduler_type='cosine',
         bf16=True,

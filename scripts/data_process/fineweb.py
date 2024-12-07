@@ -2,7 +2,7 @@
 download the fineweb pre-training corpus
 
 ```
-python scripts/data_process/fineweb.py --num_samples=1000000 --min_length_for_memory=2048 --validation_size=3000
+python scripts/data_process/fineweb.py --num_samples=10000000 --min_length_for_memory=2048 --validation_size=3000
 ```
 """
 
@@ -78,9 +78,10 @@ def main(argv):
 
     # print("text:", len(text), "textmem:", len(text_mem), "text:", len(text_inst),)
     print("text:", text, "textmem:", text_mem, "text inst:", text_inst,)
-    text.save_to_disk("dataset_cache/processed/fineweb/text")
-    text_mem.save_to_disk("dataset_cache/processed/fineweb/text_mem")
-    text_inst.save_to_disk("dataset_cache/processed/fineweb/text_inst")
+    shards = {'train': 128, 'test': 4}
+    text.save_to_disk("dataset_cache/processed/fineweb/text", num_shards=shards, num_proc=128)
+    text_mem.save_to_disk("dataset_cache/processed/fineweb/text_mem", num_shards=shards, num_proc=128)
+    text_inst.save_to_disk("dataset_cache/processed/fineweb/text_inst", num_shards=shards, num_proc=128)
 
 if __name__ == "__main__":
     set_args()
