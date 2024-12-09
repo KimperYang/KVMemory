@@ -4,15 +4,6 @@ source /u/shiyuucsb/.bashrc
 conda activate kvm
 cd /dccstor/scllm/KVMemory
 
-# Use a temporary file or define hostfile path:
-HOSTFILE="hostfile"
-
-# Clear or create the hostfile:
-> $HOSTFILE
-
-echo "${LSB_MCPU_HOSTS}" | sed 's/[[:space:]]*$//' | \
-tr ' ' '\n' | paste - - | awk '{print $1 ".pok.ibm.com slots=8"}' > hostfile
-
 startTime=$(date +%s) #mark the start of job
 MASTER_ADDR=$(echo ${LSB_MCPU_HOSTS} | tr ' ' '\n' | head -n 1)
 MASTER_PORT=28442 #5${LSB_JOBID: -5:-1}
@@ -23,7 +14,7 @@ NODE_RANK=$(($(echo ${LSB_MCPU_HOSTS} | tr ' ' '\n' | sed 'n; d' | grep -n -m1 $
 JOB_ID=${LSB_JOBID}
 
 export LAUNCHER="accelerate launch \
-    --config_file /dccstor/scllm/.cache/accelerate/default_config.yaml \
+    --config_file fsdp.yaml \
     --main_process_ip $MASTER_ADDR \
     --main_process_port $MASTER_PORT \
     --machine_rank $NODE_RANK \

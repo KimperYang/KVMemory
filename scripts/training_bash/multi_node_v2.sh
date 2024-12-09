@@ -4,15 +4,6 @@ source /u/shiyuucsb/.bashrc
 conda activate kvm
 cd /dccstor/scllm/KVMemory
 
-# Use a temporary file or define hostfile path:
-HOSTFILE="hostfile"
-
-# Clear or create the hostfile:
-> $HOSTFILE
-
-echo "${LSB_MCPU_HOSTS}" | sed 's/[[:space:]]*$//' | \
-tr ' ' '\n' | paste - - | awk '{print $1 ".pok.ibm.com slots=8"}' > hostfile
-
 startTime=$(date +%s) #mark the start of job
 MASTER_ADDR=$(echo ${LSB_MCPU_HOSTS} | tr ' ' '\n' | head -n 1)
 MASTER_PORT=28442 #5${LSB_JOBID: -5:-1}
@@ -35,4 +26,4 @@ export SCRIPT="block_attn_trainer.py"
 
 export CMD="$LAUNCHER $SCRIPT"
 
-$CMD
+jbsub -cores 4x32+8 -mem 400g -require 'a100_80gb,h100' -queue x86_6h $CMD

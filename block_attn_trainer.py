@@ -8,7 +8,7 @@ CUDA_VISIBLE_DEVICES=0 accelerate launch --config_file configs/single_gpu.yaml \
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch --config_file configs/fsdp.yaml \
     --main_process_port 25678 block_attn_trainer.py
 """
-
+import os
 from typing import Tuple
 
 import datasets
@@ -77,7 +77,7 @@ def load_from_disk_then_process(
 
 
 def main():
-    batch_size_per_device = 2
+    batch_size_per_device = 4
 
     global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
     global_model = AutoModelForCausalLM.from_pretrained(
@@ -116,17 +116,20 @@ def main():
         "sftmem": sft_mem_eval
     })
 
+    os.environ["WANDB_PROJECT"]="kvmemory"
+    os.environ["WANDB_WATCH"]="false"
+
     training_args = TrainingArguments(
-        output_dir="training_res/tem",
-        # report_to="wandb",
-        run_name=f"multinode_bsz{batch_size_per_device}_5e-6_full",
+        output_dir="training_res/multi_node/bias_bsz256",
+        report_to="wandb",
+        run_name=f"multinode_bias_bsz{batch_size_per_device}_5e-6_full",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
         max_steps=30000,
         logging_dir="training_res/logs",
         logging_steps=10,
         save_steps=2000,
-        gradient_accumulation_steps=4,
+        gradient_accumulation_steps=2,
         warmup_ratio=0.1,
         lr_scheduler_type='cosine',
         bf16=True,
@@ -134,8 +137,8 @@ def main():
         do_eval=True,
         per_device_eval_batch_size = batch_size_per_device,
         evaluation_strategy="steps",  # Add this line
-        eval_steps=1000,
-        save_total_limit=3,
+        eval_steps=2000,
+        # save_total_limit=3,
         # overwrite_output_dir = False
         remove_unused_columns=False,
         # split_batches=True,
@@ -151,7 +154,7 @@ def main():
         data_collator = custom_collate_bias
     )
 
-    trainer.train()
+    trainer.train(resume_from_checkpoint = True)
 
     trainer.save_model()
     global_tokenizer.save_pretrained(training_args.output_dir)
