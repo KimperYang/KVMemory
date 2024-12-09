@@ -80,12 +80,12 @@ def append_kv(kv_list):
     concatenated_past_key_values = ()
 
     for layer in range(num_layers):
-        
+
         keys_list = [kv[layer][0] for kv in kv_list]
         values_list = [kv[layer][1] for kv in kv_list]
 
         concatenated_keys = torch.cat(keys_list, dim=2)
-        concatenated_values = torch.cat(values_list, dim=2) 
+        concatenated_values = torch.cat(values_list, dim=2)
 
         concatenated_past_key_values = concatenated_past_key_values + ((concatenated_keys, concatenated_values),)
 
@@ -95,7 +95,7 @@ def inference(input_ids):
 
     tokenizer = global_tokenizer
     model = global_model
-    
+
     model.eval()
 
     max_length = input_ids.size(1) + 1
@@ -111,7 +111,7 @@ def inference(input_ids):
         )
     # print(outputs)
     generated_sequences = tokenizer.batch_decode(outputs, skip_special_tokens=True)
-    
+
     return generated_sequences
 
 def main():
@@ -130,7 +130,7 @@ def main():
         print("Processing sample:", str(i))
         memory_list = [template]
 
-        
+
         for j in range(0,10):
             title = jsonObj["ctxs"][i][j]["title"]
             text = jsonObj["ctxs"][i][j]["text"]
@@ -174,7 +174,7 @@ def main():
 
         res_list.append({"id": str(i),"question": jsonObj["question"][i], "response": response, "gold_answer": jsonObj["answers"][i], "Score": score})
         print("Correct progress", correct_num)
-        
+
     accuracy = correct_num / total_num
     print(accuracy)
 
