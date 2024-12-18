@@ -48,17 +48,17 @@ def best_subspan_em(prediction: str, ground_truths: List[str]) -> float:
 
 def main():
     
-    ckpt = 4000
-    run_name = "bias_30000steps_warmup0.1_decaycosine_5e-6_full"
+    ckpt = 10000
+    run_name = "bias_bsz256"
     file_path = "data/raw/dev.json"
     with open(file_path, 'r') as file:
         data = json.load(file)
     data_list = data
     # print("".join(data_list[0]['context'][8][1]))
 
-    global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
+    global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/multi_node/{run_name}/checkpoint-{ckpt}")
 
-    global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+    global_model = AutoModelForCausalLM.from_pretrained(f"training_res/multi_node/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
     
     global_model.to('cuda')
     # template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
@@ -140,7 +140,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/12-04/{run_name}_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/12-15/{run_name}_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

@@ -10,7 +10,8 @@ class CustomTrainerBiasAttn(Trainer):
 
     def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
         attention_matrices = []
-        max_length = max(inputs['input_length'])
+        # max_length = max(inputs['input_length'])
+        max_length = 4096
         for idx in range(len(inputs['input_ids'])):
             mem_num = inputs['mem_num'][idx]
             if mem_num == 0:

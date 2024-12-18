@@ -47,19 +47,19 @@ def best_subspan_em(prediction: str, ground_truths: List[str]) -> float:
     return 0.0
 
 def main():
-    
-    ckpt = 4000
-    run_name = "reencode_30000steps_warmup0.1_decaycosine_5e-6_full"
+
+    ckpt = 10000
+    run_name = "reencode_bsz256"
     file_path = "data/raw/dev.json"
     with open(file_path, 'r') as file:
         data = json.load(file)
     data_list = data
     # print("".join(data_list[0]['context'][8][1]))
 
-    global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
+    global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/multi_node/{run_name}/checkpoint-{ckpt}")
 
-    global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
-    
+    global_model = AutoModelForCausalLM.from_pretrained(f"training_res/multi_node/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+
     global_model.to('cuda')
     # template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
 
@@ -75,7 +75,7 @@ def main():
         print("Processing sample:", str(i))
         memory_list = [template]
 
-        
+
         for j in range(0,10):
             title = data_list[i]['context'][j][0]
             text = " ".join(data_list[i]['context'][j][1])
@@ -97,12 +97,12 @@ def main():
 
         new_prompt = "<|start_header_id|>user<|end_header_id|>\n\n" + data_list[i]['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         prompt_id = global_tokenizer(new_prompt, return_tensors="pt", add_special_tokens=False).input_ids.to(global_model.device)
-        
+
         # id_list.append(prompt_id)
 
         cache_id = torch.cat(id_list, dim=1).to(global_model.device)
         attention_matrix = construct_biased_attention_matrix(cache_id.size(1), biased_index, cache_id.size(1), global_model.device).unsqueeze(0).unsqueeze(0)
-        
+
         global_model.eval()
 
         generate_id = torch.cat([cache_id, prompt_id], dim = 1)
@@ -140,7 +140,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/12-04/{run_name}_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/12-15/{run_name}_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

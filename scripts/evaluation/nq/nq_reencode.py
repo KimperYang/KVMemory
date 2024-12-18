@@ -8,14 +8,27 @@ from typing import List
 from src.data.attention import construct_biased_attention_matrix
 import regex
 
-ckpt = 4000
-pos = 9
-run_name = "reencode_30000steps_warmup0.1_decaycosine_5e-6_full"
-jsonObj = pd.read_json(path_or_buf=f'data/raw/nq/nq-open-10_{pos}.jsonl', lines=True)
+import argparse
 
-global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
+parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
+parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
+parser.add_argument('--pos', type=int, required=True, help='Position value')
 
-global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+args = parser.parse_args()
+
+ckpt = args.ckpt
+pos = args.pos
+
+run_name = "reencode_bsz256"
+
+if pos in [0, 4, 9]:
+    jsonObj = pd.read_json(path_or_buf=f'data/raw/nq/nq-open-10_{pos}.jsonl', lines=True)
+else:
+    jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
+
+global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/multi_node/{run_name}/checkpoint-{ckpt}")
+
+global_model = AutoModelForCausalLM.from_pretrained(f"training_res/multi_node/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
 
 # vocab_size = len(global_tokenizer)
 # base_model.resize_token_embeddings(vocab_size)
@@ -69,13 +82,18 @@ def main():
     for i in range(total_num):
 
         print("Processing sample:", str(i))
-        memory_list = [template]
+        memory_list = []
 
-        
         for j in range(0,10):
             title = jsonObj["ctxs"][i][j]["title"]
             text = jsonObj["ctxs"][i][j]["text"]
             memory_list.append("<MEM_START>" + f"Document [{j+1}](Title: {title}) {text}" + "\n<MEM_END><MEM_SUM>")
+
+        if pos not in [0,4,9]:
+            ground_truth = memory_list.pop(0)
+            memory_list.insert(pos, ground_truth)
+
+        memory_list.insert(0, template)
 
         biased_index = []
         id_list = []
@@ -83,9 +101,9 @@ def main():
         idx = 0
 
         for st in memory_list:
-            
+
             tem_id = global_tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
-            
+            print(tem_id.size(1))
             if "<MEM_START>" in st:
                 biased_index.append([idx, idx + tem_id.size(1) - 1])
             else:
@@ -97,12 +115,12 @@ def main():
 
         new_prompt = "<|start_header_id|>user<|end_header_id|>\n\nWrite a high-quality answer for the given question using only the provided search results (some of which might be irrelevant). Question: " + jsonObj["question"][i] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         prompt_id = global_tokenizer(new_prompt, return_tensors="pt", add_special_tokens=False).input_ids.to(global_model.device)
-        
+
         # id_list.append(prompt_id)
 
         concat_id = torch.cat(id_list, dim=1).to(global_model.device)
         attention_matrix = construct_biased_attention_matrix(concat_id.size(1), biased_index, concat_id.size(1), global_model.device).unsqueeze(0).unsqueeze(0)
-        
+
         global_model.eval()
 
         generate_id = torch.cat([concat_id, prompt_id], dim = 1)
@@ -139,7 +157,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/12-04/NQ_{run_name}_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/12-15/reencode/NQ_{run_name}_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

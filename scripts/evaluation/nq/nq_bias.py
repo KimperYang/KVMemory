@@ -8,14 +8,27 @@ from typing import List
 from src.data.attention import construct_biased_attention_matrix
 import regex
 
-ckpt = 4000
-pos = 9
-run_name = "bias_30000steps_warmup0.1_decaycosine_5e-6_full"
-jsonObj = pd.read_json(path_or_buf=f'data/raw/nq/nq-open-10_{pos}.jsonl', lines=True)
+import argparse
 
-global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
+parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
+parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
+parser.add_argument('--pos', type=int, required=True, help='Position value')
 
-global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+args = parser.parse_args()
+
+ckpt = args.ckpt
+pos = args.pos
+
+run_name = "bias_bsz256"
+
+if pos in [0, 4, 9]:
+    jsonObj = pd.read_json(path_or_buf=f'data/raw/nq/nq-open-10_{pos}.jsonl', lines=True)
+else:
+    jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
+
+global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/multi_node/{run_name}/checkpoint-{ckpt}")
+
+global_model = AutoModelForCausalLM.from_pretrained(f"training_res/multi_node/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
 
 # vocab_size = len(global_tokenizer)
 # base_model.resize_token_embeddings(vocab_size)
@@ -69,13 +82,18 @@ def main():
     for i in range(total_num):
 
         print("Processing sample:", str(i))
-        memory_list = [template]
+        memory_list = []
 
-        
         for j in range(0,10):
             title = jsonObj["ctxs"][i][j]["title"]
             text = jsonObj["ctxs"][i][j]["text"]
             memory_list.append("<MEM_START>" + f"Document [{j+1}](Title: {title}) {text}" + "\n<MEM_END>")
+
+        if pos not in [0,4,9]:
+            ground_truth = memory_list.pop(0)
+            memory_list.insert(pos, ground_truth)
+
+        memory_list.insert(0, template)
 
         biased_index = []
         id_list = []
@@ -135,7 +153,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/12-04/NQ_{run_name}_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/12-15/ablation/NQ_{run_name}_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
