@@ -168,7 +168,7 @@ def main():
         data_collator = custom_collate_bias
     )
 
-    trainer.train()
+    trainer.train(resume_from_checkpoint = True)
 
     trainer.save_model()
     global_tokenizer.save_pretrained(training_args.output_dir)
