@@ -7,7 +7,7 @@ import string
 from typing import List
 from src.data.attention import construct_biased_attention_matrix
 import regex
-
+import argparse
 # vocab_size = len(global_tokenizer)
 # base_model.resize_token_embeddings(vocab_size)
 
@@ -48,8 +48,17 @@ def best_subspan_em(prediction: str, ground_truths: List[str]) -> float:
 
 def main():
 
-    ckpt = 10000
-    run_name = "reencode_bsz256"
+    parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
+    parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
+    parser.add_argument('--run', type=str, required=True, help='run name')
+    parser.add_argument('--reencode', type=int, required=True, help='sum token num')
+
+    args = parser.parse_args()
+
+    ckpt = args.ckpt
+    run_name = args.run
+    reencode_num = args.reencode
+
     file_path = "data/raw/dev.json"
     with open(file_path, 'r') as file:
         data = json.load(file)
@@ -79,7 +88,7 @@ def main():
         for j in range(0,10):
             title = data_list[i]['context'][j][0]
             text = " ".join(data_list[i]['context'][j][1])
-            memory_list.append("<MEM_START>" + f"Document [{j+1}](Title: {title}) {text}" + "\n<MEM_END><MEM_SUM>")
+            memory_list.append("<MEM_START>" + f"Document [{j+1}](Title: {title}) {text}" + "\n<MEM_END>" + "<MEM_SUM>" * reencode_num)
 
         biased_index = []
         id_list = []
@@ -89,7 +98,11 @@ def main():
         for st in memory_list:
 
             tem_id = global_tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
-            biased_index.append([idx, idx + tem_id.size(1) - 1])
+
+            if "<MEM_START>" in st:
+                biased_index.append([idx, idx + tem_id.size(1) - reencode_num])
+            else:
+                biased_index.append([idx, idx + tem_id.size(1)])
 
             id_list.append(tem_id)
 
@@ -140,7 +153,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/12-15/{run_name}_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/1-1/{run_name}_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

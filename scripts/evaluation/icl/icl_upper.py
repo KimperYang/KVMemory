@@ -6,7 +6,7 @@ from datasets import load_dataset
 data = load_dataset("CogComp/trec")
 label_dict = {0:'abbreviation', 1:'entity', 2:'description', 3:'human', 4:'location', 5:'numeric'}
 # Step 1: Load the Pretrained Model and Tokenizer
-model_name = "training_res/baseline_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-4000"  # You can choose other models like 'gpt2-medium', 'gpt-neo-125M', etc.
+model_name = "training_res/multi_node/baseline_bsz256/checkpoint-10000"  # You can choose other models like 'gpt2-medium', 'gpt-neo-125M', etc.
 # model_name = "meta-llama/Llama-3.2-1B-Instruct"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
@@ -17,8 +17,8 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
 
 def construct_examples(data):
-    num_each_class = 7
-    max_demonstration = 40
+    num_each_class = 4
+    max_demonstration = 20
     num_demo = 0
     num_stats = [0] * len(label_dict)
     context = "<|begin_of_text|>"

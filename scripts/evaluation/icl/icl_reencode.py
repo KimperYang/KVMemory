@@ -9,7 +9,7 @@ label_dict = {0:'abbreviation', 1:'entity', 2:'description', 3:'human', 4:'locat
 
 # Step 1: Load the Pretrained Model and Tokenizer
 # model_name = "/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-30000"
-model_name = "training_res/reencode_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-4000"
+model_name = "training_res/multi_node/reencode_10_bsz256/checkpoint-8000"
 
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
@@ -19,9 +19,11 @@ model.eval()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
 
+reencode_num = 10
+
 def construct_examples(data):
-    num_each_class = 7
-    max_demonstration = 40
+    num_each_class = 2
+    max_demonstration = 10
     num_demo = 0
     num_stats = [0] * len(label_dict)
     context = ["<|begin_of_text|>"]
@@ -29,7 +31,7 @@ def construct_examples(data):
         if all(num == num_each_class for num in num_stats) or num_demo == max_demonstration:
             break
         if num_stats[item['coarse_label']] < num_each_class:
-            context.append("<MEM_START>Question: " + item['text'] + "\nType: " + label_dict[item['coarse_label']] + "\n<MEM_END>")
+            context.append("<MEM_START>Question: " + item['text'] + "\nType: " + label_dict[item['coarse_label']] + "\n" + "<MEM_END>" * reencode_num)
             num_stats[item['coarse_label']] += 1
             num_demo += 1
     return context
@@ -73,7 +75,7 @@ for st in context:
     tem_id = tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
     id_list.append(tem_id)
     if "<MEM_START>" in st:
-        biased_index.append([idx, idx + tem_id.size(1) - 1])
+        biased_index.append([idx, idx + tem_id.size(1) - reencode_num])
     else:
         biased_index.append([idx, idx + tem_id.size(1)])
 

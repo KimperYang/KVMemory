@@ -51,7 +51,7 @@ export LAUNCHER="accelerate launch \
     --num_machines $NNODES \
     "
 
-export SCRIPT="block_QA_trainer.py"
+export SCRIPT="seq_attn_trainer.py"
 
 export CMD="$LAUNCHER $SCRIPT"
 

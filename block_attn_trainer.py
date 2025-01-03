@@ -68,9 +68,11 @@ def load_from_disk_then_process(
     # print(data_component.cleanup_cache_files())
 
     streaming_train_dataset = data_component["train"].to_iterable_dataset(num_shards=num_shards)
+    # streaming_train_dataset = data_component["train"]
     training_data = streaming_train_dataset.map(
         preprocessor_fn,
         remove_columns=remove_columns,
+        # num_proc=16,
         batched=False,
     )
 
@@ -168,7 +170,7 @@ def main():
         data_collator = custom_collate_bias
     )
 
-    trainer.train(resume_from_checkpoint = True)
+    trainer.train()
 
     trainer.save_model()
     global_tokenizer.save_pretrained(training_args.output_dir)

@@ -13,13 +13,15 @@ import argparse
 parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
 parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
 parser.add_argument('--pos', type=int, required=True, help='Position value')
+parser.add_argument('--reencode', type=int, required=True, help='sum token num')
 
 args = parser.parse_args()
 
 ckpt = args.ckpt
 pos = args.pos
+reencode_num = args.reencode
 
-run_name = "reencode_bsz256"
+run_name = "reencode_10_bsz256"
 
 if pos in [0, 4, 9]:
     jsonObj = pd.read_json(path_or_buf=f'data/raw/nq/nq-open-10_{pos}.jsonl', lines=True)
@@ -87,7 +89,7 @@ def main():
         for j in range(0,10):
             title = jsonObj["ctxs"][i][j]["title"]
             text = jsonObj["ctxs"][i][j]["text"]
-            memory_list.append("<MEM_START>" + f"Document [{j+1}](Title: {title}) {text}" + "\n<MEM_END><MEM_SUM>")
+            memory_list.append("<MEM_START>" + f"Document [{j+1}](Title: {title}) {text}" + "\n<MEM_END>" + "<MEM_SUM>" * reencode_num)
 
         if pos not in [0,4,9]:
             ground_truth = memory_list.pop(0)
@@ -105,7 +107,7 @@ def main():
             tem_id = global_tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
             print(tem_id.size(1))
             if "<MEM_START>" in st:
-                biased_index.append([idx, idx + tem_id.size(1) - 1])
+                biased_index.append([idx, idx + tem_id.size(1) - reencode_num])
             else:
                 biased_index.append([idx, idx + tem_id.size(1)])
 
@@ -157,7 +159,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/12-15/reencode/NQ_{run_name}_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/12-24/NQ_{run_name}_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

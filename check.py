@@ -1,11 +1,27 @@
-my_list = [10, 20, 30, 40, 50]
-n = 0
+from src.data.input_preprocessor import baseline_attention_preprocessor, custom_collate_baseline
+from datasets import load_from_disk
+from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments, Trainer
 
-# Remove element at index 0
-element = my_list.pop(0)  # element = 10, my_list now = [20, 30, 40, 50]
+# qa_path = f"dataset_cache/processed/block_qa/qa"
+# qa_mem_path = f"dataset_cache/processed/block_qa/qa_mem"
+tl_path = f"dataset_cache/processed/tulu/sft"
+tl = load_from_disk(tl_path)['train']
 
-# Insert it at the new index (n = 2)
-my_list.insert(n, element)  # my_list = [20, 30, 10, 40, 50]
+# qa = load_from_disk(qa_path)['train']
+# qamem = load_from_disk(qa_mem_path)['train']
+# remove_columns=['prompt', 'question', 'answers', 'generated', 'inputs', 'documents']
+remove_columns=["id", "messages", "source"]
 
-print(my_list)
-# Output: [20, 30, 10, 40, 50]
+global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+
+preprocessor = baseline_attention_preprocessor(
+    tokenizer=global_tokenizer,
+    max_len=4096
+)
+
+tl.map(
+        preprocessor.process_tulu,
+        remove_columns=remove_columns,
+        num_proc=96,
+        batched=False
+)

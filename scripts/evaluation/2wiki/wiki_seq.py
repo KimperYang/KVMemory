@@ -55,17 +55,17 @@ def main():
 
     ckpt = args.ckpt
 
-    run_name = "bias_tulu_bsz256"
+    run_name = "seq_bsz256"
     file_path = "data/raw/dev.json"
     with open(file_path, 'r') as file:
         data = json.load(file)
     data_list = data
     # print("".join(data_list[0]['context'][8][1]))
 
-    global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/QA/{run_name}/checkpoint-{ckpt}")
+    global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/multi_node/{run_name}/checkpoint-{ckpt}")
 
-    global_model = AutoModelForCausalLM.from_pretrained(f"training_res/QA/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
-    
+    global_model = AutoModelForCausalLM.from_pretrained(f"training_res/multi_node/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+
     global_model.to('cuda')
     # template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
 
@@ -85,30 +85,37 @@ def main():
         for j in range(0,10):
             title = data_list[i]['context'][j][0]
             text = " ".join(data_list[i]['context'][j][1])
-            memory_list.append("<MEM_START>" + f"Document [{j+1}](Title: {title}) {text}" + "\n<MEM_END>")
+            memory_list.append(f"Document [{j+1}](Title: {title}) {text}" + "\n")
 
         biased_index = []
         id_list = []
 
         idx = 0
+        special_token_start = 128011
 
-        for st in memory_list:
+        for k in range(len(memory_list)):
 
-            tem_id = global_tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
-            biased_index.append([idx, idx + tem_id.size(1)])
+            tem_id = global_tokenizer(memory_list[k], return_tensors="pt", add_special_tokens=False).input_ids
+
+            if "<|begin_of_text|><|start_header_id|>system<|end_header_id|>" not in memory_list[k]:
+
+                mem_idx = k-1
+                tem_id = torch.cat([torch.tensor([[special_token_start + 2 * mem_idx]]), tem_id, torch.tensor([[special_token_start + 2 * mem_idx + 1]])], dim = 1)
+
+                biased_index.append([idx + 1, idx + tem_id.size(1) - 1])
 
             id_list.append(tem_id)
 
             idx = idx + tem_id.size(1)
 
-        new_prompt = "<MEM_SUM><|start_header_id|>user<|end_header_id|>\n\n" + data_list[i]['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        new_prompt = "<|start_header_id|>user<|end_header_id|>\n\n" + data_list[i]['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         prompt_id = global_tokenizer(new_prompt, return_tensors="pt", add_special_tokens=False).input_ids.to(global_model.device)
-        
+
         # id_list.append(prompt_id)
 
         cache_id = torch.cat(id_list, dim=1).to(global_model.device)
         attention_matrix = construct_biased_attention_matrix(cache_id.size(1), biased_index, cache_id.size(1), global_model.device).unsqueeze(0).unsqueeze(0)
-        
+
         global_model.eval()
 
         generate_id = torch.cat([cache_id, prompt_id], dim = 1)

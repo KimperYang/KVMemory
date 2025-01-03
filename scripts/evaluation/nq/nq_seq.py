@@ -4,8 +4,8 @@ import pandas as pd
 import json
 import datetime
 import string
-import time
 from typing import List
+from src.data.attention import construct_biased_attention_matrix
 import regex
 
 import argparse
@@ -19,28 +19,23 @@ args = parser.parse_args()
 ckpt = args.ckpt
 pos = args.pos
 
-run_name = "baseline_tulu_bsz256"
+run_name = "seq_bsz256"
 
 if pos in [0, 4, 9]:
     jsonObj = pd.read_json(path_or_buf=f'data/raw/nq/nq-open-10_{pos}.jsonl', lines=True)
 else:
     jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
 
-global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/QA/{run_name}/checkpoint-{ckpt}")
+global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/multi_node/{run_name}/checkpoint-{ckpt}")
 
-global_model = AutoModelForCausalLM.from_pretrained(f"training_res/QA/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
-# global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
-
-# global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16)
-
+global_model = AutoModelForCausalLM.from_pretrained(f"training_res/multi_node/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
 
 # vocab_size = len(global_tokenizer)
 # base_model.resize_token_embeddings(vocab_size)
 
-# peft_config_path = "/mnt/data/jingbo/kv_dump_combine_mix5_5000steps/checkpoint-5000"  # Path to the directory where LoRA weights are stored
+# peft_config_path = "/mnt/data/jingbo/kv_dump_combine_mix5_5000steps_5e-6_full/checkpoint-5000"  # Path to the directory where LoRA weights are stored
 
 # global_model = PeftModel.from_pretrained(base_model, peft_config_path)
-
 
 def normalize_answer(s: str) -> str:
     """Normalization from the SQuAD evaluation script.
@@ -73,66 +68,17 @@ def best_subspan_em(prediction: str, ground_truths: List[str]) -> float:
             return 1.0
     return 0.0
 
-def generate_kv_with_id(input_ids, p_id):
-
-    with torch.no_grad():
-        out = global_model(input_ids, position_ids = p_id)
-        past_key_values = out.past_key_values
-
-    return past_key_values
-
-def append_kv(kv_list):
-    if not kv_list:
-        raise ValueError("kv_list is empty. It must contain at least one past_key_values list.")
-
-    num_layers = len(kv_list[0])
-
-    concatenated_past_key_values = ()
-
-    for layer in range(num_layers):
-
-        keys_list = [kv[layer][0] for kv in kv_list]
-        values_list = [kv[layer][1] for kv in kv_list]
-
-        concatenated_keys = torch.cat(keys_list, dim=2)
-        concatenated_values = torch.cat(values_list, dim=2) 
-
-        concatenated_past_key_values = concatenated_past_key_values + ((concatenated_keys, concatenated_values),)
-
-    return concatenated_past_key_values
-
-def inference(input_ids):
-
-    tokenizer = global_tokenizer
-    model = global_model
-
-    model.eval()
-
-    with torch.no_grad():
-
-        outputs = model.generate(
-            input_ids=input_ids,
-            max_new_tokens=200,
-            do_sample=False,
-            temperature=None,
-            top_p=1.0
-        )
-    # print(outputs)
-    generated_sequences = tokenizer.batch_decode(outputs, skip_special_tokens=True)
-
-    return generated_sequences
-
 def main():
     global_model.to('cuda')
     # template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
 
-    template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a helpful, respectful and honest assistant.<|eot_id|><|start_header_id|>user<|end_header_id|>Write a high-quality answer for the given question using only the provided search results (some of which might be irrelevant)."
+    template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a helpful, respectful and honest assistant.<|eot_id|>"
 
     # total_num = len(jsonObj)
     total_num = 500
     correct_num = 0
     res_list = []
-    execution_time = 0
+
     for i in range(total_num):
 
         print("Processing sample:", str(i))
@@ -141,7 +87,7 @@ def main():
         for j in range(0,10):
             title = jsonObj["ctxs"][i][j]["title"]
             text = jsonObj["ctxs"][i][j]["text"]
-            memory_list.append(f"Document [{j+1}](Title: {title}) {text}"+"\n")
+            memory_list.append(f"Document [{j+1}](Title: {title}) {text}" + "\n")
 
         if pos not in [0,4,9]:
             ground_truth = memory_list.pop(0)
@@ -149,19 +95,55 @@ def main():
 
         memory_list.insert(0, template)
 
-        prompt = "".join(memory_list)
-        new_prompt = "\n\nQuestion: " + jsonObj["question"][i] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
-        prompt += new_prompt
-        # prompt = template + new_prompt
+        biased_index = []
+        id_list = []
 
-        prompt_id = global_tokenizer(prompt, return_tensors="pt").input_ids
+        idx = 0
+        special_token_start = 128011
 
-        # start_time = time.time()
-        generated_seq = inference(prompt_id.to(global_model.device))
-        # end_time = time.time()
-        # if i >= 100:
-        #     execution_time += end_time - start_time
-        # print(f"Execution time: {execution_time} seconds")
+        for k in range(len(memory_list)):
+
+            tem_id = global_tokenizer(memory_list[k], return_tensors="pt", add_special_tokens=False).input_ids
+
+            if "<|begin_of_text|><|start_header_id|>system<|end_header_id|>" not in memory_list[k]:
+
+                mem_idx = k-1
+                tem_id = torch.cat([torch.tensor([[special_token_start + 2 * mem_idx]]), tem_id, torch.tensor([[special_token_start + 2 * mem_idx + 1]])], dim = 1)
+
+                biased_index.append([idx + 1, idx + tem_id.size(1) - 1])
+
+            id_list.append(tem_id)
+
+            idx = idx + tem_id.size(1)
+
+        new_prompt = "<|start_header_id|>user<|end_header_id|>\n\nWrite a high-quality answer for the given question using only the provided search results (some of which might be irrelevant). Question: " + jsonObj["question"][i] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        prompt_id = global_tokenizer(new_prompt, return_tensors="pt", add_special_tokens=False).input_ids.to(global_model.device)
+
+        # id_list.append(prompt_id)
+
+        concat_id = torch.cat(id_list, dim=1).to(global_model.device)
+        attention_matrix = construct_biased_attention_matrix(concat_id.size(1), biased_index, concat_id.size(1), global_model.device).unsqueeze(0).unsqueeze(0)
+
+        global_model.eval()
+
+        generate_id = torch.cat([concat_id, prompt_id], dim = 1)
+
+        with torch.no_grad():
+            outputs = global_model(input_ids = concat_id, attention_mask = attention_matrix)
+            past_key_values = outputs.past_key_values
+
+            outputs = global_model.generate(
+                input_ids=generate_id,
+                max_new_tokens=200,
+                do_sample=False,
+                temperature=None,
+                top_p=1.0,
+                past_key_values=past_key_values,
+                use_cache=True
+            )
+        # print(outputs)
+        generated_seq = global_tokenizer.batch_decode(outputs, skip_special_tokens=True)
+    
         response = generated_seq[0].split('assistant\n\n')[-1]
         print(response)
 
@@ -171,15 +153,15 @@ def main():
 
         res_list.append({"id": str(i),"question": jsonObj["question"][i], "response": response, "gold_answer": jsonObj["answers"][i], "Score": score})
         print("Correct progress", correct_num)
-
+        
     accuracy = correct_num / total_num
     print(accuracy)
-    # print(f"Average execution time: {execution_time / 400} seconds")
+
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    # file_name = f"result/upper/NQ_{run_name}_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
-    file_name = f"result/upper/NQ_{run_name}_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/1-1/NQ_{run_name}_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
+
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
             json_line = json.dumps(entry)

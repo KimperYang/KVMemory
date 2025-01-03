@@ -76,7 +76,8 @@ def load_from_disk_then_process(
 
 
 def main():
-    batch_size_per_device = 4
+    batch_size_per_device = 8
+    reencode_num = 10
 
     global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
     global_model = AutoModelForCausalLM.from_pretrained(
@@ -92,7 +93,8 @@ def main():
 
     preprocessor = reencode_attention_preprocessor(
         tokenizer=global_tokenizer,
-        max_len=4096
+        max_len=4096,
+        reencode_num = reencode_num
     )
 
     ptr_train, ptr_eval = load_from_disk_then_process("text", preprocessor)
@@ -119,16 +121,16 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir="training_res/multi_node/reencode_bsz256",
+        output_dir=f"training_res/multi_node/reencode_{reencode_num}_bsz256",
         report_to="wandb",
-        run_name=f"multinode_reencode_4GPU_bsz{batch_size_per_device}_5e-6_full",
+        run_name=f"multinode_reencode_{reencode_num}_4GPU_bsz{batch_size_per_device}_5e-6_full",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
         max_steps=30000,
         logging_dir="training_res/logs",
         logging_steps=10,
         save_steps=2000,
-        gradient_accumulation_steps=2,
+        gradient_accumulation_steps=1,
         warmup_ratio=0.1,
         lr_scheduler_type='cosine',
         bf16=True,
@@ -137,6 +139,7 @@ def main():
         per_device_eval_batch_size = batch_size_per_device,
         evaluation_strategy="steps",  # Add this line
         eval_steps=2000,
+        gradient_checkpointing=True,
         # save_total_limit=3,
         # overwrite_output_dir = False
         remove_unused_columns=False,
@@ -155,8 +158,8 @@ def main():
 
     trainer.train()
 
-    trainer.save_model()
-    global_tokenizer.save_pretrained(training_args.output_dir)
+    # trainer.save_model()
+    # global_tokenizer.save_pretrained(training_args.output_dir)
 
 if __name__ == "__main__":
     main()
