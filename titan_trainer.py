@@ -13,19 +13,25 @@ python src/data/titan_download_tokenizer.py \
 
 
 2. Running
+
+```sh
 LOG_RANK=${LOG_RANK:-0}
 NGPU=${NGPU:-"8"}
 
 PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True" \
 torchrun --nproc_per_node=8 --rdzv_backend c10d --rdzv_endpoint="localhost:0" \
---local-ranks-filter ${LOG_RANK} --role rank --tee 3 \
-titan_trainer.py
+    --local-ranks-filter ${LOG_RANK} --role rank --tee 3 \
+    titan_trainer.py --config_name block_datav1_step10k_bsz64_single_node
+```
+
+Available config names: block_datav1_step10k_bsz64_single_node, block_datav1_step10k_bsz256_4_node
 
 3. View the tensorboard logs:
 ssh -N -f -L localhost:16006:localhost:6006 satori1
 tensorboard --logdir=/nobackup/users/bairu/repos/KVMemory/run_logs/block_datav1_step10k/tensorboard/20250105-1953 --port=6006
 """
 
+import argparse
 import os
 import time
 from dataclasses import replace
@@ -67,7 +73,7 @@ from src.training.titan_training_utils import (
 )
 
 CONFIG_DICT = {
-    "block_datav1_step10k": TitanTrainerConfig(
+    "block_datav1_step10k_bsz64_single_node": TitanTrainerConfig(
         model_name_or_path="meta-llama/Llama-3.2-1B-Instruct",
         tokenizer_path="data/titan_tokenizer/original/tokenizer.model",
         dataset_version="v1",
@@ -75,6 +81,16 @@ CONFIG_DICT = {
         job_dump_folder="run_logs/block_datav1_step10k",
         ckpt_config=COMMON_CHECKPOINT_CONFIG,
         training_recipe=bsz64_lr56_steps10k,
+        activation_checkpoint=DEFAULT_ACTIVATION_CHECKPOINT_CONFIG,
+    ),
+    "block_datav1_step10k_bsz256_4_node": TitanTrainerConfig(
+        model_name_or_path="meta-llama/Llama-3.2-1B-Instruct",
+        tokenizer_path="data/titan_tokenizer/original/tokenizer.model",
+        dataset_version="v1",
+        seq_len=4096,
+        job_dump_folder="run_logs/block_datav1_step10k",
+        ckpt_config=COMMON_CHECKPOINT_CONFIG,
+        training_recipe=bsz256_lr56_steps10k,
         activation_checkpoint=DEFAULT_ACTIVATION_CHECKPOINT_CONFIG,
     ),
 }
@@ -462,7 +478,14 @@ def main(config_name: str):
 
 
 if __name__ == "__main__":
-    config_name = "block_datav1_step10k"
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--config_name",
+        default="block_datav1_step10k_bsz64_single_node",
+        type=str,
+    )
+    args = parser.parse_args()
+    config_name = args.config_name
     main(config_name)
     torch.distributed.destroy_process_group()
 
