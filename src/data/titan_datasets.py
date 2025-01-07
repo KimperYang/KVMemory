@@ -65,14 +65,14 @@ def load_data_and_process_fn(
         remove_columns=["id", "messages", "source"]
         num_shards = 32
     elif data_component_name in ["qa", "qa_mem"]:
-        data_path = f"dataset_cache/processed/2wiki/{data_component_name}"
+        data_path = f"dataset_cache/processed/block_qa/{data_component_name}"
         if data_component_name == "qa":
             preprocessor_fn = preprocessor.process_qa
         elif data_component_name == "qa_mem":
             preprocessor_fn = preprocessor.process_qamem
         else:
             raise NotImplementedError()
-        remove_columns=["question", "context", "answer"]
+        remove_columns=['prompt', 'question', 'answers', 'generated', 'inputs', 'documents']
         num_shards = 32
     else:
         raise ValueError(f"Unrecognized dataset name {data_component_name}.")
