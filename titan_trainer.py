@@ -89,6 +89,8 @@ from src.training.titan_training_utils import (
     PRETRAINED_MODEL_CKPT_PATH_MAPS,
     SELECTIVE_ACTIVATION_CHECKPOINT_CONFIG,
     bsz64_lr56_steps10k,
+    bsz128_lr56_steps10k,
+    bsz256_lr56_steps6k,
     bsz256_lr56_steps10k,
 )
 from src.training.torchtune_model_checkpointer import load_checkpoint
@@ -133,6 +135,16 @@ CONFIG_DICT = {
         ckpt_config=COMMON_CHECKPOINT_CONFIG,
         training_recipe=bsz256_lr56_steps10k,
         activation_checkpoint=SELECTIVE_ACTIVATION_CHECKPOINT_CONFIG,
+    ),
+    "block_datav3_step6k_bsz256_4_node_full_ckpt": TitanTrainerConfig(
+        model_name_or_path="meta-llama/Llama-3.2-1B-Instruct",
+        tokenizer_path="data/titan_tokenizer/original/tokenizer.model",
+        dataset_version="v3",
+        seq_len=4096,
+        job_dump_folder="run_logs/block_datav3_step6k",
+        ckpt_config=COMMON_CHECKPOINT_CONFIG,
+        training_recipe=bsz256_lr56_steps6k,
+        activation_checkpoint=FULL_ACTIVATION_CHECKPOINT_CONFIG,
     ),
 }
 

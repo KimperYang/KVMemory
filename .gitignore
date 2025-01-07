@@ -3,7 +3,7 @@ wandb/
 .vscode/
 *pyc
 KVMemory.egg-info/
-./data/
+/data/
 result/
 training_res/
 *test.py
