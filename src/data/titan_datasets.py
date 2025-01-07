@@ -8,17 +8,14 @@ import random
 from typing import Any, Dict, List, Tuple
 
 import datasets
-import torch
 from datasets.distributed import split_dataset_by_node
 from torch.distributed.checkpoint.stateful import Stateful
 from torch.utils.data import IterableDataset
 from torchdata.stateful_dataloader import StatefulDataLoader
-from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
 
 from src.data.titan_preprocessor import bias_attention_preprocessor
 from src.data.titan_tokenizer import Tokenizer
 from src.torchtitan.logging import logger
-from src.training.custom_trainer import CustomTrainerBiasAttn
 
 
 def load_data_and_process_fn(
@@ -140,10 +137,11 @@ class HuggingFaceDataset(IterableDataset, Stateful):
 
     def load_state_dict(self, state_dict):
         self._sample_idx = state_dict["sample_idx"]
-        self._all_tokens = state_dict["token_buffer"]
+        # self._all_tokens = state_dict["token_buffer"]
 
     def state_dict(self):
-        return {"token_buffer": self._all_tokens, "sample_idx": self._sample_idx}
+        # return {"token_buffer": self._all_tokens, "sample_idx": self._sample_idx}
+        return {"sample_idx": self._sample_idx}
 
 
 class WeightedAggregatorDataset(IterableDataset, Stateful):
