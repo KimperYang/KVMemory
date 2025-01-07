@@ -11,24 +11,24 @@ import regex
 import argparse
 
 parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
+parser.add_argument('--run', type=str, required=True, help='Path under training_res')
 parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
 parser.add_argument('--pos', type=int, required=True, help='Position value')
 
 args = parser.parse_args()
 
+run_name = args.run
 ckpt = args.ckpt
 pos = args.pos
-
-run_name = "bias_tulu_bsz256"
 
 if pos in [0, 4, 9]:
     jsonObj = pd.read_json(path_or_buf=f'data/raw/nq/nq-open-10_{pos}.jsonl', lines=True)
 else:
     jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
 
-global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/QA/{run_name}/checkpoint-{ckpt}")
+global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
 
-global_model = AutoModelForCausalLM.from_pretrained(f"training_res/QA/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
 
 # vocab_size = len(global_tokenizer)
 # base_model.resize_token_embeddings(vocab_size)
@@ -153,7 +153,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/1-1/NQ_{run_name}_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/new_data/bias/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

@@ -14,23 +14,22 @@ parser = argparse.ArgumentParser(description="Run script with specified ckpt and
 parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
 parser.add_argument('--pos', type=int, required=True, help='Position value')
 parser.add_argument('--reencode', type=int, required=True, help='sum token num')
-
+parser.add_argument('--run', type=str, required=True, help='Path under training_res')
 args = parser.parse_args()
 
 ckpt = args.ckpt
 pos = args.pos
 reencode_num = args.reencode
-
-run_name = "reencode_10_bsz256"
+run_name = args.run
 
 if pos in [0, 4, 9]:
     jsonObj = pd.read_json(path_or_buf=f'data/raw/nq/nq-open-10_{pos}.jsonl', lines=True)
 else:
     jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
 
-global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/multi_node/{run_name}/checkpoint-{ckpt}")
+global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
 
-global_model = AutoModelForCausalLM.from_pretrained(f"training_res/multi_node/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
 
 # vocab_size = len(global_tokenizer)
 # base_model.resize_token_embeddings(vocab_size)
@@ -105,7 +104,6 @@ def main():
         for st in memory_list:
 
             tem_id = global_tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
-            print(tem_id.size(1))
             if "<MEM_START>" in st:
                 biased_index.append([idx, idx + tem_id.size(1) - reencode_num])
             else:
@@ -142,7 +140,7 @@ def main():
             )
         # print(outputs)
         generated_seq = global_tokenizer.batch_decode(outputs, skip_special_tokens=True)
-    
+
         response = generated_seq[0].split('assistant\n\n')[-1]
         print(response)
 
@@ -152,14 +150,14 @@ def main():
 
         res_list.append({"id": str(i),"question": jsonObj["question"][i], "response": response, "gold_answer": jsonObj["answers"][i], "Score": score})
         print("Correct progress", correct_num)
-        
+
     accuracy = correct_num / total_num
     print(accuracy)
 
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/12-24/NQ_{run_name}_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/new_data/reencode_{reencode_num}/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

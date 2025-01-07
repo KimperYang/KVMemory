@@ -15,12 +15,13 @@ import datasets
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
 
-from src.data.input_preprocessor import bias_attention_preprocessor, custom_collate_bias
+from src.data.input_preprocessor import custom_collate_bias, reencode_attention_preprocessor
 from src.training.custom_trainer import CustomTrainerBiasAttn
+
 
 def load_from_disk_then_process(
     data_component_name: str,
-    preprocessor: bias_attention_preprocessor,
+    preprocessor: reencode_attention_preprocessor,
 ) -> Tuple[datasets.IterableDataset, datasets.Dataset]:
     """
     load the downloaded data from disk and then pair it with the preprocessor
@@ -53,14 +54,14 @@ def load_from_disk_then_process(
         remove_columns=["system", "mask", "dataset", "conversations"]
         num_shards = 32
     elif data_component_name in ["qa", "qa_mem"]:
-        data_path = f"dataset_cache/processed/2wiki/{data_component_name}"
+        data_path = f"dataset_cache/processed/block_qa/{data_component_name}"
         if data_component_name == "qa":
             preprocessor_fn = preprocessor.process_qa
         elif data_component_name == "qa_mem":
-            preprocessor_fn = preprocessor.process_qamem
+            preprocessor_fn = preprocessor.process_qa
         else:
             raise NotImplementedError()
-        remove_columns=["question", "context", "answer"]
+        remove_columns=['prompt', 'question', 'answers', 'generated', 'inputs', 'documents']
         num_shards = 32
     elif data_component_name in ["tulu"]:
         data_path = "dataset_cache/processed/tulu/sft"
@@ -69,17 +70,16 @@ def load_from_disk_then_process(
         else:
             raise NotImplementedError()
         remove_columns=["id", "messages", "source"]
+        num_shards = 32
     else:
         raise NotImplementedError()
     data_component: datasets.DatasetDict = datasets.load_from_disk(data_path)
     # print(data_component.cleanup_cache_files())
 
     streaming_train_dataset = data_component["train"].to_iterable_dataset(num_shards=num_shards)
-    # streaming_train_dataset = data_component["train"]
     training_data = streaming_train_dataset.map(
         preprocessor_fn,
         remove_columns=remove_columns,
-        # num_proc=16,
         batched=False,
     )
 
@@ -89,6 +89,7 @@ def load_from_disk_then_process(
         remove_columns=remove_columns,
         num_proc=96,
         batched=False,
+        load_from_cache_file=False
     )
 
     return training_data, eval_data
@@ -96,6 +97,7 @@ def load_from_disk_then_process(
 
 def main():
     batch_size_per_device = 8
+    reencode_num = 5
 
     global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
     global_model = AutoModelForCausalLM.from_pretrained(
@@ -109,25 +111,27 @@ def main():
     global_tokenizer.add_tokens(new_token)
     global_model.resize_token_embeddings(len(global_tokenizer))
 
-    preprocessor = bias_attention_preprocessor(
+    preprocessor = reencode_attention_preprocessor(
         tokenizer=global_tokenizer,
-        max_len=4096
+        max_len=4096,
+        reencode_num = reencode_num
     )
 
     ptr_train, ptr_eval = load_from_disk_then_process("text", preprocessor)
     ptr_mem_train, ptr_mem_eval = load_from_disk_then_process("text_mem", preprocessor)
     ptr_inst_train, ptr_inst_eval = load_from_disk_then_process("text_inst", preprocessor)
-    sft_train, sft_eval = load_from_disk_then_process("sft", preprocessor)
+    sft_train, sft_eval = load_from_disk_then_process("tulu", preprocessor)
     sft_mem_train, sft_mem_eval = load_from_disk_then_process("sft_mem", preprocessor)
     qa_train, qa_eval = load_from_disk_then_process("qa", preprocessor)
     qa_mem_train, qa_mem_eval = load_from_disk_then_process("qa_mem", preprocessor)
 
     train_dataset = datasets.interleave_datasets(
         [sft_mem_train, sft_train, ptr_inst_train, ptr_train, ptr_mem_train, qa_train, qa_mem_train],
-        probabilities=[0.15, 0.15, 0.1, 0.2, 0.1, 0.15, 0.15],
+        probabilities=[0.2, 0.25, 0.1, 0.25, 0.1, 0.05, 0.05],
         seed=42,
         stopping_strategy="all_exhausted",
     )
+
     eval_dataset = datasets.DatasetDict({
         "text": ptr_eval,
         "textmem": ptr_mem_eval,
@@ -142,12 +146,12 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir="training_res/QA/bias_bsz256",
+        output_dir=f"training_res/new_data/reencode_{reencode_num}",
         report_to="wandb",
-        run_name=f"QA_bias_4GPU_bsz{batch_size_per_device}_5e-6_full",
+        run_name=f"new_data_reencode{reencode_num}_bsz{batch_size_per_device}_5e-6_full",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
-        max_steps=30000,
+        max_steps=6000,
         logging_dir="training_res/logs",
         logging_steps=10,
         save_steps=2000,
@@ -166,6 +170,7 @@ def main():
         remove_unused_columns=False,
         # split_batches=True,
         dispatch_batches=False,
+        eval_on_start=True
     )
 
     trainer = CustomTrainerBiasAttn(
@@ -179,8 +184,8 @@ def main():
 
     trainer.train()
 
-    trainer.save_model()
-    global_tokenizer.save_pretrained(training_args.output_dir)
+    # trainer.save_model()
+    # global_tokenizer.save_pretrained(training_args.output_dir)
 
 if __name__ == "__main__":
     main()

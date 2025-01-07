@@ -681,6 +681,89 @@ class reencode_attention_preprocessor():
             'biased_index': None
         }
 
+    def process_qamem(
+        self,
+        example: Dict[str, str],
+    ):
+        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
+        system_input_ids = self.tokenizer(system, add_special_tokens=False).input_ids
+        input_ids = system_input_ids
+        sys_len = len(system_input_ids)
+
+        current_index = sys_len
+        biased_index = []
+
+        for j in range(0,10):
+            title = example['documents'][j]['title']
+            text = example['documents'][j]['text']
+            tem_id = self.tokenizer(f"Document [{j+1}](Title: {title}) {text}\n", add_special_tokens=False).input_ids
+
+            tem_id = [128256] + tem_id + [128257] + [128258] * self.reencode_num
+
+            biased_index.append([current_index, current_index + len(tem_id) - self.reencode_num])
+
+            current_index += len(tem_id)
+
+            input_ids += tem_id
+
+        user = "<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n" + example['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        user_id = self.tokenizer(user, add_special_tokens=False).input_ids
+        input_ids += user_id
+
+        ans_id = self.tokenizer(example['generated'] + "<|eot_id|>", add_special_tokens=False).input_ids
+        input_ids += ans_id
+
+        ans_len = len(ans_id)
+        input_len = len(input_ids)
+
+        labels = [-100] * (input_len - ans_len) + ans_id
+
+        if len(input_ids)>4096:
+            print(f"qamem Exceed: {len(input_ids)}")
+
+        return {
+            'input_ids': input_ids,
+            'labels': labels,
+            'biased_index': biased_index
+        }
+
+    def process_qa(
+        self,
+        example: Dict[str, str],
+    ):
+        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
+        system_input_ids = self.tokenizer(system, add_special_tokens=False).input_ids
+        input_ids = system_input_ids
+
+        for j in range(0,10):
+            title = example['documents'][j]['title']
+            text = example['documents'][j]['text']
+            tem_id = self.tokenizer(f"Document [{j+1}](Title: {title}) {text}\n", add_special_tokens=False).input_ids
+
+            input_ids += tem_id
+
+        user = "<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n" + example['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        user_id = self.tokenizer(user, add_special_tokens=False).input_ids
+        input_ids += user_id
+
+        ans_id = self.tokenizer(example['generated'] + "<|eot_id|>", add_special_tokens=False).input_ids
+        input_ids += ans_id
+
+        ans_len = len(ans_id)
+        input_len = len(input_ids)
+
+        labels = [-100] * (input_len - ans_len) + ans_id
+
+        if len(input_ids)>4096:
+            print(f"qa Exceed: {len(input_ids)}")
+
+
+        return {
+            'input_ids': input_ids,
+            'labels': labels,
+            'biased_index': None
+        }
+
     def process_textmem(
         self,
         example: Dict[str, str],
@@ -746,6 +829,57 @@ class reencode_attention_preprocessor():
             'input_ids': concat_ids,
             'labels': labels,
             'biased_index': biased_index
+        }
+
+    def process_tulu(
+        self,
+        example: Dict[str, str],
+    ):
+        conversation = example['messages']
+        # Extract "Assistant" responses and mask "User" queries
+        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who answer the question with the knowledge provided in the prompt<|eot_id|>"
+        system_tokenized = self.tokenizer(system, add_special_tokens=False)
+        system_input_ids = system_tokenized.input_ids
+        sys_len = len(system_input_ids)
+
+        input_ids_list = system_input_ids
+        labels = [-100] * sys_len
+        for i in range(len(conversation)):
+
+            if conversation[i]["role"] == "user":
+
+                t = "<|start_header_id|>user<|end_header_id|>\n\n" + conversation[i]["content"]  + "<|eot_id|>"
+
+                tokenized = self.tokenizer(t, add_special_tokens=False)
+
+                input_ids = tokenized.input_ids
+                if len(labels) + len(input_ids) >= self.max_len:
+                    break
+
+                labels.extend([-100] * len(input_ids))
+                input_ids_list += input_ids
+
+            elif conversation[i]["role"] == "assistant":
+                t = "<|start_header_id|>assistant<|end_header_id|>\n\n" + conversation[i]["content"]
+                tokenized = self.tokenizer(t, add_special_tokens=False)
+
+                input_ids = tokenized.input_ids
+                if len(labels) + len(input_ids) > self.max_len - 1:
+                    input_ids = input_ids[:self.max_len - 1 - len(labels)]
+
+                input_ids += [128009]
+
+                labels.extend(input_ids)
+
+                input_ids_list += input_ids
+
+        if len(input_ids_list)>4096:
+            print(f"sft Exceed: {len(input_ids_list)}")
+
+        return {
+            'input_ids': input_ids_list,
+            'labels': labels,
+            'biased_index': None
         }
 
 class baseline_attention_preprocessor():
@@ -995,7 +1129,7 @@ class baseline_attention_preprocessor():
         labels = [-100] * sys_len
         for i in range(len(conversation)):
 
-            if conversation[i]["role"] == "User":
+            if conversation[i]["role"] == "user":
 
                 t = "<|start_header_id|>user<|end_header_id|>\n\n" + conversation[i]["content"]  + "<|eot_id|>"
 
@@ -1008,7 +1142,7 @@ class baseline_attention_preprocessor():
                 labels.extend([-100] * len(input_ids))
                 input_ids_list += input_ids
 
-            elif conversation[i]["role"] == "Assistant":
+            elif conversation[i]["role"] == "assistant":
                 t = "<|start_header_id|>assistant<|end_header_id|>\n\n" + conversation[i]["content"]
                 tokenized = self.tokenizer(t, add_special_tokens=False)
 

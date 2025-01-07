@@ -1,0 +1,121 @@
+import argparse
+import datetime
+import json
+
+import torch
+from datasets import load_dataset
+from rouge_score import rouge_scorer
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+from src.data.attention import construct_biased_attention_matrix
+
+
+def calculate_rouge_l_score(candidate, reference):
+    scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
+    scores = scorer.score(reference, candidate)
+    # rouge_l_score = scores['rougeL'].recall
+    rouge_l_score = scores['rougeL'].fmeasure
+    return rouge_l_score
+
+def main():
+
+    parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
+    parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
+    parser.add_argument('--run', type=str, required=True, help='Run name')
+
+    args = parser.parse_args()
+
+    ckpt = args.ckpt
+    run_name = args.run
+
+    global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
+
+    global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+    global_model.to('cuda')
+
+    samsum = load_dataset("Samsung/samsum")
+
+    sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nSummarize the dialogue into a few short sentences. <|eot_id|>"
+    sys_id = global_tokenizer(sys, add_special_tokens=False).input_ids
+    context_id = sys_id
+
+    biased_index = []
+    num_demon = 10
+    curren_position = len(sys_id)
+
+    special_token_start = 128011
+
+    for idx in range(num_demon):
+
+        demonstration = "<|start_header_id|>user<|end_header_id|>\n\n" + "Dialogue: " + samsum['train'][idx]['dialogue'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n" + "Summary: " + samsum['train'][idx]['summary'] + "<|eot_id|>"
+        demonstration_id = global_tokenizer(demonstration, add_special_tokens=False).input_ids
+        demonstration_id = [special_token_start + 2 * idx] + demonstration_id + [special_token_start + 2 * idx + 1]
+
+        context_id += demonstration_id
+
+        biased_index.append([curren_position + 1, curren_position + len(demonstration_id) - 1])
+
+        curren_position += len(demonstration_id)
+
+    attention_matrix = construct_biased_attention_matrix(len(context_id), biased_index, len(context_id), global_model.device).unsqueeze(0).unsqueeze(0)
+
+    global_model.eval()
+    with torch.no_grad():
+            outputs = global_model(input_ids = torch.tensor([context_id],device=global_model.device), attention_mask = attention_matrix)
+            past_key_values = outputs.past_key_values
+
+    total_num = len(samsum['test'])
+    total_score = 0
+    res_list = []
+
+    for i in range(total_num):
+
+        print("Processing sample:", str(i))
+
+        new_prompt = "<|start_header_id|>user<|end_header_id|>\n\n" + "Dialogue: " + samsum['test'][i]['dialogue'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nSummary: "
+        prompt_id = global_tokenizer(new_prompt, add_special_tokens=False).input_ids
+
+        generate_id = torch.tensor([context_id + prompt_id], device=global_model.device)
+
+        with torch.no_grad():
+
+            outputs = global_model.generate(
+                input_ids=generate_id,
+                max_new_tokens=128,
+                do_sample=False,
+                temperature=None,
+                top_p=1.0,
+                past_key_values=past_key_values,
+                use_cache=True
+            )
+        # print(outputs)
+        generated_seq = global_tokenizer.batch_decode(outputs, skip_special_tokens=True)
+
+        response = generated_seq[0].split('assistant\n\n')[-1]
+
+        score = calculate_rouge_l_score(response, samsum['test'][i]['summary'])
+
+        total_score = total_score + score
+
+        res_list.append({"id": str(i),"dialogue": samsum['test'][i]['dialogue'], "response": response, "gold_answer": samsum['test'][i]['summary'], "Score": score})
+        print("Response", response)
+        # print("Gold_ans", samsum['test'][i]['summary'])
+        print("Score", score)
+
+    avg_score = total_score / total_num
+    print(avg_score)
+
+    current_time = datetime.datetime.now()
+    time_str = current_time.strftime("%Y%m%d-%H%M%S")
+
+    file_name = f"result/new_data/seq/Samsum_demon{num_demon}_ckpt{ckpt}_{avg_score}_{time_str}.jsonl"
+
+    with open(file_name, 'w', encoding='utf-8') as f:
+        for entry in res_list:
+            json_line = json.dumps(entry)
+            f.write(json_line + '\n')
+
+    print(f"Dumped at {file_name}")
+
+if __name__ == "__main__":
+    main()

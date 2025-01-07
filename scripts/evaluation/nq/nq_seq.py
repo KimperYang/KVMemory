@@ -13,29 +13,22 @@ import argparse
 parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
 parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
 parser.add_argument('--pos', type=int, required=True, help='Position value')
+parser.add_argument('--run', type=str, required=True, help='Path under training_res')
 
 args = parser.parse_args()
 
 ckpt = args.ckpt
 pos = args.pos
-
-run_name = "seq_bsz256"
+run_name = args.run
 
 if pos in [0, 4, 9]:
     jsonObj = pd.read_json(path_or_buf=f'data/raw/nq/nq-open-10_{pos}.jsonl', lines=True)
 else:
     jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
 
-global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/multi_node/{run_name}/checkpoint-{ckpt}")
+global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
 
-global_model = AutoModelForCausalLM.from_pretrained(f"training_res/multi_node/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
-
-# vocab_size = len(global_tokenizer)
-# base_model.resize_token_embeddings(vocab_size)
-
-# peft_config_path = "/mnt/data/jingbo/kv_dump_combine_mix5_5000steps_5e-6_full/checkpoint-5000"  # Path to the directory where LoRA weights are stored
-
-# global_model = PeftModel.from_pretrained(base_model, peft_config_path)
+global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
 
 def normalize_answer(s: str) -> str:
     """Normalization from the SQuAD evaluation script.
@@ -153,14 +146,14 @@ def main():
 
         res_list.append({"id": str(i),"question": jsonObj["question"][i], "response": response, "gold_answer": jsonObj["answers"][i], "Score": score})
         print("Correct progress", correct_num)
-        
+
     accuracy = correct_num / total_num
     print(accuracy)
 
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/1-1/NQ_{run_name}_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/new_data/seq/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

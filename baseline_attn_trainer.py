@@ -88,6 +88,7 @@ def load_from_disk_then_process(
         remove_columns=remove_columns,
         num_proc=96,
         batched=False,
+        load_from_cache_file=False
     )
 
     return training_data, eval_data
@@ -144,12 +145,12 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir="training_res/QA/baseline_tulu_bsz256",
+        output_dir="training_res/new_data/baseline",
         report_to="wandb",
-        run_name=f"baseline_tulu_bsz{batch_size_per_device}_5e-6_full",
+        run_name=f"new_data_baseline_bsz{batch_size_per_device}_5e-6_full",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
-        max_steps=30000,
+        max_steps=6000,
         logging_dir="training_res/logs",
         logging_steps=10,
         save_steps=2000,
@@ -168,6 +169,7 @@ def main():
         remove_unused_columns=False,
         # split_batches=True,
         dispatch_batches=False,
+        eval_on_start=True
     )
 
     trainer = Trainer(

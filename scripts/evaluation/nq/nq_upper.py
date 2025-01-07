@@ -11,24 +11,24 @@ import regex
 import argparse
 
 parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
+parser.add_argument('--run', type=str, required=True, help='Path under training_res')
 parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
 parser.add_argument('--pos', type=int, required=True, help='Position value')
 
 args = parser.parse_args()
 
+run_name = args.run
 ckpt = args.ckpt
 pos = args.pos
-
-run_name = "baseline_tulu_bsz256"
 
 if pos in [0, 4, 9]:
     jsonObj = pd.read_json(path_or_buf=f'data/raw/nq/nq-open-10_{pos}.jsonl', lines=True)
 else:
     jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
 
-global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/QA/{run_name}/checkpoint-{ckpt}")
+global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
 
-global_model = AutoModelForCausalLM.from_pretrained(f"training_res/QA/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
 # global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
 
 # global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16)
@@ -72,34 +72,6 @@ def best_subspan_em(prediction: str, ground_truths: List[str]) -> float:
         if normalized_ground_truth.lower() in normalized_prediction.lower():
             return 1.0
     return 0.0
-
-def generate_kv_with_id(input_ids, p_id):
-
-    with torch.no_grad():
-        out = global_model(input_ids, position_ids = p_id)
-        past_key_values = out.past_key_values
-
-    return past_key_values
-
-def append_kv(kv_list):
-    if not kv_list:
-        raise ValueError("kv_list is empty. It must contain at least one past_key_values list.")
-
-    num_layers = len(kv_list[0])
-
-    concatenated_past_key_values = ()
-
-    for layer in range(num_layers):
-
-        keys_list = [kv[layer][0] for kv in kv_list]
-        values_list = [kv[layer][1] for kv in kv_list]
-
-        concatenated_keys = torch.cat(keys_list, dim=2)
-        concatenated_values = torch.cat(values_list, dim=2) 
-
-        concatenated_past_key_values = concatenated_past_key_values + ((concatenated_keys, concatenated_values),)
-
-    return concatenated_past_key_values
 
 def inference(input_ids):
 
@@ -179,7 +151,7 @@ def main():
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
     # file_name = f"result/upper/NQ_{run_name}_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
-    file_name = f"result/upper/NQ_{run_name}_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/new_data/upper/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
             json_line = json.dumps(entry)

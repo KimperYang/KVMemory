@@ -15,8 +15,9 @@ import datasets
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
 
-from src.data.input_preprocessor import seq_attention_preprocessor, custom_collate_bias
+from src.data.input_preprocessor import custom_collate_bias, seq_attention_preprocessor
 from src.training.custom_trainer import CustomTrainerBiasAttn
+
 
 def load_from_disk_then_process(
     data_component_name: str,
@@ -90,6 +91,7 @@ def load_from_disk_then_process(
         remove_columns=remove_columns,
         num_proc=16,
         batched=False,
+        load_from_cache_file=False
     )
 
     return training_data, eval_data
@@ -115,24 +117,24 @@ def main():
     ptr_train, ptr_eval = load_from_disk_then_process("text", preprocessor)
     ptr_mem_train, ptr_mem_eval = load_from_disk_then_process("text_mem", preprocessor)
     ptr_inst_train, ptr_inst_eval = load_from_disk_then_process("text_inst", preprocessor)
-    sft_train, sft_eval = load_from_disk_then_process("sft", preprocessor)
+    sft_train, sft_eval = load_from_disk_then_process("tulu", preprocessor)
     sft_mem_train, sft_mem_eval = load_from_disk_then_process("sft_mem", preprocessor)
-    # qa_train, qa_eval = load_from_disk_then_process("qa", preprocessor)
-    # qa_mem_train, qa_mem_eval = load_from_disk_then_process("qa_mem", preprocessor)
-
-    # train_dataset = datasets.interleave_datasets(
-    #     [sft_mem_train, sft_train, ptr_inst_train, ptr_train, ptr_mem_train, qa_train, qa_mem_train],
-    #     probabilities=[0.2, 0.25, 0.1, 0.25, 0.1, 0.05, 0.05],
-    #     seed=42,
-    #     stopping_strategy="all_exhausted",
-    # )
+    qa_train, qa_eval = load_from_disk_then_process("qa", preprocessor)
+    qa_mem_train, qa_mem_eval = load_from_disk_then_process("qa_mem", preprocessor)
 
     train_dataset = datasets.interleave_datasets(
-        [sft_mem_train, sft_train, ptr_inst_train, ptr_train, ptr_mem_train],
-        probabilities=[0.25, 0.25, 0.2, 0.1, 0.2],
+        [sft_mem_train, sft_train, ptr_inst_train, ptr_train, ptr_mem_train, qa_train, qa_mem_train],
+        probabilities=[0.2, 0.25, 0.1, 0.25, 0.1, 0.05, 0.05],
         seed=42,
         stopping_strategy="all_exhausted",
     )
+
+    # train_dataset = datasets.interleave_datasets(
+    #     [sft_mem_train, sft_train, ptr_inst_train, ptr_train, ptr_mem_train],
+    #     probabilities=[0.25, 0.25, 0.2, 0.1, 0.2],
+    #     seed=42,
+    #     stopping_strategy="all_exhausted",
+    # )
 
     eval_dataset = datasets.DatasetDict({
         "text": ptr_eval,
@@ -140,20 +142,20 @@ def main():
         "textinst": ptr_inst_eval,
         "sft": sft_eval,
         "sftmem": sft_mem_eval,
-        # "qa": qa_eval,
-        # "qamem": qa_mem_eval
+        "qa": qa_eval,
+        "qamem": qa_mem_eval
     })
 
     os.environ["WANDB_PROJECT"]="kvmemory"
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir="training_res/multi_node/seq_bsz256",
+        output_dir="training_res/new_data/seq",
         report_to="wandb",
-        run_name=f"seq_4GPU_bsz{batch_size_per_device}_5e-6_full",
+        run_name=f"new_data_seq_bsz{batch_size_per_device}_5e-6_full",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
-        max_steps=30000,
+        max_steps=6000,
         logging_dir="training_res/logs",
         logging_steps=10,
         save_steps=2000,
@@ -172,6 +174,7 @@ def main():
         remove_unused_columns=False,
         # split_batches=True,
         dispatch_batches=False,
+        eval_on_start=True
     )
 
     trainer = CustomTrainerBiasAttn(
@@ -185,8 +188,8 @@ def main():
 
     trainer.train()
 
-    trainer.save_model()
-    global_tokenizer.save_pretrained(training_args.output_dir)
+    # trainer.save_model()
+    # global_tokenizer.save_pretrained(training_args.output_dir)
 
 if __name__ == "__main__":
     main()

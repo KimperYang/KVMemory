@@ -4,6 +4,6 @@ source /u/shiyuucsb/.bashrc
 conda activate kvm
 cd /dccstor/scllm/KVMemory
 
-python scripts/evaluation/nq/nq_bias.py --ckpt 2000 --pos 0
-python scripts/evaluation/nq/nq_bias.py --ckpt 2000 --pos 4
+CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --run "new_data/baseline" --ckpt 6000 --pos 8 &
 
+wait
