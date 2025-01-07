@@ -12,3 +12,4 @@ regex==2024.9.11
 rouge_score==0.1.2
 torch==2.3.1
 transformers==4.43.1
+torchao

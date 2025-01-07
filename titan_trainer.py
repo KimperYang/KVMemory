@@ -11,8 +11,14 @@ python src/data/titan_download_tokenizer.py \
     --local_dir data/titan_tokenizer/ \
     --hf_token=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
 
+2. Download the model
+tune download meta-llama/Llama-3.2-1B-Instruct \
+    --output-dir model_cache/Llama-3.2-1B-Instruct \
+    --ignore-patterns "original/consolidated.00.pth" \
+    --hf-token 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 \
 
-2. Running
+
+3. Running
 
 ```sh
 LOG_RANK=${LOG_RANK:-0}
@@ -34,14 +40,21 @@ tensorboard --logdir=/nobackup/users/bairu/repos/KVMemory/run_logs/block_datav1_
 import argparse
 import os
 import time
-from dataclasses import replace
 from datetime import timedelta
+from typing import Dict
 
 import torch
+import torchtune.training as training
+import tqdm
 from torch.distributed.elastic.multiprocessing.errors import record
-from transformers import LlamaForCausalLM
+from torch.utils.data import DataLoader
+from torchtune.models.llama3_2 import llama3_2_1b
 
 from src.data.attention import construct_biased_attention_matrix
+from src.data.titan_data_utils import (
+    build_hf_data_loader,
+    build_hf_eval_data_loader,
+)
 from src.data.titan_preprocessor import custom_collate_bias
 from src.data.titan_tokenizer import LLaMA32Tokenizer
 from src.torchtitan import utils
@@ -67,10 +80,11 @@ from src.training.titan_training_utils import (
     DATASET_MAPPING,
     DEFAULT_ACTIVATION_CHECKPOINT_CONFIG,
     DEFUALT_TRAINING_RECIPE,
+    PRETRAINED_MODEL_CKPT_PATH_MAPS,
     bsz64_lr56_steps10k,
     bsz256_lr56_steps10k,
-    build_hf_data_loader,
 )
+from src.training.torchtune_model_checkpointer import load_checkpoint
 
 CONFIG_DICT = {
     "block_datav1_step10k_bsz64_single_node": TitanTrainerConfig(
@@ -95,6 +109,7 @@ CONFIG_DICT = {
     ),
 }
 
+
 # Enable debug tracing on failure: https://pytorch.org/docs/stable/elastic/errors.html
 @record
 def main(config_name: str):
@@ -105,6 +120,7 @@ def main(config_name: str):
     job_dump_folder = task_config.job_dump_folder
     log_freq = 10
     train_timeout_seconds = 100
+    eval_interval = task_config.training_recipe.eval_every_n_steps
 
 
     logger.info(f"Starting job: {config_name}")
@@ -175,20 +191,28 @@ def main(config_name: str):
         infinite=True,
         collate_fn=custom_collate_bias,
     )
-
-    # build model (using meta init)
-    logger.info(f"Building {model_name}...")
-    model = LlamaForCausalLM.from_pretrained(
-        model_name,
-        trust_remote_code=True,
-        use_flash_attention_2=False,
-        attn_implementation='sdpa',
-        torch_dtype=torch.bfloat16,
-        use_cache=True,
-        device_map=None,
+    eval_data_loader_dict: Dict[str, DataLoader] = build_hf_eval_data_loader(
+        data_components,
+        tokenizer,
+        batch_size=local_batch_size,
+        seq_len=task_config.seq_len,
+        world_size=dp_degree,
+        rank=dp_rank,
+        collate_fn=custom_collate_bias,
     )
-    # must add this line of code
-    model.gradient_checkpointing_enable()
+
+    logger.info(f"Building {model_name}...")
+    model = llama3_2_1b()
+    ckpt_path = PRETRAINED_MODEL_CKPT_PATH_MAPS[task_config.model_name_or_path]
+    state_dict = load_checkpoint(ckpt_path=ckpt_path, model_name=task_config.model_name_or_path)
+    is_rank_0 = torch.distributed.get_rank() == 0
+    training.load_from_full_model_state_dict(
+        model=model,
+        full_sd=state_dict,
+        device=device_type,
+        is_rank_zero=is_rank_0,
+        strict=True,
+    )
 
     # log model size
     model_param_count = utils.get_num_params(model)
@@ -198,10 +222,10 @@ def main(config_name: str):
     )
 
     # loss function to be shared by Pipeline Parallel and SPMD training
-    # def loss_fn(pred, labels):
-    #     return torch.nn.functional.cross_entropy(
-    #         pred.flatten(0, 1).float(), labels.flatten(0, 1)
-    #     )
+    def loss_fn(pred, labels):
+        return torch.nn.functional.cross_entropy(
+            pred.flatten(0, 1).float(), labels.flatten(0, 1)
+        )
 
     # init_device = device_type
     # buffer_device = None
@@ -264,6 +288,9 @@ def main(config_name: str):
     metric_logger = build_metric_logger(
         parallel_dims,
         dump_folder=job_dump_folder,
+        enable_tensorboard=True,
+        enable_wandb=False,
+        wandb_name=config_name,
     )
 
     # plot losses loaded from checkpoint (if any) to TensorBoard
@@ -312,7 +339,6 @@ def main(config_name: str):
             # get batch
             data_load_start = time.perf_counter()
             batch = next(data_iterator)
-            # input_ids, labels = batch
             input_ids = batch["input_ids"]
             labels = batch["labels"]
             attention_matrices = []
@@ -329,7 +355,7 @@ def main(config_name: str):
                         biased_ranges,
                         max_length,
                         batch['input_ids'].device
-                    ).unsqueeze(0)
+                    )
                 )
 
 
@@ -339,24 +365,17 @@ def main(config_name: str):
             input_ids = input_ids.to(device_type)
             labels = labels.to(device_type)
             attention_mask = torch.stack(attention_matrices).to(device_type)
-            # print(input_ids)
-            # print(labels)
-            # print(attention_mask)
             optimizers.zero_grad()
 
             # Non-PP forward / backward
-            # pred = model(input_ids)
-            # loss = loss_fn(pred, labels)
-            outputs = model(
-                input_ids=input_ids,
-                attention_mask=attention_mask,
-                labels=labels,
-                # output_hidden_states=True,
-            )
-            loss = outputs.loss
-            # pred.shape=(bs, seq_len, vocab_size)
-            # need to free to before bwd to avoid peaking memory
-            # del pred
+            pred = model(tokens=input_ids, mask=attention_mask)
+            if isinstance(pred, list):
+                # get the output logits
+                pred = pred[-1]
+            pred = pred[..., :-1, :].contiguous()
+            labels = labels[..., 1:].contiguous()
+            loss = loss_fn(pred, labels)
+            del pred
             loss.backward()
 
             # clip gradients
@@ -454,6 +473,84 @@ def main(config_name: str):
             checkpoint.save(
                 train_state.step, force=(train_state.step == task_config.training_recipe.max_steps)
             )
+
+            ###############################################################################
+            # NEW EVALUATION CODE TO ADD (e.g., right before the end of the training loop)
+            ###############################################################################
+            if train_state.step % eval_interval == 0:
+                model.eval()
+                all_eval_losses = {}
+
+                is_rank_0 = (torch.distributed.get_rank() == 0)
+
+                with torch.no_grad():
+                    for eval_dataset_name, eval_loader in eval_data_loader_dict.items():
+                        eval_losses = []
+                        if is_rank_0:
+                            eval_iterator = tqdm.tqdm(eval_loader, desc=f"Eval {eval_dataset_name}")
+                        else:
+                            eval_iterator = eval_loader
+                        for eval_batch in eval_iterator:
+                            # move input to device
+                            input_ids = eval_batch["input_ids"].to(device_type)
+                            labels = eval_batch["labels"].to(device_type)
+
+                            # build the attention mask the same way as training
+                            max_length = max(eval_batch["input_length"])
+                            attention_matrices = []
+                            for idx in range(len(eval_batch["input_ids"])):
+                                mem_num = eval_batch["mem_num"][idx]
+                                if mem_num == 0:
+                                    biased_ranges = None
+                                else:
+                                    biased_ranges = eval_batch["biased_index"][idx][:mem_num]
+
+                                attention_matrices.append(
+                                    construct_biased_attention_matrix(
+                                        eval_batch["input_length"][idx],
+                                        biased_ranges,
+                                        max_length,
+                                        eval_batch["input_ids"].device,
+                                    )
+                                )
+                            attention_mask = torch.stack(attention_matrices).to(device_type)
+
+                            # forward pass
+                            pred = model(tokens=input_ids, mask=attention_mask)
+                            if isinstance(pred, list):
+                                pred = pred[-1]
+
+                            # shift for causal LM cross-entropy
+                            pred = pred[..., :-1, :].contiguous()
+                            labels_ = labels[..., 1:].contiguous()
+
+                            # compute loss
+                            loss = loss_fn(pred, labels_)
+                            eval_losses.append(loss.item())
+
+                        # compute local average loss (on this rank)
+                        local_avg_loss = sum(eval_losses) / len(eval_losses)
+
+                        # reduce over DP/CP groups if necessary (to get a global average)
+                        if parallel_dims.dp_enabled or parallel_dims.cp_enabled:
+                            global_avg_loss = utils.dist_mean(local_avg_loss, world_mesh["dp_cp"])
+                        else:
+                            global_avg_loss = local_avg_loss
+
+                        # store for logging
+                        all_eval_losses[eval_dataset_name] = global_avg_loss
+
+                # log and print eval metrics
+                for eval_dataset_name, eval_loss in all_eval_losses.items():
+                    metric_logger.log({f"eval/{eval_dataset_name}_loss": eval_loss}, step=train_state.step)
+                    logger.info(
+                        f"[Evaluation - {eval_dataset_name}] step: {train_state.step}  loss: {eval_loss:7.4f}"
+                    )
+
+                # restore train mode
+                model.train()
+            ###############################################################################
+
 
             # signal the profiler that the next profiling step has started
             if torch_profiler:

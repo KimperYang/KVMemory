@@ -164,10 +164,10 @@ def _apply_ac_to_transformer_block(module: nn.Module, ac_config):
 def apply_ac(model: nn.Module, ac_config):
     """Apply activation checkpointing to the model."""
     # for layer_id, transformer_block in model.layers.named_children():
-    for layer_id, transformer_block in model.model.layers.named_children():
+    for layer_id, transformer_block in model.layers.named_children():
         transformer_block = _apply_ac_to_transformer_block(transformer_block, ac_config)
         # model.layers.register_module(layer_id, transformer_block)
-        model.model.layers.register_module(layer_id, transformer_block)
+        model.layers.register_module(layer_id, transformer_block)
 
     logger.info(f"Applied {ac_config.mode.value} activation checkpointing to the model")
 
@@ -189,7 +189,7 @@ def apply_fsdp(
         fsdp_config["offload_policy"] = CPUOffloadPolicy()
 
     # for layer_id, transformer_block in model.layers.items():
-    for layer_id, transformer_block in enumerate(model.model.layers):
+    for layer_id, transformer_block in enumerate(model.layers):
         if pp_enabled:
             # For PP, do not reshard after forward to avoid per-microbatch
             # all-gathers, which can be expensive and non-overlapped
@@ -197,8 +197,7 @@ def apply_fsdp(
         else:
             # As an optimization, do not reshard after forward for the last
             # transformer block since FSDP would prefetch it immediately
-            # reshard_after_forward = int(layer_id) < len(model.layers) - 1
-            reshard_after_forward = int(layer_id) < len(model.model.layers) - 1
+            reshard_after_forward = int(layer_id) < len(model.layers) - 1
         fully_shard(
             transformer_block,
             **fsdp_config,

@@ -1,12 +1,6 @@
 from dataclasses import replace
 from typing import List
 
-from src.data.titan_datasets import (
-    DPAwareDataLoader,
-    HuggingFaceDataset,
-    WeightedAggregatorDataset,
-)
-from src.data.titan_tokenizer import LLaMA32Tokenizer
 from src.training.titan_trainer_config_utils import (
     ActivationCheckpoint,
     ActivationCheckpointMode,
@@ -58,6 +52,7 @@ DEFUALT_TRAINING_RECIPE = TrainingRecipe(
     warmup_steps=1_000,
     fused=False,
     max_norm=1.0,
+    eval_every_n_steps=1000,
 )
 
 bsz256_lr56_steps10k =replace(
@@ -71,11 +66,11 @@ bsz64_lr56_steps10k =replace(
 )
 
 
-
 TRAINING_RECIPE_MAPS = {
     "bsz32_lr25_steps10k": DEFUALT_TRAINING_RECIPE,
     "bsz256_lr56_steps10k": bsz256_lr56_steps10k
 }
+
 
 DEFAULT_ACTIVATION_CHECKPOINT_CONFIG = ActivationCheckpoint(
     # mode=ActivationCheckpointMode.NONE,
@@ -85,40 +80,8 @@ DEFAULT_ACTIVATION_CHECKPOINT_CONFIG = ActivationCheckpoint(
     # selective_ac_option="2",
 )
 
-def build_hf_data_loader(
-    data_components: List[DataComponent],
-    tokenizer: LLaMA32Tokenizer,
-    seed: int,
-    batch_size: int,
-    seq_len: int,
-    world_size: int,
-    rank: int,
-    collate_fn,
-    infinite: bool = True,
-):
-    """Build a data loader for HuggingFace datasets."""
-    all_datasets = []
-    dataset_weights = []
-    for data_component in data_components:
-        dataset_name = data_component.dataset_name
-        weight = data_component.weight
-        hf_ds = HuggingFaceDataset(
-            dataset_name,
-            tokenizer,
-            seq_len=seq_len,
-            world_size=world_size,
-            rank=rank,
-            infinite=infinite,
-        )
-        all_datasets.append(hf_ds)
-        dataset_weights.append(weight)
 
-    combined_ds = WeightedAggregatorDataset(
-        all_datasets,
-        dataset_weights,
-        seed=seed,
-        infinite=infinite,
-    )
-    return DPAwareDataLoader(rank, combined_ds, batch_size=batch_size, collate_fn=collate_fn)
-
+PRETRAINED_MODEL_CKPT_PATH_MAPS = {
+    "meta-llama/Llama-3.2-1B-Instruct": "model_cache/Llama-3.2-1B-Instruct/model.safetensors",
+}
 

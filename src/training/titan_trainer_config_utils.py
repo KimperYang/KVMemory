@@ -42,6 +42,7 @@ class TrainingRecipe:
     warmup_steps: int
     fused: bool
     max_norm: float
+    eval_every_n_steps: int
 
 
 @dataclass

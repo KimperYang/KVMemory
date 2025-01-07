@@ -110,7 +110,9 @@ class TensorBoardLogger(BaseLogger):
 
     def __init__(self, log_dir: str, tag: Optional[str] = None):
         self.tag = tag
-        self.writer = SummaryWriter(log_dir, max_queue=1000)
+        # self.writer = SummaryWriter(log_dir, max_queue=1000)
+        # change max_queue to 10
+        self.writer = SummaryWriter(log_dir, max_queue=10)
         logger.info(f"TensorBoard logging enabled. Logs will be saved at {log_dir}")
 
     def log(self, metrics: Dict[str, Any], step: int) -> None:
@@ -125,7 +127,7 @@ class TensorBoardLogger(BaseLogger):
 class WandBLogger(BaseLogger):
     """Logger implementation for Weights & Biases."""
 
-    def __init__(self, log_dir: str, tag: Optional[str] = None):
+    def __init__(self, log_dir: str, tag: Optional[str] = None, name: Optional[str] = None):
         # Import wandb here to avoid startup import
         import wandb
 
@@ -135,6 +137,7 @@ class WandBLogger(BaseLogger):
         self.wandb.init(
             project="torchtitan",
             dir=log_dir,
+            name=name,
         )
         logger.info("WandB logging enabled")
 
@@ -171,12 +174,15 @@ def build_metric_logger(
     save_tb_folder: str = "tensorboard",
     save_wandb_folder: str = "wandb",
     tag: Optional[str] = None,
+    enable_wandb: bool = True,
+    enable_tensorboard = False,
+    wandb_name: Optional[str] = None,
 ) -> BaseLogger:
     """
     Build an appropriate metric logger based on configuration.
     """
-    enable_tensorboard = True
-    enable_wandb = True
+    # enable_tensorboard = True
+    # enable_wandb = True
     # enable_wandb = False
     rank_0_only = True
 
@@ -217,7 +223,7 @@ def build_metric_logger(
             os.makedirs(wandb_log_dir)
         logger.debug("Attempting to create WandB logger")
         try:
-            return WandBLogger(wandb_log_dir, tag)
+            return WandBLogger(wandb_log_dir, tag, name=wandb_name)
         except Exception as e:
             if "No module named 'wandb'" in str(e):
                 logger.error(
