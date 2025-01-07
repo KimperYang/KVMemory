@@ -56,6 +56,14 @@ def load_data_and_process_fn(
             raise NotImplementedError()
         remove_columns=["system", "mask", "dataset", "conversations"]
         num_shards = 32
+    elif data_component_name in ["tulu"]:
+        data_path = "dataset_cache/processed/tulu/sft"
+        if data_component_name == "tulu":
+            preprocessor_fn = preprocessor.process_tulu
+        else:
+            raise NotImplementedError()
+        remove_columns=["id", "messages", "source"]
+        num_shards = 32
     elif data_component_name in ["qa", "qa_mem"]:
         data_path = f"dataset_cache/processed/2wiki/{data_component_name}"
         if data_component_name == "qa":

@@ -31,7 +31,7 @@ DATA_V3: List[DataComponent] = [
     DataComponent(dataset_name="text", weight=25.0),
     DataComponent(dataset_name="text_mem", weight=10.0),
     DataComponent(dataset_name="text_inst", weight=10.0),
-    DataComponent(dataset_name="sft", weight=25.0),
+    DataComponent(dataset_name="tulu", weight=25.0),
     DataComponent(dataset_name="sft_mem", weight=20.0),
     DataComponent(dataset_name="qa", weight=5.0),
     DataComponent(dataset_name="qa_mem", weight=5.0),
