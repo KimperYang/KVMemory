@@ -72,10 +72,14 @@ TRAINING_RECIPE_MAPS = {
 }
 
 
-DEFAULT_ACTIVATION_CHECKPOINT_CONFIG = ActivationCheckpoint(
-    # mode=ActivationCheckpointMode.NONE,
-    # mode=ActivationCheckpointMode.SELECTIVE,
+FULL_ACTIVATION_CHECKPOINT_CONFIG = ActivationCheckpoint(
     mode=ActivationCheckpointMode.FULL,
+    selective_ac_option="op",
+    # selective_ac_option="2",
+)
+
+SELECTIVE_ACTIVATION_CHECKPOINT_CONFIG = ActivationCheckpoint(
+    mode=ActivationCheckpointMode.SELECTIVE,
     selective_ac_option="op",
     # selective_ac_option="2",
 )

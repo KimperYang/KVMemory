@@ -27,14 +27,20 @@ NGPU=${NGPU:-"8"}
 PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True" \
 torchrun --nproc_per_node=8 --rdzv_backend c10d --rdzv_endpoint="localhost:0" \
     --local-ranks-filter ${LOG_RANK} --role rank --tee 3 \
-    titan_trainer.py --config_name block_datav1_step10k_bsz64_single_node
+    titan_trainer.py --config_name block_datav1_step10k_bsz64_single_node_selective_ckpt
 ```
 
-Available config names: block_datav1_step10k_bsz64_single_node, block_datav1_step10k_bsz256_4_node
+3. View the tensorboard logs in remote server:
+Run the command in the local machine:
+ssh -L 6006:localhost:6006 satori1
 
-3. View the tensorboard logs:
-ssh -N -f -L localhost:16006:localhost:6006 satori1
+Run the command in the remote server:
 tensorboard --logdir=/nobackup/users/bairu/repos/KVMemory/run_logs/block_datav1_step10k/tensorboard/20250105-1953 --port=6006
+
+Now open http://localhost:6006/ in the local machine.
+
+4. Visualize multiple tensorboard logs:
+tensorboard --logdir_spec=full_ckpt:20250106-1910,selective_ckpt:20250106-1919 --port=6007
 """
 
 import argparse
@@ -78,16 +84,17 @@ from src.training.titan_trainer_config_utils import (
 from src.training.titan_training_utils import (
     COMMON_CHECKPOINT_CONFIG,
     DATASET_MAPPING,
-    DEFAULT_ACTIVATION_CHECKPOINT_CONFIG,
     DEFUALT_TRAINING_RECIPE,
+    FULL_ACTIVATION_CHECKPOINT_CONFIG,
     PRETRAINED_MODEL_CKPT_PATH_MAPS,
+    SELECTIVE_ACTIVATION_CHECKPOINT_CONFIG,
     bsz64_lr56_steps10k,
     bsz256_lr56_steps10k,
 )
 from src.training.torchtune_model_checkpointer import load_checkpoint
 
 CONFIG_DICT = {
-    "block_datav1_step10k_bsz64_single_node": TitanTrainerConfig(
+    "block_datav1_step10k_bsz64_single_node_full_ckpt": TitanTrainerConfig(
         model_name_or_path="meta-llama/Llama-3.2-1B-Instruct",
         tokenizer_path="data/titan_tokenizer/original/tokenizer.model",
         dataset_version="v1",
@@ -95,9 +102,19 @@ CONFIG_DICT = {
         job_dump_folder="run_logs/block_datav1_step10k",
         ckpt_config=COMMON_CHECKPOINT_CONFIG,
         training_recipe=bsz64_lr56_steps10k,
-        activation_checkpoint=DEFAULT_ACTIVATION_CHECKPOINT_CONFIG,
+        activation_checkpoint=FULL_ACTIVATION_CHECKPOINT_CONFIG,
     ),
-    "block_datav1_step10k_bsz256_4_node": TitanTrainerConfig(
+    "block_datav1_step10k_bsz64_single_node_selective_ckpt": TitanTrainerConfig(
+        model_name_or_path="meta-llama/Llama-3.2-1B-Instruct",
+        tokenizer_path="data/titan_tokenizer/original/tokenizer.model",
+        dataset_version="v1",
+        seq_len=4096,
+        job_dump_folder="run_logs/block_datav1_step10k",
+        ckpt_config=COMMON_CHECKPOINT_CONFIG,
+        training_recipe=bsz64_lr56_steps10k,
+        activation_checkpoint=SELECTIVE_ACTIVATION_CHECKPOINT_CONFIG,
+    ),
+    "block_datav1_step10k_bsz256_4_node_full_ckpt": TitanTrainerConfig(
         model_name_or_path="meta-llama/Llama-3.2-1B-Instruct",
         tokenizer_path="data/titan_tokenizer/original/tokenizer.model",
         dataset_version="v1",
@@ -105,7 +122,17 @@ CONFIG_DICT = {
         job_dump_folder="run_logs/block_datav1_step10k",
         ckpt_config=COMMON_CHECKPOINT_CONFIG,
         training_recipe=bsz256_lr56_steps10k,
-        activation_checkpoint=DEFAULT_ACTIVATION_CHECKPOINT_CONFIG,
+        activation_checkpoint=FULL_ACTIVATION_CHECKPOINT_CONFIG,
+    ),
+    "block_datav1_step10k_bsz256_4_node_selective_ckpt": TitanTrainerConfig(
+        model_name_or_path="meta-llama/Llama-3.2-1B-Instruct",
+        tokenizer_path="data/titan_tokenizer/original/tokenizer.model",
+        dataset_version="v1",
+        seq_len=4096,
+        job_dump_folder="run_logs/block_datav1_step10k",
+        ckpt_config=COMMON_CHECKPOINT_CONFIG,
+        training_recipe=bsz256_lr56_steps10k,
+        activation_checkpoint=SELECTIVE_ACTIVATION_CHECKPOINT_CONFIG,
     ),
 }
 
