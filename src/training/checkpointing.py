@@ -145,6 +145,7 @@ class CheckpointManager:
         lr_schedulers: SchedulersContainer,
         states: Dict[str, Any],
         ckpt_config: CheckpointConfig,
+        job_dump_folder: str,
     ) -> None:
         ckpt_config = ckpt_config
         self.enable_checkpoint = ckpt_config.enable_checkpoint
@@ -189,8 +190,8 @@ class CheckpointManager:
         )
         self.states.update(lr_schedulers.get_lr_scheduler_state())
 
-        # self.folder = os.path.join(job_config.job.dump_folder, ckpt_config.folder)
-        self.folder = ckpt_config.folder
+        self.folder = os.path.join(job_dump_folder, ckpt_config.folder)
+        # self.folder = ckpt_config.folder
         self.interval_type = (
             IntervalType.SECONDS
             if ckpt_config.interval_type == "seconds"

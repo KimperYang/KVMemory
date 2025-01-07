@@ -313,6 +313,7 @@ def main(config_name: str):
         lr_schedulers=lr_schedulers,
         states={"train_state": train_state},
         ckpt_config=task_config.ckpt_config,
+        job_dump_folder=job_dump_folder,
     )
 
     if task_config.ckpt_config.create_seed_checkpoint:
