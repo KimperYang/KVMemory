@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import functools
+import math
 from typing import Any, Dict, List
 
 import torch
@@ -166,6 +167,28 @@ def linear_warmup_linear_decay(
 
     return curr_adjustment
 
+def linear_warmup_cos_decay(
+    warmup_steps: int,
+    decay_steps: int,
+    current_step: int,
+    num_cycles: float = 0.5
+) -> float:
+    if current_step < warmup_steps:
+        # linear warmup
+        # 0-indexed step, hence + 1 adjustments
+        current_step += 1
+        curr_adjustment = float(current_step / (warmup_steps + 1))
+        return curr_adjustment
+
+    # cosine
+    progress = (current_step - warmup_steps) / max(1, decay_steps)
+
+    cosine_lr_multiple = 0.5 * (
+        1.0 + math.cos(math.pi * num_cycles * 2.0 * progress)
+    )
+    return max(0.0, cosine_lr_multiple)
+
+
 
 class SchedulersContainer:
     """Util for calling step on multiple learning rate schedulers needed for virtual pipeline stages"""
@@ -195,8 +218,14 @@ def build_lr_schedulers(
     optimizers,
     steps: int,
     warmup_steps: int,
+    scheduler_type = "linear",
 ) -> SchedulersContainer:
     warmup_steps = int(warmup_steps)
     decay_steps = float(max(1, steps - warmup_steps))
-    lr_lambda = functools.partial(linear_warmup_linear_decay, warmup_steps, decay_steps)
+    if scheduler_type == "linear":
+        lr_lambda = functools.partial(linear_warmup_linear_decay, warmup_steps, decay_steps)
+    elif scheduler_type == "cosine":
+        lr_lambda = functools.partial(linear_warmup_cos_decay, warmup_steps, decay_steps)
+    else:
+        raise ValueError()
     return SchedulersContainer(optimizers, lr_lambda)

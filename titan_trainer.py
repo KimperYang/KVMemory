@@ -160,6 +160,7 @@ def main(config_name: str):
     log_freq = 10
     train_timeout_seconds = 100
     eval_interval = task_config.training_recipe.eval_every_n_steps
+    scheduler_type = "cosine"
 
 
     logger.info(f"Starting job: {config_name}")
@@ -301,6 +302,7 @@ def main(config_name: str):
         optimizers.optimizers,
         steps=task_config.training_recipe.max_steps,
         warmup_steps=task_config.training_recipe.warmup_steps,
+        scheduler_type=scheduler_type,
     )
 
     train_state = TrainState()
