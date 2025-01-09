@@ -12,3 +12,4 @@ tem.py
 training_res/
 run_logs/
 model_cache/
+launch_cmds/

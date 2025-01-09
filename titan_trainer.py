@@ -242,18 +242,8 @@ def main(config_name: str):
     )
 
     logger.info(f"Building {model_name}...")
-    model = llama3_2_1b()
-    ckpt_path = PRETRAINED_MODEL_CKPT_PATH_MAPS[task_config.model_name_or_path]
-    state_dict = load_checkpoint(ckpt_path=ckpt_path, model_name=task_config.model_name_or_path)
-    is_rank_0 = torch.distributed.get_rank() == 0
-    training.load_from_full_model_state_dict(
-        model=model,
-        full_sd=state_dict,
-        device=device_type,
-        is_rank_zero=is_rank_0,
-        strict=True,
-    )
-
+    with torch.device("meta"):
+        model = llama3_2_1b()
     # log model size
     model_param_count = utils.get_num_params(model)
     logger.info(
@@ -270,7 +260,7 @@ def main(config_name: str):
     # init_device = device_type
     # buffer_device = None
 
-    model = model.to(device_type)
+    # model = model.to(device_type)
     # apply PT-D Tensor Parallel, activation checkpointing, torch.compile, Data Parallel
     parallelize_llama(
         model,
@@ -278,9 +268,28 @@ def main(config_name: str):
         parallel_dims,
         activation_checkpoint=task_config.activation_checkpoint,
     )
+    with training.set_default_dtype(torch.bfloat16), device:
+        for m in model.modules():
+            # RoPE is not covered in state dict
+            if hasattr(m, "rope_init"):
+                m.rope_init()
+
     # model.to_empty(device=init_device)
     # with torch.no_grad():
     #     model.init_weights(buffer_device=buffer_device)
+    with torch.no_grad():
+        ckpt_path = PRETRAINED_MODEL_CKPT_PATH_MAPS[task_config.model_name_or_path]
+        state_dict = load_checkpoint(ckpt_path=ckpt_path, model_name=task_config.model_name_or_path)
+        is_rank_0 = torch.distributed.get_rank() == 0
+        training.load_from_full_model_state_dict(
+            model=model,
+            full_sd=state_dict,
+            device=device_type,
+            is_rank_zero=is_rank_0,
+            strict=True,
+        )
+
+
     model.train()
 
     model_parts = [model]
