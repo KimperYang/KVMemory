@@ -20,24 +20,15 @@ def calculate_rouge_l_score(candidate, reference):
 def main():
 
     parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
-    parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
     parser.add_argument('--run', type=str, required=True, help='Run name')
 
     args = parser.parse_args()
 
-    ckpt = args.ckpt
     run_name = args.run
 
-    if "meta" in run_name:
-        global_tokenizer = AutoTokenizer.from_pretrained(f"{run_name}")
+    global_tokenizer = AutoTokenizer.from_pretrained(f"{run_name}")
 
-        global_model = AutoModelForCausalLM.from_pretrained(f"{run_name}", torch_dtype=torch.bfloat16)
-
-    else:
-        global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
-
-        global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
-
+    global_model = AutoModelForCausalLM.from_pretrained(f"{run_name}", torch_dtype=torch.bfloat16)
     global_model.to('cuda')
 
     samsum = load_dataset("Samsung/samsum")
@@ -46,7 +37,9 @@ def main():
     sys_id = global_tokenizer(sys, add_special_tokens=False).input_ids
     context_id = sys_id
 
-    num_demon = 10
+    biased_index = []
+    num_demon = 20
+    curren_position = len(sys_id)
 
     for idx in range(num_demon):
 
@@ -55,9 +48,15 @@ def main():
 
         context_id += demonstration_id
 
+        biased_index.append([curren_position, curren_position + len(demonstration_id)])
+
+        curren_position += len(demonstration_id)
+
+    attention_matrix = construct_biased_attention_matrix(len(context_id), biased_index, len(context_id), global_model.device).unsqueeze(0).unsqueeze(0)
+
     global_model.eval()
     with torch.no_grad():
-            outputs = global_model(input_ids = torch.tensor([context_id],device=global_model.device))
+            outputs = global_model(input_ids = torch.tensor([context_id],device=global_model.device), attention_mask = attention_matrix)
             past_key_values = outputs.past_key_values
 
     total_num = len(samsum['test'])
@@ -105,9 +104,9 @@ def main():
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
     if "meta" in run_name:
-        file_name = f"result/new_data/upper/Samsum_original_demon{num_demon}_{avg_score}_{time_str}.jsonl"
+        file_name = f"result/new_data/block/Samsum_promptcache_demon{num_demon}_{avg_score}_{time_str}.jsonl"
     else:
-        file_name = f"result/new_data/upper/Samsum_demon{num_demon}_ckpt{ckpt}_{avg_score}_{time_str}.jsonl"
+        file_name = f"result/new_data/block/Samsum_demon{num_demon}_{avg_score}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

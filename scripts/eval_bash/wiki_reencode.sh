@@ -4,10 +4,12 @@ source /u/shiyuucsb/.bashrc
 conda activate kvm
 cd /dccstor/scllm/KVMemory
 
-CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/2wiki/wiki_reencode.py --ckpt 10000 --run "reencode_5_bsz256" --reencode 5 &
-CUDA_VISIBLE_DEVICES=1 python scripts/evaluation/2wiki/wiki_reencode.py --ckpt 8000 --run "reencode_10_bsz256" --reencode 10 &
-CUDA_VISIBLE_DEVICES=2 python scripts/evaluation/2wiki/wiki_seq.py --ckpt 10000 &
-CUDA_VISIBLE_DEVICES=3 python scripts/evaluation/2wiki/wiki_block.py --ckpt "/dccstor/scllm/Block-Attention/training_res/checkpoint-624" &
-CUDA_VISIBLE_DEVICES=4 python scripts/evaluation/2wiki/wiki_promptcache.py &
+CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/2wiki/wiki_reencode.py --ckpt 6000 --run "new_data/reencode_5" --reencode 5 &
+CUDA_VISIBLE_DEVICES=1 python scripts/evaluation/2wiki/wiki_upper.py --run "new_data/upper" --ckpt 6000 &
+CUDA_VISIBLE_DEVICES=2 python scripts/evaluation/2wiki/wiki_seq.py --run "new_data/seq" --ckpt 6000 &
+CUDA_VISIBLE_DEVICES=3 python scripts/evaluation/2wiki/wiki_bias.py --run "new_data/bias" --ckpt 6000 &
+CUDA_VISIBLE_DEVICES=4 python scripts/evaluation/2wiki/wiki_reencode.py --ckpt 6000 --run "new_data/reencode_1" --reencode 1 &
+# CUDA_VISIBLE_DEVICES=3 python scripts/evaluation/2wiki/wiki_block.py --ckpt "/dccstor/scllm/Block-Attention/training_res/checkpoint-624" &
+# CUDA_VISIBLE_DEVICES=4 python scripts/evaluation/2wiki/wiki_promptcache.py &
 
 wait

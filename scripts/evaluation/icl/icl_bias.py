@@ -9,7 +9,7 @@ label_dict = {0:'abbreviation', 1:'entity', 2:'description', 3:'human', 4:'locat
 
 # Step 1: Load the Pretrained Model and Tokenizer
 # model_name = "/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-30000"
-model_name = "training_res/multi_node/bias_bsz256/checkpoint-10000"
+model_name = "training_res/new_data/bias/checkpoint-6000"
 
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
@@ -20,8 +20,8 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
 
 def construct_examples(data):
-    num_each_class = 4
-    max_demonstration = 20
+    num_each_class = 2
+    max_demonstration = 10
     num_demo = 0
     num_stats = [0] * len(label_dict)
     context = ["<|begin_of_text|>"]
@@ -72,7 +72,8 @@ idx = 0
 for st in context:
     tem_id = tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
     id_list.append(tem_id)
-    biased_index.append([idx, idx + tem_id.size(1)])
+    if "<MEM_START>" in st:
+        biased_index.append([idx, idx + tem_id.size(1)])
     idx = idx + tem_id.size(1)
 
 prefix_id = torch.cat(id_list, dim = 1)

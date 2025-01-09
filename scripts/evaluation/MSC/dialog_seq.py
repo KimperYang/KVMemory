@@ -1,21 +1,36 @@
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, DynamicCache
-import pandas as pd    
-import json
+import argparse
 import datetime
-from rouge_score import rouge_scorer
+import json
+
+import pandas as pd
+import torch
 from datasets import load_dataset
-from peft import PeftModel, PeftConfig
+from rouge_score import rouge_scorer
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
-# global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-chat-hf")
-# base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-chat-hf", torch_dtype=torch.float16, device_map="auto")
+from src.data.attention import construct_biased_attention_matrix
 
-global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
-base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16, device_map="auto")
-peft_config_path = "/mnt/data/jingbo/kv_dump_combine_mix5/checkpoint-5000"  # Path to the directory where LoRA weights are stored
-lora_config = PeftConfig.from_pretrained(peft_config_path)
+parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
+parser.add_argument('--run', type=str, required=True, help='Path under training_res')
+parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
 
-global_model = PeftModel.from_pretrained(base_model, peft_config_path)
+args = parser.parse_args()
+
+run_name = args.run
+ckpt = args.ckpt
+
+global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
+
+global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+
+special_start_token = 128011
+# vocab_size = len(global_tokenizer)
+# base_model.resize_token_embeddings(vocab_size)
+
+# peft_config_path = "/mnt/data/jingbo/kv_dump_combine_mix5/checkpoint-5000"  # Path to the directory where LoRA weights are stored
+# lora_config = PeftConfig.from_pretrained(peft_config_path)
+
+# global_model = PeftModel.from_pretrained(base_model, peft_config_path)
 
 def generate_kv(prompt):
 
@@ -56,7 +71,7 @@ def append_kv(kv_list):
     concatenated_past_key_values = ()
 
     for layer in range(num_layers):
-        
+
         keys_list = [kv[layer][0] for kv in kv_list]
         values_list = [kv[layer][1] for kv in kv_list]
 
@@ -69,11 +84,11 @@ def append_kv(kv_list):
     # torch.save(values, "values.pt")
     return concatenated_past_key_values
 
-def inference(input_ids, past_key_values, model_name="meta-llama/Llama-2-7b-chat-hf", max_length=2000):
+def inference(input_ids, past_key_values, model_name="meta-llama/Llama-3.2-1B-Instruct", max_length=2000):
 
     tokenizer = global_tokenizer
     model = global_model
-    
+    attention_msk = torch.tensor([[1]*(input_ids.size(1) + past_key_values[0][0].size(2))]).to(input_ids.device)
     model.eval()
 
     max_length = input_ids.size(1) + 100
@@ -82,6 +97,7 @@ def inference(input_ids, past_key_values, model_name="meta-llama/Llama-2-7b-chat
 
         outputs = model.generate(
             input_ids=input_ids,
+            attention_mask=attention_msk,
             max_length=max_length,
             do_sample=False,
             temperature=None,
@@ -154,46 +170,58 @@ def main():
     score_list = []
 
     for i in range(total_num):
-        # memory_list = ["<s>[INST] Your task is to answer a question from the user about your prior conversations. The following is a summary of all your prior conversations: "]
-        memory_list = ["<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYour task is to answer a question from the user about your prior conversations.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n The following is a summary of all your prior conversations.\n"]
+        memory_list = ["<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYour task is to answer a question from the user about your prior conversations.<|eot_id|>"]
         print("id:", str(i))
-        # memory_list.append(template)
 
         for j in range(len(dataset["train"]["summary_speaker_1"][i])):
             # print(j)
             memory = reorganize_summary(dataset["train"]["summary_speaker_1"][i][j], dataset["train"]["summary_speaker_2"][i][j])
             memory_list.append(memory)
-     
-        # memory_list.append(" Answer from the perspective of the persona provided (do not say that you are an AI assistant). If you do not have enough information to answer the question, reply 'NO ANSWER'. Either reply with the answer, or reply 'NO ANSWER', do not say anything else. ")
-        memory_list.append(" Answer from the perspective of the persona provided (do not say that you are an AI assistant).")
 
-        tokenized_sentences = [global_tokenizer(sentence, return_tensors="pt", add_special_tokens=False) for sentence in memory_list]
-    
         current_position = 0
-        kv_list = []
-        for tokenized in tokenized_sentences:
-            sentence_length = tokenized['input_ids'].size(1)
-            print(sentence_length)
-            position_ids = torch.arange(current_position, current_position + sentence_length).unsqueeze(0)
-            outputs = global_model(input_ids=tokenized['input_ids'].to(global_model.device), attention_mask=tokenized['attention_mask'].to(global_model.device), position_ids=position_ids.to(global_model.device))
-            kv_list.append(outputs.past_key_values)
-            current_position += sentence_length
-        
-        concatenated_past_key_values = append_kv(kv_list)
+        id_list = []
+        biased_index = []
 
-        question = dataset["train"]["self_instruct"][i]["B"] + "'[/INST]"
-        # print(seq)
+        for idx in range(len(memory_list)):
+
+            mem_idx = idx - 1
+            tem_id = global_tokenizer(memory_list[idx], add_special_tokens=False, return_tensors="pt").input_ids
+
+            if "<|begin_of_text|><|start_header_id|>system<|end_header_id|>" not in memory_list[idx]:
+
+                biased_index.append([current_position + 1, current_position + tem_id.size(1) - 1])
+                tem_id = torch.cat([torch.tensor([[special_start_token + mem_idx * 2]]), tem_id, torch.tensor([[special_start_token + mem_idx * 2 + 1]])], dim = 1)
+
+            id_list.append(tem_id)
+
+            current_position = current_position + tem_id.size(1)
+
+        question = "<|start_header_id|>user<|end_header_id|>\n\n Answer from the perspective of the conversation summaries provided (do not say that you are an AI assistant)." + dataset["train"]["self_instruct"][i]["B"] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         question_ids = global_tokenizer(question, return_tensors="pt", add_special_tokens=False).input_ids
 
-        cache_ids = torch.cat([tokenized['input_ids'] for tokenized in tokenized_sentences], dim=1)
+        cache_id = torch.cat(id_list, dim=1)
 
-        final_ids = torch.cat([cache_ids, question_ids], dim=1)
+        generate_id = torch.cat([cache_id, question_ids], dim=1).to(global_model.device)
 
-        print(cache_ids.size(1), question_ids.size(1), concatenated_past_key_values[0][0].size(2))
-        generated_seq = inference(final_ids.to(global_model.device), past_key_values= concatenated_past_key_values)
+        attention_matrix = construct_biased_attention_matrix(cache_id.size(1), biased_index, cache_id.size(1), global_model.device).unsqueeze(0).unsqueeze(0)
 
+        with torch.no_grad():
+            outputs = global_model(input_ids = cache_id.to(global_model.device), attention_mask = attention_matrix)
+            past_key_values = outputs.past_key_values
 
-        response = generated_seq[0].split('[/INST]')[1]
+            outputs = global_model.generate(
+                input_ids=generate_id,
+                max_new_tokens=200,
+                do_sample=False,
+                temperature=None,
+                top_p=1.0,
+                past_key_values=past_key_values,
+                use_cache=True
+            )
+
+        generated_seq = global_tokenizer.batch_decode(outputs, skip_special_tokens=True)
+
+        response = generated_seq[0].split("assistant\n\n")[-1]
 
         gold_answer = dataset["train"]["self_instruct"][i]["A"]
         score = calculate_rouge_l_score(response, gold_answer)
@@ -202,14 +230,13 @@ def main():
         print('score:', str(score))
         score_list.append(score)
         res_list.append({"score": str(score),"question": dataset["train"]["self_instruct"][i]["B"], "response": response, "gold_answer": gold_answer})
-        
 
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
     final_score = sum(score_list) / len(score_list)
 
-    file_name = f"result/dialog/dialog_llama3.21B_mix5_5000steps_{final_score}_{time_str}.json"
+    file_name = f"result/new_data/seq/MSC_ckpt{ckpt}_{final_score}_{time_str}.jsonl"
 
     with open(file_name, 'w') as f:
         for entry in res_list:

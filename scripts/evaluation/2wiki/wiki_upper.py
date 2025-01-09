@@ -1,12 +1,15 @@
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, DynamicCache
-import pandas as pd    
-import json
+import argparse
 import datetime
+import json
 import string
 from typing import List
-from src.data.attention import construct_biased_attention_matrix
+
+import pandas as pd
 import regex
+import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer, DynamicCache
+
+from src.data.attention import construct_biased_attention_matrix
 
 # vocab_size = len(global_tokenizer)
 # base_model.resize_token_embeddings(vocab_size)
@@ -47,9 +50,16 @@ def best_subspan_em(prediction: str, ground_truths: List[str]) -> float:
     return 0.0
 
 def main():
-    
-    ckpt = 10000
-    run_name = "baseline_bsz256"
+
+    parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
+    parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
+    parser.add_argument('--run', type=str, required=True, help='Checkpoint number')
+
+    args = parser.parse_args()
+
+    ckpt = args.ckpt
+    run_name = args.run
+
     file_path = "data/raw/dev.json"
     with open(file_path, 'r') as file:
         data = json.load(file)
@@ -60,10 +70,10 @@ def main():
 
     # global_model = AutoModelForCausalLM.from_pretrained(run_name, torch_dtype=torch.bfloat16)
 
-    global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/multi_node/{run_name}/checkpoint-{ckpt}")
+    global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
 
-    global_model = AutoModelForCausalLM.from_pretrained(f"training_res/multi_node/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16, attn_implementation="flash_attention_2")
-    
+    global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16, attn_implementation="flash_attention_2")
+
     global_model.to('cuda')
     # template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
 
@@ -79,7 +89,6 @@ def main():
         print("Processing sample:", str(i))
         memory_list = [template]
 
-        
         for j in range(0,10):
             title = data_list[i]['context'][j][0]
             text = " ".join(data_list[i]['context'][j][1])
@@ -138,7 +147,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/12-15/{run_name}_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/{run_name}/wiki_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

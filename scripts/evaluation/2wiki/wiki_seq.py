@@ -1,13 +1,16 @@
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, DynamicCache
-import pandas as pd    
-import json
+import argparse
 import datetime
+import json
 import string
 from typing import List
-from src.data.attention import construct_biased_attention_matrix
+
+import pandas as pd
 import regex
-import argparse
+import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer, DynamicCache
+
+from src.data.attention import construct_biased_attention_matrix
+
 # vocab_size = len(global_tokenizer)
 # base_model.resize_token_embeddings(vocab_size)
 
@@ -50,21 +53,22 @@ def main():
 
     parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
     parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
+    parser.add_argument('--run', type=str, required=True, help='Checkpoint number')
 
     args = parser.parse_args()
 
     ckpt = args.ckpt
+    run_name = args.run
 
-    run_name = "seq_bsz256"
     file_path = "data/raw/dev.json"
     with open(file_path, 'r') as file:
         data = json.load(file)
     data_list = data
     # print("".join(data_list[0]['context'][8][1]))
 
-    global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/multi_node/{run_name}/checkpoint-{ckpt}")
+    global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
 
-    global_model = AutoModelForCausalLM.from_pretrained(f"training_res/multi_node/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+    global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
 
     global_model.to('cuda')
     # template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
@@ -135,7 +139,7 @@ def main():
             )
         # print(outputs)
         generated_seq = global_tokenizer.batch_decode(outputs, skip_special_tokens=True)
-    
+
         response = generated_seq[0].split('assistant\n\n')[-1]
         # print(response)
         print("response:", response)
@@ -146,14 +150,14 @@ def main():
 
         res_list.append({"id": str(i),"question": data_list[i]['question'], "response": response, "gold_answer": data_list[i]['answer'], "Score": score})
         print("Correct progress", correct_num)
-        
+
     accuracy = correct_num / total_num
     print(accuracy)
 
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/1-1/wiki_{run_name}_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/{run_name}/wiki_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

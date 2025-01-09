@@ -4,8 +4,7 @@ source /u/shiyuucsb/.bashrc
 conda activate kvm
 cd /dccstor/scllm/KVMemory
 
-python scripts/evaluation/2wiki/wiki_bias.py --ckpt 10000
-python scripts/evaluation/2wiki/wiki_bias.py --ckpt 6000
-python scripts/evaluation/2wiki/wiki_bias.py --ckpt 8000
-python scripts/evaluation/2wiki/wiki_bias.py --ckpt 4000
-python scripts/evaluation/2wiki/wiki_bias.py --ckpt 2000
+CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/2wiki/wiki_block.py --run "/dccstor/scllm/Block-Attention/training_res" --ckpt 624 &
+CUDA_VISIBLE_DEVICES=1 python scripts/evaluation/2wiki/wiki_block.py --run "/dccstor/scllm/KVMemory/training_res/new_data/block" --ckpt 6000 &
+
+wait

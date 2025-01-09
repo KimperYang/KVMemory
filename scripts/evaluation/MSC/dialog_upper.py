@@ -5,12 +5,26 @@ import json
 import datetime
 from rouge_score import rouge_scorer
 from datasets import load_dataset
+import argparse
 
-run_name = "kv_dump_bias_30000steps_bsz256_5e-6_full"
-ckpt = 30000
+parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
+parser.add_argument('--run', type=str, required=True, help='Path under training_res')
+parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
 
-global_tokenizer = AutoTokenizer.from_pretrained(f"/mnt/data/jingbo/{run_name}/checkpoint-{ckpt}")
-global_model = AutoModelForCausalLM.from_pretrained(f"/mnt/data/jingbo/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16, device_map="auto")
+args = parser.parse_args()
+
+run_name = args.run
+ckpt = args.ckpt
+
+if "meta" not in run_name:
+    global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
+
+    global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+
+else:
+    global_tokenizer = AutoTokenizer.from_pretrained(f"{run_name}")
+
+    global_model = AutoModelForCausalLM.from_pretrained(f"{run_name}", torch_dtype=torch.bfloat16)
 
 def generate_kv(prompt):
 
@@ -185,7 +199,10 @@ def main():
 
     final_score = sum(score_list) / len(score_list)
 
-    file_name = f"result/11-26/dialog/{run_name}_ckpt{ckpt}_{final_score}_{time_str}.json"
+    if "meta" not in run_name:
+        file_name = f"result/new_data/upper/MSC_ckpt{ckpt}_{final_score}_{time_str}.json"
+    else:
+        file_name = f"result/new_data/upper/MSC_original_ckpt{ckpt}_{final_score}_{time_str}.json"
 
     with open(file_name, 'w') as f:
         for entry in res_list:

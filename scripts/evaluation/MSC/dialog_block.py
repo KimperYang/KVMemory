@@ -1,23 +1,41 @@
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, DynamicCache
-import pandas as pd    
-import json
+import argparse
 import datetime
-from rouge_score import rouge_scorer
+import json
+
+import pandas as pd
+import torch
 from datasets import load_dataset
-from peft import PeftModel, PeftConfig
+from rouge_score import rouge_scorer
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
-global_tokenizer = AutoTokenizer.from_pretrained("/mnt/data/jingbo/kv_dump_combine_mix5/checkpoint-5000")
+from src.data.attention import construct_biased_attention_matrix
 
-base_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16)
+parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
+parser.add_argument('--run', type=str, required=True, help='Path under training_res')
+parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
 
-vocab_size = len(global_tokenizer)
-base_model.resize_token_embeddings(vocab_size)
+args = parser.parse_args()
 
-peft_config_path = "/mnt/data/jingbo/kv_dump_combine_mix5/checkpoint-5000"  # Path to the directory where LoRA weights are stored
-lora_config = PeftConfig.from_pretrained(peft_config_path)
+run_name = args.run
+ckpt = args.ckpt
 
-global_model = PeftModel.from_pretrained(base_model, peft_config_path)
+if "meta" not in run_name:
+    global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
+
+    global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+
+else:
+    global_tokenizer = AutoTokenizer.from_pretrained(f"{run_name}")
+
+    global_model = AutoModelForCausalLM.from_pretrained(f"{run_name}", torch_dtype=torch.bfloat16)
+
+# vocab_size = len(global_tokenizer)
+# base_model.resize_token_embeddings(vocab_size)
+
+# peft_config_path = "/mnt/data/jingbo/kv_dump_combine_mix5/checkpoint-5000"  # Path to the directory where LoRA weights are stored
+# lora_config = PeftConfig.from_pretrained(peft_config_path)
+
+# global_model = PeftModel.from_pretrained(base_model, peft_config_path)
 
 def generate_kv(prompt):
 
@@ -58,7 +76,7 @@ def append_kv(kv_list):
     concatenated_past_key_values = ()
 
     for layer in range(num_layers):
-        
+
         keys_list = [kv[layer][0] for kv in kv_list]
         values_list = [kv[layer][1] for kv in kv_list]
 
@@ -133,7 +151,7 @@ def reorganize_summary(sum1, sum2):
     concatenated_asst = "You: " + " ".join(sum1)
     concatenated_user = "User: " + " ".join(sum2)
 
-    return concatenated_asst + " " + concatenated_user + "<MEM>"
+    return concatenated_asst + " " + concatenated_user
 
 def calculate_rouge_l_score(candidate, reference):
     scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
@@ -157,47 +175,53 @@ def main():
     score_list = []
 
     for i in range(total_num):
-        memory_list = ["<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYour task is to answer a question from the user about your prior conversations.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n The following is a summary of all your prior conversations.\n"]
+        memory_list = ["<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYour task is to answer a question from the user about your prior conversations.<|eot_id|>"]
         print("id:", str(i))
-        # memory_list.append(template)
 
         for j in range(len(dataset["train"]["summary_speaker_1"][i])):
             # print(j)
             memory = reorganize_summary(dataset["train"]["summary_speaker_1"][i][j], dataset["train"]["summary_speaker_2"][i][j])
             memory_list.append(memory)
-     
-        memory_list.append(" Answer from the perspective of the conversation summaries provided (do not say that you are an AI assistant). <MEM>")
-        # template = f"[INST] Your task is to answer a question from the user about your prior conversations. The following is a summary of all your prior conversations: {memory} Answer from the perspective of the persona provided (do not say that you are an AI assistant). If you do not have enough information to answer the question, reply 'NO ANSWER'. Either reply with the answer, or reply 'NO ANSWER', do not say anything else. "
-        # print(memory_list)
-        # print(new_prompt)
 
-        # tokenized_batch  = global_tokenizer(memory_list, return_tensors="pt", add_special_tokens=False, padding=False, truncation=False)
-        tokenized_sentences = [global_tokenizer(sentence, return_tensors="pt", add_special_tokens=False) for sentence in memory_list]
-    
         current_position = 0
-        kv_list = []
-        for tokenized in tokenized_sentences:
-            sentence_length = tokenized['input_ids'].size(1)
-            position_ids = torch.arange(current_position, current_position + sentence_length).unsqueeze(0)
-            outputs = global_model(input_ids=tokenized['input_ids'].to(global_model.device), attention_mask=tokenized['attention_mask'].to(global_model.device), position_ids=position_ids.to(global_model.device))
-            kv_list.append(outputs.past_key_values)
-            current_position += sentence_length
-        
-        concatenated_past_key_values = append_kv(kv_list)
+        id_list = []
+        biased_index = []
 
-        question = dataset["train"]["self_instruct"][i]["B"] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
-        # print(seq)
+        for st in memory_list:
+            tem_id = global_tokenizer(st, add_special_tokens=False, return_tensors="pt").input_ids
+
+            id_list.append(tem_id)
+
+            if "<|begin_of_text|><|start_header_id|>system<|end_header_id|>" not in st:
+                biased_index.append([current_position, current_position + tem_id.size(1)])
+
+            current_position = current_position + tem_id.size(1)
+
+        question = "<|start_header_id|>user<|end_header_id|>\n\n Answer from the perspective of the conversation summaries provided (do not say that you are an AI assistant)." + dataset["train"]["self_instruct"][i]["B"] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         question_ids = global_tokenizer(question, return_tensors="pt", add_special_tokens=False).input_ids
 
-        cache_ids = torch.cat([tokenized['input_ids'] for tokenized in tokenized_sentences], dim=1)
+        cache_id = torch.cat(id_list, dim=1)
 
-        final_ids = torch.cat([cache_ids, question_ids], dim=1)
+        generate_id = torch.cat([cache_id, question_ids], dim=1).to(global_model.device)
 
-        # print(cache_ids.size(1), question_ids.size(1), concatenated_past_key_values[0][0].size(2))
-        generated_seq = inference(final_ids.to(global_model.device), past_key_values= concatenated_past_key_values)
+        attention_matrix = construct_biased_attention_matrix(cache_id.size(1), biased_index, cache_id.size(1), global_model.device).unsqueeze(0).unsqueeze(0)
 
+        with torch.no_grad():
+            outputs = global_model(input_ids = cache_id.to(global_model.device), attention_mask = attention_matrix)
+            past_key_values = outputs.past_key_values
 
-        # print(generated_seq[0])
+            outputs = global_model.generate(
+                input_ids=generate_id,
+                max_new_tokens=200,
+                do_sample=False,
+                temperature=None,
+                top_p=1.0,
+                past_key_values=past_key_values,
+                use_cache=True
+            )
+
+        generated_seq = global_tokenizer.batch_decode(outputs, skip_special_tokens=True)
+
         response = generated_seq[0].split("assistant\n\n")[-1]
 
         gold_answer = dataset["train"]["self_instruct"][i]["A"]
@@ -207,14 +231,16 @@ def main():
         print('score:', str(score))
         score_list.append(score)
         res_list.append({"score": str(score),"question": dataset["train"]["self_instruct"][i]["B"], "response": response, "gold_answer": gold_answer})
-        
 
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
     final_score = sum(score_list) / len(score_list)
 
-    file_name = f"result/dialog/dialog_llama3.21B_mix5_5000steps_{final_score}_{time_str}.json"
+    if "meta" not in run_name:
+        file_name = f"result/new_data/block/MSC_ckpt{ckpt}_{final_score}_{time_str}.json"
+    else:
+        file_name = f"result/new_data/block/MSC_promptcache_ckpt{ckpt}_{final_score}_{time_str}.json"
 
     with open(file_name, 'w') as f:
         for entry in res_list:

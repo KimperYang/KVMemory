@@ -1,19 +1,27 @@
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
-import pandas as pd    
-import json
+import argparse
 import datetime
-from rouge_score import rouge_scorer
+import json
+
+import pandas as pd
+import torch
 from datasets import load_dataset
+from rouge_score import rouge_scorer
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
 from src.data.attention import construct_biased_attention_matrix
 
-run_name = "kv_dump_bias_30000steps_bsz256_5e-6_full"
+parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
+parser.add_argument('--run', type=str, required=True, help='Path under training_res')
+parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
 
-ckpt = 30000
+args = parser.parse_args()
 
-global_tokenizer = AutoTokenizer.from_pretrained(f"/mnt/data/jingbo/{run_name}/checkpoint-{ckpt}")
+run_name = args.run
+ckpt = args.ckpt
 
-global_model = AutoModelForCausalLM.from_pretrained(f"/mnt/data/jingbo/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
+
+global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
 
 # vocab_size = len(global_tokenizer)
 # base_model.resize_token_embeddings(vocab_size)
@@ -62,7 +70,7 @@ def append_kv(kv_list):
     concatenated_past_key_values = ()
 
     for layer in range(num_layers):
-        
+
         keys_list = [kv[layer][0] for kv in kv_list]
         values_list = [kv[layer][1] for kv in kv_list]
 
@@ -177,10 +185,10 @@ def main():
             tem_id = global_tokenizer(st, add_special_tokens=False, return_tensors="pt").input_ids
 
             id_list.append(tem_id)
-            biased_index.append([current_position, current_position + tem_id.size(1)])
+            if "<|begin_of_text|><|start_header_id|>system<|end_header_id|>" not in st:
+                biased_index.append([current_position, current_position + tem_id.size(1)])
 
             current_position = current_position + tem_id.size(1)
-    
 
         question = "<MEM_SUM><|start_header_id|>user<|end_header_id|>\n\n Answer from the perspective of the conversation summaries provided (do not say that you are an AI assistant)." + dataset["train"]["self_instruct"][i]["B"] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         question_ids = global_tokenizer(question, return_tensors="pt", add_special_tokens=False).input_ids
@@ -216,14 +224,13 @@ def main():
         print('score:', str(score))
         score_list.append(score)
         res_list.append({"score": str(score),"question": dataset["train"]["self_instruct"][i]["B"], "response": response, "gold_answer": gold_answer})
-        
 
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
     final_score = sum(score_list) / len(score_list)
 
-    file_name = f"result/11-26/dialog/{run_name}_ckpt{ckpt}_{final_score}_{time_str}.jsonl"
+    file_name = f"result/new_data/bias/MSC_ckpt{ckpt}_{final_score}_{time_str}.jsonl"
 
     with open(file_name, 'w') as f:
         for entry in res_list:

@@ -9,7 +9,7 @@ label_dict = {0:'abbreviation', 1:'entity', 2:'description', 3:'human', 4:'locat
 
 # Step 1: Load the Pretrained Model and Tokenizer
 # model_name = "/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-30000"
-model_name = "training_res/new_data/reencode_5/checkpoint-6000"
+model_name = "training_res/new_data/seq/checkpoint-6000"
 
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
@@ -19,7 +19,7 @@ model.eval()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
 
-reencode_num = 5
+special_token_start = 128011
 
 def construct_examples(data):
     num_each_class = 2
@@ -31,7 +31,7 @@ def construct_examples(data):
         if all(num == num_each_class for num in num_stats) or num_demo == max_demonstration:
             break
         if num_stats[item['coarse_label']] < num_each_class:
-            context.append("<MEM_START>Question: " + item['text'] + "\nType: " + label_dict[item['coarse_label']] + "\n" + "<MEM_END>" * reencode_num)
+            context.append("Question: " + item['text'] + "\nType: " + label_dict[item['coarse_label']] + "\n")
             num_stats[item['coarse_label']] += 1
             num_demo += 1
     return context
@@ -71,14 +71,17 @@ biased_index = []
 id_list = []
 idx = 0
 
-for st in context:
-    tem_id = tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
-    id_list.append(tem_id)
-    if "<MEM_START>" in st:
-        biased_index.append([idx, idx + tem_id.size(1) - reencode_num])
-    # else:
-    #     biased_index.append([idx, idx + tem_id.size(1)])
+for idx in range(len(context)):
+    tem_id = tokenizer(context[idx], add_special_tokens=False).input_ids
 
+    mem_idx = idx - 1
+    if "Question" in context[idx]:
+
+        tem_id = [special_token_start + mem_idx * 2] + tem_id + [special_token_start + mem_idx * 2 + 1]
+        biased_index.append([idx + 1, idx + len(tem_id) - 1])
+
+    tem_id = torch.tensor([tem_id])
+    id_list.append(tem_id)
     idx = idx + tem_id.size(1)
 
 print(biased_index)
