@@ -8,17 +8,18 @@ export LD_LIBRARY_PATH=$CONDA_PREFIX/lib
 export CUDA_HOME="$CONDA_PREFIX"
 
 # export NCCL_DEBUG=INFO
-# export NCCL_SOCKET_IFNAME="ib,bond"
-# export NCCL_IB_CUDA_SUPPORT=1
+export NCCL_SOCKET_IFNAME="ib,bond"
+export NCCL_IB_CUDA_SUPPORT=1
+export NCCL_IB_GID_INDEX=3
 # export NCCL_IB_DISABLE=0
 # export CUDA_DEVICE_MAX_CONNECTIONS=1
 
-export NCCL_SOCKET_IFNAME=bond1
+# export NCCL_SOCKET_IFNAME=bond1
 # export NCCL_SOCKET_IFNAME="eth0,en,eth,em,bond"
 
-export NCCL_IB_DISABLE=1
+export NCCL_IB_DISABLE=0
 export NCCL_P2P_DISABLE=0
-export NCCL_BUFFSIZE=2097152
+# export NCCL_BUFFSIZE=2097152
 # export NCCL_SOCKET_NTHREADS=16
 
 # export NCCL_NET=IB
@@ -55,7 +56,7 @@ export LAUNCHER="torchrun \
     --rdzv_endpoint=${MASTER_ADDR}:29500 \
     --local-ranks-filter ${LOG_RANK} \
     --role rank --tee 3 \
-    titan_trainer.py --config_name block_datav3_step6k_bsz64_1_node_selective_ckpt \
+    titan_trainer.py --config_name block_datav3_step6k_bsz256_4_node_full_ckpt \
     "
 
 export CMD="$LAUNCHER"
