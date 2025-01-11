@@ -20,8 +20,8 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
 
 def construct_examples(data):
-    num_each_class = 2
-    max_demonstration = 10
+    num_each_class = 4
+    max_demonstration = 20
     num_demo = 0
     num_stats = [0] * len(label_dict)
     context = ["<|begin_of_text|>"]

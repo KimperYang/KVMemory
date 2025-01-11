@@ -22,8 +22,8 @@ model.to(device)
 special_token_start = 128011
 
 def construct_examples(data):
-    num_each_class = 2
-    max_demonstration = 10
+    num_each_class = 4
+    max_demonstration = 20
     num_demo = 0
     num_stats = [0] * len(label_dict)
     context = ["<|begin_of_text|>"]
@@ -79,7 +79,7 @@ for idx in range(len(context)):
     tem_id = tokenizer(context[idx], add_special_tokens=False).input_ids
 
     mem_idx = idx - 1
-    if "Question" in context[idx]:
+    if "<|begin_of_text|>" not in context[idx]:
 
         tem_id = [special_token_start + mem_idx * 2] + tem_id + [special_token_start + mem_idx * 2 + 1]
         biased_index.append([idx + 1, idx + len(tem_id) - 1])
