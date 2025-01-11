@@ -26,8 +26,9 @@ def construct_examples(data):
         if all(num == num_each_class for num in num_stats) or num_demo == max_demonstration:
             break
         if num_stats[item['coarse_label']] < num_each_class:
-            context += "Question: " + item['text'] + "\nType: " + label_dict[item['coarse_label']] + "\n"
-            num_stats[item['coarse_label']] += 1
+            user = f"<|start_header_id|>user<|end_header_id|>\n\nCategories: abbreviation, entity, description, human, location, numeric.\nWhat category best describes: {item['text']}<|eot_id|>"
+            asst = f"<|start_header_id|>assistant<|end_header_id|>\n\nAnswer: {label_dict[item['coarse_label']]}<|eot_id|>"
+            context += user + asst
             num_demo += 1
     return context
 
@@ -69,7 +70,8 @@ for idx in range(total_num):
     print(idx)
 
     # Step 2: Prepare the Context and Options
-    context = prefix + "Question: " + data['test'][idx]['text'] + "\nType: "
+    question = f"<|start_header_id|>user<|end_header_id|>\n\nCategories: abbreviation, entity, description, human, location, numeric.\nWhat category best describes: {data['test'][idx]['text']}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nAnswer: "
+    context = prefix + question
     options = label_dict.values()
 
     # Step 3: Compute Log-Likelihoods for Each Option

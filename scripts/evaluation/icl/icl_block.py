@@ -9,8 +9,8 @@ label_dict = {0:'abbreviation', 1:'entity', 2:'description', 3:'human', 4:'locat
 
 # Step 1: Load the Pretrained Model and Tokenizer
 # model_name = "/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-30000"
-# model_name = "training_res/new_data/block/checkpoint-6000"
-model_name = "meta-llama/Llama-3.2-1B-Instruct"
+model_name = "training_res/new_data/block/checkpoint-6000"
+# model_name = "meta-llama/Llama-3.2-1B-Instruct"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
 model.eval()
@@ -29,7 +29,9 @@ def construct_examples(data):
         if all(num == num_each_class for num in num_stats) or num_demo == max_demonstration:
             break
         if num_stats[item['coarse_label']] < num_each_class:
-            context.append("Question: " + item['text'] + "\nType: " + label_dict[item['coarse_label']] + "\n")
+            user = f"<|start_header_id|>user<|end_header_id|>\n\nCategories: abbreviation, entity, description, human, location, numeric.\nWhat category best describes: {item['text']}<|eot_id|>"
+            asst = f"<|start_header_id|>assistant<|end_header_id|>\n\nAnswer: {label_dict[item['coarse_label']]}<|eot_id|>"
+            context.append(user + asst)
             num_stats[item['coarse_label']] += 1
             num_demo += 1
     return context
@@ -81,7 +83,7 @@ prefix_id = torch.cat(id_list, dim = 1)
 for idx in range(total_num):
     print(idx)
     # Step 2: Prepare the Context and Options
-    question = "Question: " + data['test'][idx]['text'] + "\nType: "
+    question = f"<|start_header_id|>user<|end_header_id|>\n\nCategories: abbreviation, entity, description, human, location, numeric.\nWhat category best describes: {data['test'][idx]['text']}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nAnswer: "
     options = label_dict.values()
 
     # Step 3: Compute Log-Likelihoods for Each Option

@@ -29,8 +29,8 @@ def construct_examples(data):
         if all(num == num_each_class for num in num_stats) or num_demo == max_demonstration:
             break
         if num_stats[item['coarse_label']] < num_each_class:
-            user = f"<MEM_START><|start_header_id|>user<|end_header_id|>\n\nQuestion: {item['text']}\nPlease classify this question into one of the six classes: abbreviation, entity, description, human, location, numeric.<|eot_id|>"
-            asst = f"<|start_header_id|>assistant<|end_header_id|>\n\nType: {label_dict[item['coarse_label']]}<|eot_id|><MEM_END>"
+            user = f"<MEM_START><|start_header_id|>user<|end_header_id|>\n\nCategories: abbreviation, entity, description, human, location, numeric.\nWhat category best describes: {item['text']}<|eot_id|>"
+            asst = f"<|start_header_id|>assistant<|end_header_id|>\n\nAnswer: {label_dict[item['coarse_label']]}<|eot_id|><MEM_END>"
             context.append(user + asst)
             num_stats[item['coarse_label']] += 1
             num_demo += 1
@@ -65,7 +65,9 @@ total_num = len(data['test'])
 correct_num = 0
 context = construct_examples(data)
 
-print(len(context))
+for ctx in context:
+    print(ctx)
+    print()
 
 biased_index = []
 id_list = []
@@ -83,7 +85,7 @@ prefix_id = torch.cat(id_list, dim = 1)
 for idx in range(total_num):
     print(idx)
     # Step 2: Prepare the Context and Options
-    question = f"<MEM_START><|start_header_id|>user<|end_header_id|>\n\nQuestion: {data['test'][idx]['text']}\nPlease classify this question into one of the six classes: abbreviation, entity, description, human, location, numeric.<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nType: "
+    question = f"<MEM_SUM><|start_header_id|>user<|end_header_id|>\n\nCategories: abbreviation, entity, description, human, location, numeric.\nWhat category best describes: {data['test'][idx]['text']}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nAnswer: "
     # question = "<MEM_SUM>Question: " + data['test'][idx]['text'] + "\nType: "
     options = label_dict.values()
 
