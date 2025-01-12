@@ -3,15 +3,15 @@ import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from datasets import load_dataset
 from src.data.attention import construct_biased_attention_matrix
-
+import transformers.models.llama.convert_llama_weights_to_hf
 data = load_dataset("CogComp/trec")
 label_dict = {0:'abbreviation', 1:'entity', 2:'description', 3:'human', 4:'location', 5:'numeric'}
 
 # Step 1: Load the Pretrained Model and Tokenizer
 # model_name = "/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-30000"
-model_name = "training_res/new_data/bias/checkpoint-6000"
-
-tokenizer = AutoTokenizer.from_pretrained(model_name)
+# model_name = "training_res/new_data/bias/checkpoint-6000"
+model_name = "training_res/torchtune"
+tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
 model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
 model.eval()
 
