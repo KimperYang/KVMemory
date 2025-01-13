@@ -9,9 +9,9 @@ label_dict = {0:'abbreviation', 1:'entity', 2:'description', 3:'human', 4:'locat
 
 # Step 1: Load the Pretrained Model and Tokenizer
 # model_name = "/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-30000"
-model_name = "training_res/new_data/bias/checkpoint-6000"
-# model_name = "training_res/torchtune"
-tokenizer = AutoTokenizer.from_pretrained(model_name)
+# model_name = "training_res/new_data/bias/checkpoint-6000"
+model_name = "training_res/torchtune"
+tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
 model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
 model.eval()
 
@@ -20,7 +20,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
 
 def construct_examples(data):
-    num_each_class = 4
+    num_each_class = 2
     max_demonstration = 20
     num_demo = 0
     num_stats = [0] * len(label_dict)
@@ -29,8 +29,8 @@ def construct_examples(data):
         if all(num == num_each_class for num in num_stats) or num_demo == max_demonstration:
             break
         if num_stats[item['coarse_label']] < num_each_class:
-            user = f"<MEM_START><|start_header_id|>user<|end_header_id|>\n\nCategories: abbreviation, entity, description, human, location, numeric.\nWhat category best describes: {item['text']}<|eot_id|>"
-            asst = f"<|start_header_id|>assistant<|end_header_id|>\n\nAnswer: {label_dict[item['coarse_label']]}<|eot_id|><MEM_END>"
+            user = f"<|reserved_special_token_3|><|start_header_id|>user<|end_header_id|>\n\nCategories: abbreviation, entity, description, human, location, numeric.\nWhat category best describes: {item['text']}<|eot_id|>"
+            asst = f"<|start_header_id|>assistant<|end_header_id|>\n\nAnswer: {label_dict[item['coarse_label']]}<|eot_id|><|reserved_special_token_4|>"
             context.append(user + asst)
             num_stats[item['coarse_label']] += 1
             num_demo += 1
@@ -76,7 +76,7 @@ idx = 0
 for st in context:
     tem_id = tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
     id_list.append(tem_id)
-    if "<MEM_START>" in st:
+    if "<|reserved_special_token_3|>" in st:
         biased_index.append([idx, idx + tem_id.size(1)])
     idx = idx + tem_id.size(1)
 
@@ -85,8 +85,8 @@ prefix_id = torch.cat(id_list, dim = 1)
 for idx in range(total_num):
     print(idx)
     # Step 2: Prepare the Context and Options
-    question = f"<MEM_SUM><|start_header_id|>user<|end_header_id|>\n\nCategories: abbreviation, entity, description, human, location, numeric.\nWhat category best describes: {data['test'][idx]['text']}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nAnswer: "
-    # question = "<MEM_SUM>Question: " + data['test'][idx]['text'] + "\nType: "
+    question = f"<|reserved_special_token_5|><|start_header_id|>user<|end_header_id|>\n\nCategories: abbreviation, entity, description, human, location, numeric.\nWhat category best describes: {data['test'][idx]['text']}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nAnswer: "
+    # question = "<|reserved_special_token_5|>Question: " + data['test'][idx]['text'] + "\nType: "
     options = label_dict.values()
 
     # Step 3: Compute Log-Likelihoods for Each Option

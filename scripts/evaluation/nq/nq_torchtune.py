@@ -24,7 +24,7 @@ if pos in [0, 4, 9]:
 else:
     jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
 
-global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}")
+global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
 
 global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}", torch_dtype=torch.bfloat16)
 
@@ -85,7 +85,7 @@ def main():
         for j in range(0,10):
             title = jsonObj["ctxs"][i][j]["title"]
             text = jsonObj["ctxs"][i][j]["text"]
-            memory_list.append("<MEM_START>" + f"Document [{j+1}](Title: {title}) {text}" + "\n<MEM_END>")
+            memory_list.append("<|reserved_special_token_3|>" + f"Document [{j+1}](Title: {title}) {text}" + "\n<|reserved_special_token_4|>")
 
         if pos not in [0,4,9]:
             ground_truth = memory_list.pop(0)
@@ -107,7 +107,7 @@ def main():
 
             idx = idx + tem_id.size(1)
 
-        new_prompt = "<MEM_SUM><|start_header_id|>user<|end_header_id|>\n\nWrite a high-quality answer for the given question using only the provided search results (some of which might be irrelevant). Question: " + jsonObj["question"][i] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        new_prompt = "<|reserved_special_token_5|><|start_header_id|>user<|end_header_id|>\n\nWrite a high-quality answer for the given question using only the provided search results (some of which might be irrelevant). Question: " + jsonObj["question"][i] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         prompt_id = global_tokenizer(new_prompt, return_tensors="pt", add_special_tokens=False).input_ids.to(global_model.device)
 
         # id_list.append(prompt_id)
