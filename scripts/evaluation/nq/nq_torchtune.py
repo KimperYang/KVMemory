@@ -7,8 +7,8 @@ import string
 from typing import List
 from src.data.attention import construct_biased_attention_matrix
 import regex
-
 import argparse
+from src.model.titan_preprocessor import LLaMA32Tokenizer
 
 parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
 parser.add_argument('--run', type=str, required=True, help='Path under training_res')
@@ -24,7 +24,8 @@ if pos in [0, 4, 9]:
 else:
     jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
 
-global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+# global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+global_tokenizer = LLaMA32Tokenizer(model_path="data/titan_tokenizer/original/tokenizer.model")
 
 global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}", torch_dtype=torch.bfloat16)
 
@@ -100,24 +101,24 @@ def main():
 
         for st in memory_list:
 
-            tem_id = global_tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
-            biased_index.append([idx, idx + tem_id.size(1)])
+            # tem_id = global_tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
+            tem_id = global_tokenizer(st, add_special_tokens=False).input_ids
+            biased_index.append([idx, idx + len(tem_id)])
 
-            id_list.append(tem_id)
-
-            idx = idx + tem_id.size(1)
+            id_list += tem_id
+            idx = idx + len(tem_id)
 
         new_prompt = "<|reserved_special_token_5|><|start_header_id|>user<|end_header_id|>\n\nWrite a high-quality answer for the given question using only the provided search results (some of which might be irrelevant). Question: " + jsonObj["question"][i] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
-        prompt_id = global_tokenizer(new_prompt, return_tensors="pt", add_special_tokens=False).input_ids.to(global_model.device)
+        prompt_id = global_tokenizer(new_prompt, add_special_tokens=False).input_ids
 
         # id_list.append(prompt_id)
 
-        concat_id = torch.cat(id_list, dim=1).to(global_model.device)
-        attention_matrix = construct_biased_attention_matrix(concat_id.size(1), biased_index, concat_id.size(1), global_model.device).unsqueeze(0).unsqueeze(0)
+        concat_id = torch.tensor([id_list], device = global_model.device)
+        attention_matrix = construct_biased_attention_matrix(len(concat_id), biased_index, len(concat_id), global_model.device).unsqueeze(0).unsqueeze(0)
 
         global_model.eval()
 
-        generate_id = torch.cat([concat_id, prompt_id], dim = 1)
+        generate_id = torch.tensor([id_list + prompt_id], device = global_model.device)
 
         with torch.no_grad():
             outputs = global_model(input_ids = concat_id, attention_mask = attention_matrix)
@@ -133,7 +134,7 @@ def main():
                 use_cache=True
             )
         # print(outputs)
-        generated_seq = global_tokenizer.batch_decode(outputs, skip_special_tokens=True)
+        generated_seq = global_tokenizer.decode(outputs)
 
         response = generated_seq[0].split('assistant\n\n')[-1]
         print(response)
