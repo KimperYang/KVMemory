@@ -31,7 +31,7 @@ class CheckpointConfig:
 class CommonConfig:
     gc_freq: int = 50
     seed: int = 42
-    deterministic: bool = True
+    deterministic: bool = False
 
 
 @dataclass
