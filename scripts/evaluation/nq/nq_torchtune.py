@@ -25,7 +25,7 @@ else:
     jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
 
 # global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
-global_tokenizer = LLaMA32Tokenizer(model_path="data/titan_tokenizer/original/tokenizer.model")
+global_tokenizer = LLaMA32Tokenizer(model_path="training_res/torchtune/tokenizer.model")
 
 global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}", torch_dtype=torch.bfloat16)
 
@@ -102,19 +102,19 @@ def main():
         for st in memory_list:
 
             # tem_id = global_tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
-            tem_id = global_tokenizer(st, add_special_tokens=False).input_ids
+            tem_id = global_tokenizer.__call__(st, allowed_special='all', disallowed_special = None, add_special_tokens = False)['input_ids']
             biased_index.append([idx, idx + len(tem_id)])
 
             id_list += tem_id
             idx = idx + len(tem_id)
 
         new_prompt = "<|reserved_special_token_5|><|start_header_id|>user<|end_header_id|>\n\nWrite a high-quality answer for the given question using only the provided search results (some of which might be irrelevant). Question: " + jsonObj["question"][i] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
-        prompt_id = global_tokenizer(new_prompt, add_special_tokens=False).input_ids
+        prompt_id = global_tokenizer.__call__(new_prompt, allowed_special='all', disallowed_special = None, add_special_tokens = False)['input_ids']
 
         # id_list.append(prompt_id)
 
         concat_id = torch.tensor([id_list], device = global_model.device)
-        attention_matrix = construct_biased_attention_matrix(len(concat_id), biased_index, len(concat_id), global_model.device).unsqueeze(0).unsqueeze(0)
+        attention_matrix = construct_biased_attention_matrix(concat_id.size(1), biased_index, concat_id.size(1), global_model.device).unsqueeze(0).unsqueeze(0)
 
         global_model.eval()
 
@@ -133,10 +133,10 @@ def main():
                 past_key_values=past_key_values,
                 use_cache=True
             )
-        # print(outputs)
-        generated_seq = global_tokenizer.decode(outputs)
+        generated_seq = global_tokenizer.decode(list(outputs[0]))
 
-        response = generated_seq[0].split('assistant\n\n')[-1]
+        print(generated_seq)
+        response = generated_seq.split('<|start_header_id|>assistant<|end_header_id|>')[-1].strip().split('<|eot_id|>')[0]
         print(response)
 
         score = best_subspan_em(response, jsonObj["answers"][i])

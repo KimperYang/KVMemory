@@ -127,7 +127,7 @@ def main():
     train_dataset = datasets.interleave_datasets(
         [sft_mem_train, sft_train, ptr_inst_train, ptr_train, ptr_mem_train, qa_train, qa_mem_train],
         probabilities=[0.2, 0.25, 0.1, 0.25, 0.1, 0.05, 0.05],
-        seed=42,
+        seed=57,
         stopping_strategy="all_exhausted",
     )
     eval_dataset = datasets.DatasetDict({
@@ -144,9 +144,9 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir="training_res/new_data/bias",
+        output_dir="training_res/torchtune/bias",
         report_to="wandb",
-        run_name=f"new_data_bias_bsz{batch_size_per_device}_5e-6_full",
+        run_name=f"seed57_bias_bsz{batch_size_per_device}_5e-6_full",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
         max_steps=6000,
@@ -168,7 +168,8 @@ def main():
         remove_unused_columns=False,
         # split_batches=True,
         dispatch_batches=False,
-        eval_on_start=True
+        eval_on_start=True,
+        seed=57
     )
 
     trainer = CustomTrainerBiasAttn(

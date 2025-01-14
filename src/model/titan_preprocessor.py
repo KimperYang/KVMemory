@@ -212,10 +212,10 @@ class LLaMA32Tokenizer(Tokenizer):
                     current_slice_len = 1
         yield s[slice_start:]
 
-    def __call__(self, text: str, add_special_tokens: bool = True):
+    def __call__(self, text: str, add_special_tokens: bool = True,  allowed_special: Optional[Union[Literal["all"], AbstractSet[str]]] = None, disallowed_special: Optional[Union[Literal["all"], Collection[str]]] = None):
         if add_special_tokens:
-            input_ids = self.encode(text, bos=True, eos=False)
+            input_ids = self.encode(text, bos=True, eos=False, allowed_special=allowed_special, disallowed_special=disallowed_special)
         else:
-            input_ids = self.encode(text, bos=False, eos=False)
+            input_ids = self.encode(text, bos=False, eos=False, allowed_special=allowed_special, disallowed_special=disallowed_special)
         return {"input_ids": input_ids}
 

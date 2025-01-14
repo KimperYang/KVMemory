@@ -7,29 +7,7 @@ import string
 from typing import List
 from src.data.attention import construct_biased_attention_matrix
 import regex
-
 import argparse
-
-parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
-parser.add_argument('--run', type=str, required=True, help='Path under training_res')
-parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
-parser.add_argument('--pos', type=int, required=True, help='Position value')
-
-args = parser.parse_args()
-
-run_name = args.run
-ckpt = args.ckpt
-pos = args.pos
-
-if pos in [0, 4, 9]:
-    jsonObj = pd.read_json(path_or_buf=f'data/raw/nq/nq-open-10_{pos}.jsonl', lines=True)
-else:
-    jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
-
-global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
-
-global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
-
 # vocab_size = len(global_tokenizer)
 # base_model.resize_token_embeddings(vocab_size)
 
@@ -69,58 +47,83 @@ def best_subspan_em(prediction: str, ground_truths: List[str]) -> float:
     return 0.0
 
 def main():
-    global_model.to('cuda')
-    # template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
 
-    template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a helpful, respectful and honest assistant.<|eot_id|>"
+    parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
+    parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
+    parser.add_argument('--run', type=str, required=True, help='Checkpoint number')
+    parser.add_argument('--reencode', type=int, required=True, help='Reencode num')
+
+    args = parser.parse_args()
+
+    ckpt = args.ckpt
+    run_name = args.run
+    reencode_num = args.reencode
+
+    special_token_start=128011
+    mem_start=128254
+    mem_end=128255
+
+    file_path = "data/raw/dev.json"
+    with open(file_path, 'r') as file:
+        data = json.load(file)
+    data_list = data
+    # print("".join(data_list[0]['context'][8][1]))
+
+    global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
+
+    global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+
+    global_model.to('cuda')
+
+    template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question.<|eot_id|>"
 
     # total_num = len(jsonObj)
-    total_num = 500
+    total_num = len(data_list)
     correct_num = 0
     res_list = []
 
     for i in range(total_num):
 
         print("Processing sample:", str(i))
+
+        sys_id = global_tokenizer(template, add_special_tokens=False).input_ids
+        sys_id = sys_id + [mem_start]
         memory_list = []
 
+
         for j in range(0,10):
-            title = jsonObj["ctxs"][i][j]["title"]
-            text = jsonObj["ctxs"][i][j]["text"]
-            memory_list.append("<MEM_START>" + f"Document [{j+1}](Title: {title}) {text}" + "\n<MEM_END>")
-
-        if pos not in [0,4,9]:
-            ground_truth = memory_list.pop(0)
-            memory_list.insert(pos, ground_truth)
-
-        memory_list.insert(0, template)
+            title = data_list[i]['context'][j][0]
+            text = " ".join(data_list[i]['context'][j][1])
+            memory_list.append(f"Document [{j+1}](Title: {title}) {text}\n")
 
         biased_index = []
-        id_list = []
+        concat_id = []
 
-        idx = 0
+        idx = len(sys_id)
 
-        for st in memory_list:
+        for j in range(len(memory_list)):
 
-            tem_id = global_tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
-            biased_index.append([idx, idx + tem_id.size(1)])
+            tem_id = global_tokenizer(memory_list[j], add_special_tokens=False).input_ids
 
-            id_list.append(tem_id)
+            for sub_idx in range(reencode_num):
+                tem_id = tem_id + [special_token_start + reencode_num * j + sub_idx]
 
-            idx = idx + tem_id.size(1)
+            biased_index.append([idx, idx + len(tem_id) - reencode_num])
 
-        new_prompt = "<MEM_SUM><|start_header_id|>user<|end_header_id|>\n\nWrite a high-quality answer for the given question using only the provided search results (some of which might be irrelevant). Question: " + jsonObj["question"][i] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
-        prompt_id = global_tokenizer(new_prompt, return_tensors="pt", add_special_tokens=False).input_ids.to(global_model.device)
+            concat_id += tem_id
 
-        # id_list.append(prompt_id)
+            idx = idx + len(tem_id)
 
-        concat_id = torch.cat(id_list, dim=1).to(global_model.device)
+        concat_id = sys_id + concat_id + [mem_end]
+        concat_id = torch.tensor([concat_id], device=global_model.device)
         attention_matrix = construct_biased_attention_matrix(concat_id.size(1), biased_index, concat_id.size(1), global_model.device).unsqueeze(0).unsqueeze(0)
 
-        global_model.eval()
+        new_prompt = "<|start_header_id|>user<|end_header_id|>\n\n" + data_list[i]['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        prompt_id = global_tokenizer(new_prompt, return_tensors="pt", add_special_tokens=False).input_ids.to(global_model.device)
 
         generate_id = torch.cat([concat_id, prompt_id], dim = 1)
 
+        global_model.eval()
         with torch.no_grad():
             outputs = global_model(input_ids = concat_id, attention_mask = attention_matrix)
             past_key_values = outputs.past_key_values
@@ -138,13 +141,14 @@ def main():
         generated_seq = global_tokenizer.batch_decode(outputs, skip_special_tokens=True)
 
         response = generated_seq[0].split('assistant\n\n')[-1]
-        print(response)
+        # print(response)
+        print("response:", response)
 
-        score = best_subspan_em(response, jsonObj["answers"][i])
+        score = best_subspan_em(response, [data_list[i]['answer']])
 
         correct_num = correct_num + int(score)
 
-        res_list.append({"id": str(i),"question": jsonObj["question"][i], "response": response, "gold_answer": jsonObj["answers"][i], "Score": score})
+        res_list.append({"id": str(i),"question": data_list[i]['question'], "response": response, "gold_answer": data_list[i]['answer'], "Score": score})
         print("Correct progress", correct_num)
 
     accuracy = correct_num / total_num
@@ -153,7 +157,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/torchtune/bias/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/{run_name}/wiki_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
