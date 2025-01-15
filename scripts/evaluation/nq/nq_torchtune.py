@@ -152,7 +152,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/torchtune/NQ_at{pos}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/deter/NQ_at{pos}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
