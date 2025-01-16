@@ -2,7 +2,7 @@ import torch
 import transformers
 from torchtune.models.convert_weights import tune_to_hf
 
-model = torch.load("deter.pt", weights_only=False)
+model = torch.load("decay.pt", weights_only=False)
 
 model = model['model']
 
@@ -19,7 +19,7 @@ config = transformers.AutoConfig.from_pretrained("meta-llama/Llama-3.2-1B-Instru
 model = transformers.AutoModelForCausalLM.from_config(config)
 model.load_state_dict(converted_state_dict)
 
-model.save_pretrained("/dccstor/scllm/KVMemory/training_res/deter")
+model.save_pretrained("/dccstor/scllm/KVMemory/training_res/decay")
 # print(model)
 # model2 = transformers.AutoModelForCausalLM.from_pretrained("training_res/torchtune")
 

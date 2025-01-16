@@ -21,7 +21,6 @@ def main():
 
     mem_start = 128054
     mem_end = 128055
-    special_start_token = 128011
 
     parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
     parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
