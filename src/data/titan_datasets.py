@@ -62,14 +62,14 @@ def load_data_and_process_fn(
         remove_columns=["id", "messages", "source"]
         num_shards = 32
     elif data_component_name in ["qa", "qa_mem"]:
-        data_path = f"dataset_cache/processed/block_qa/{data_component_name}"
+        data_path = f"dataset_cache/processed/2wiki/{data_component_name}"
         if data_component_name == "qa":
             preprocessor_fn = preprocessor.process_qa
         elif data_component_name == "qa_mem":
             preprocessor_fn = preprocessor.process_qamem
         else:
             raise NotImplementedError()
-        remove_columns=['prompt', 'question', 'answers', 'generated', 'inputs', 'documents']
+        remove_columns=["question", "context", "answer"]
         num_shards = 32
     else:
         raise ValueError(f"Unrecognized dataset name {data_component_name}.")
@@ -90,7 +90,10 @@ class HuggingFaceDataset(IterableDataset, Stateful):
         world_size: int = 1,
         rank: int = 0,
         infinite: bool = False,
+        packing_mode: str = "padding",
     ) -> None:
+        self.packing_mode = packing_mode
+        assert self.packing_mode in ["padding", "packing"]
         preprocessor = bias_attention_preprocessor(tokenizer=tokenizer, max_len=seq_len)
         ds, preprocess_fn, columns_to_remove = load_data_and_process_fn(
             data_component_name=dataset_name,
@@ -108,6 +111,8 @@ class HuggingFaceDataset(IterableDataset, Stateful):
 
         # Variables for checkpointing
         self._sample_idx = 0
+        self._all_tokens: List[int] = []
+        self._all_labels: List[int] = []
 
     def _get_data_iter(self):
         if self._sample_idx == 0:
@@ -119,13 +124,38 @@ class HuggingFaceDataset(IterableDataset, Stateful):
         return iter(self._data.skip(self._sample_idx))
 
     def __iter__(self):
+        # Original Titan Trainer write it as `1 + self.seq_len` because it will shift the labels
+        # by 1. But for our case (huggingface models), the shift happens when computing the loss
+        # So, no need to +1 here
+        max_buffer_token_len = self.seq_len
+
         while True:
             for sample in self._get_data_iter():
                 # Use the dataset-specific text processor
                 processed_example = self.preprocess_fn(sample)
-                yield processed_example
+                if self.packing_mode == "padding":
+                    yield processed_example
+                    self._sample_idx += 1
+                else:
+                    input_ids = processed_example["input_ids"]
+                    labels = processed_example["labels"]
+                    self._all_tokens.extend(input_ids)
+                    self._all_labels.extend(labels)
+                    self._sample_idx += 1
 
-                self._sample_idx += 1
+                    while len(self._all_tokens) >= max_buffer_token_len:
+                        packed_tokens = self._all_tokens[:max_buffer_token_len]
+                        packed_labels = self._all_labels[:max_buffer_token_len]
+                        # update tokens to the remaining tokens
+                        self._all_tokens = self._all_tokens[max_buffer_token_len:]
+                        self._all_labels = self._all_labels[max_buffer_token_len:]
+                        packed_example = {
+                            "input_ids": packed_tokens,
+                            "labels": packed_labels,
+                            "biased_index": None,
+                        }
+                        yield packed_example
+
 
             if not self.infinite:
                 logger.warning(f"Dataset {self.dataset_name} has run out of data")
@@ -137,11 +167,17 @@ class HuggingFaceDataset(IterableDataset, Stateful):
 
     def load_state_dict(self, state_dict):
         self._sample_idx = state_dict["sample_idx"]
-        # self._all_tokens = state_dict["token_buffer"]
+        if self.packing_mode == "packing":
+            self._all_tokens = state_dict["token_buffer"]
+            self._all_labels = state_dict["label_buffer"]
 
     def state_dict(self):
-        # return {"token_buffer": self._all_tokens, "sample_idx": self._sample_idx}
-        return {"sample_idx": self._sample_idx}
+        return {
+            "token_buffer": self._all_tokens,
+            "label_buffer": self._all_labels,
+            "sample_idx": self._sample_idx,
+        }
+        # return {"sample_idx": self._sample_idx}
 
 
 class WeightedAggregatorDataset(IterableDataset, Stateful):

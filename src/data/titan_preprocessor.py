@@ -109,12 +109,12 @@ class bias_attention_preprocessor():
                 if i==0:
                     t = conversation[i]["value"] + "<|eot_id|>"
                 else:
-                    t = "<|start_header_id|>user<|end_header_id|>\n\n" + conversation[i]["value"]  + "<|eot_id|>" 
+                    t = "<|start_header_id|>user<|end_header_id|>\n\n" + conversation[i]["value"]  + "<|eot_id|>"
 
-                tokenized = self.tokenizer(t)
+                tokenized = self.tokenizer(t, add_special_tokens=False)
 
-                input_ids = tokenized["input_ids"][1:]
-                if len(labels) + len(input_ids) >= self.max_len: 
+                input_ids = tokenized["input_ids"]
+                if len(labels) + len(input_ids) >= self.max_len:
                     break
 
                 labels.extend([-100] * len(input_ids))
@@ -122,10 +122,10 @@ class bias_attention_preprocessor():
 
             elif conversation[i]["from"] == "Assistant":
                 t = "<|start_header_id|>assistant<|end_header_id|>\n\n" + conversation[i]["value"]
-                tokenized = self.tokenizer(t)
+                tokenized = self.tokenizer(t, add_special_tokens=False)
 
-                input_ids = tokenized["input_ids"][1:]
-                if len(labels) + len(input_ids) > self.max_len - 1: 
+                input_ids = tokenized["input_ids"]
+                if len(labels) + len(input_ids) > self.max_len - 1:
                     input_ids = input_ids[:self.max_len - 1 - len(labels)]
 
                 input_ids += [128009]

@@ -146,15 +146,15 @@ CONFIG_DICT = {
         training_recipe=bsz256_lr56_steps6k,
         activation_checkpoint=FULL_ACTIVATION_CHECKPOINT_CONFIG,
     ),
-    "block_datav3_step6k_bsz64_1_node_full_ckpt": TitanTrainerConfig(
+    "block_datav3_step6k_bsz256_4_node_selective_ckpt": TitanTrainerConfig(
         model_name_or_path="meta-llama/Llama-3.2-1B-Instruct",
         tokenizer_path="data/titan_tokenizer/original/tokenizer.model",
         dataset_version="v3",
         seq_len=4096,
-        job_dump_folder="run_logs/block_datav1_step10k",
+        job_dump_folder="run_logs/block_datav3_step6k",
         ckpt_config=COMMON_CHECKPOINT_CONFIG,
-        training_recipe=bsz64_lr56_steps10k,
-        activation_checkpoint=FULL_ACTIVATION_CHECKPOINT_CONFIG,
+        training_recipe=bsz256_lr56_steps6k,
+        activation_checkpoint=SELECTIVE_ACTIVATION_CHECKPOINT_CONFIG,
     ),
 }
 
@@ -252,18 +252,8 @@ def main(config_name: str):
     )
 
     logger.info(f"Building {model_name}...")
-    model = llama3_2_1b()
-    ckpt_path = PRETRAINED_MODEL_CKPT_PATH_MAPS[task_config.model_name_or_path]
-    state_dict = load_checkpoint(ckpt_path=ckpt_path, model_name=task_config.model_name_or_path)
-    is_rank_0 = torch.distributed.get_rank() == 0
-    training.load_from_full_model_state_dict(
-        model=model,
-        full_sd=state_dict,
-        device=device_type,
-        is_rank_zero=is_rank_0,
-        strict=True,
-    )
-
+    with torch.device("meta"):
+        model = llama3_2_1b()
     # log model size
     model_param_count = utils.get_num_params(model)
     logger.info(
@@ -280,7 +270,7 @@ def main(config_name: str):
     # init_device = device_type
     # buffer_device = None
 
-    model = model.to(device_type)
+    # model = model.to(device_type)
     # apply PT-D Tensor Parallel, activation checkpointing, torch.compile, Data Parallel
     parallelize_llama(
         model,
@@ -288,9 +278,28 @@ def main(config_name: str):
         parallel_dims,
         activation_checkpoint=task_config.activation_checkpoint,
     )
+    with training.set_default_dtype(torch.bfloat16), device:
+        for m in model.modules():
+            # RoPE is not covered in state dict
+            if hasattr(m, "rope_init"):
+                m.rope_init()
+
     # model.to_empty(device=init_device)
     # with torch.no_grad():
     #     model.init_weights(buffer_device=buffer_device)
+    with torch.no_grad():
+        ckpt_path = PRETRAINED_MODEL_CKPT_PATH_MAPS[task_config.model_name_or_path]
+        state_dict = load_checkpoint(ckpt_path=ckpt_path, model_name=task_config.model_name_or_path)
+        is_rank_0 = torch.distributed.get_rank() == 0
+        training.load_from_full_model_state_dict(
+            model=model,
+            full_sd=state_dict,
+            device=device_type,
+            is_rank_zero=is_rank_0,
+            strict=True,
+        )
+
+
     model.train()
 
     model_parts = [model]
@@ -378,7 +387,7 @@ def main(config_name: str):
     )
     with maybe_enable_profiling(
         # TODO: check if this works
-        enable_profiling=True,
+        enable_profiling=False,
         job_dump_folder=job_dump_folder,
         global_step=train_state.step
     ) as torch_profiler, maybe_enable_memory_snapshot(
