@@ -19,45 +19,61 @@ def calculate_rouge_l_score(candidate, reference):
 
 def main():
 
+    mem_start = 128054
+    mem_end = 128055
+    special_start_token = 128011
+
     parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
     parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
     parser.add_argument('--run', type=str, required=True, help='Run name')
+    parser.add_argument('--reencode', type=int, required=True, help='Checkpoint number')
 
     args = parser.parse_args()
 
     ckpt = args.ckpt
     run_name = args.run
+    reencode_num = args.reencode
 
-    if "meta" in run_name:
-        global_tokenizer = AutoTokenizer.from_pretrained(f"{run_name}")
+    global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
 
-        global_model = AutoModelForCausalLM.from_pretrained(f"{run_name}", torch_dtype=torch.bfloat16)
-
-    else:
-        global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
-
-        global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
-
+    global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
     global_model.to('cuda')
 
     samsum = load_dataset("Samsung/samsum")
 
     sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nSummarize the dialogue into a few short sentences. <|eot_id|>"
     sys_id = global_tokenizer(sys, add_special_tokens=False).input_ids
+    sys_id += [mem_start]
+
     context_id = sys_id
 
+    biased_index = []
     num_demon = 20
+    curren_position = len(sys_id)
+
+    special_token_start = 128011
 
     for idx in range(num_demon):
 
         demonstration = "<|start_header_id|>user<|end_header_id|>\n\n" + "Dialogue: " + samsum['train'][idx]['dialogue'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n" + "Summary: " + samsum['train'][idx]['summary'] + "<|eot_id|>"
         demonstration_id = global_tokenizer(demonstration, add_special_tokens=False).input_ids
 
+        for sub_idx in range(reencode_num):
+            demonstration_id = demonstration_id + [special_token_start + idx * reencode_num + sub_idx]
+
         context_id += demonstration_id
+
+        biased_index.append([curren_position, curren_position + len(demonstration_id) - reencode_num])
+
+        curren_position += len(demonstration_id)
+
+    context_id += [mem_end]
+
+    attention_matrix = construct_biased_attention_matrix(len(context_id), biased_index, len(context_id), global_model.device).unsqueeze(0).unsqueeze(0)
 
     global_model.eval()
     with torch.no_grad():
-            outputs = global_model(input_ids = torch.tensor([context_id],device=global_model.device))
+            outputs = global_model(input_ids = torch.tensor([context_id],device=global_model.device), attention_mask = attention_matrix)
             past_key_values = outputs.past_key_values
 
     total_num = len(samsum['test'])
@@ -104,10 +120,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    if "meta" in run_name:
-        file_name = f"result/new_data/upper/Samsum_original_demon{num_demon}_{avg_score}_{time_str}.jsonl"
-    else:
-        file_name = f"result/{run_name}/Samsum_demon{num_demon}_ckpt{ckpt}_{avg_score}_{time_str}.jsonl"
+    file_name = f"result/{run_name}/Samsum_demon{num_demon}_ckpt{ckpt}_{avg_score}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

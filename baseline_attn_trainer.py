@@ -145,9 +145,9 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir="training_res/new_data/baseline",
+        output_dir="training_res/new_data/baseline_5e-5",
         report_to="wandb",
-        run_name=f"new_data_baseline_bsz{batch_size_per_device}_5e-6_full",
+        run_name=f"new_data_baseline_bsz{batch_size_per_device}_5e-5_full",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
         max_steps=6000,
@@ -158,7 +158,7 @@ def main():
         warmup_ratio=0.1,
         lr_scheduler_type='cosine',
         bf16=True,
-        learning_rate=5e-6,
+        learning_rate=5e-5,
         do_eval=True,
         per_device_eval_batch_size = batch_size_per_device,
         evaluation_strategy="steps",  # Add this line
@@ -169,7 +169,8 @@ def main():
         remove_unused_columns=False,
         # split_batches=True,
         dispatch_batches=False,
-        eval_on_start=True
+        eval_on_start=True,
+        save_total_limit=2
     )
 
     trainer = Trainer(
