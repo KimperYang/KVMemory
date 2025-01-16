@@ -133,8 +133,10 @@ def build_optimizers(
     optim_in_bwd = early_step_in_backward
     optimizer_kwargs = {
         "lr": lr,
-        "betas": (0.9, 0.95),
-        "weight_decay": 0.1,
+        # "betas": (0.9, 0.95),
+        # "weight_decay": 0.1,
+        "betas": (0.9, 0.999),
+        "weight_decay": 0,
         "fused": fused,
         "foreach": not fused,
     }

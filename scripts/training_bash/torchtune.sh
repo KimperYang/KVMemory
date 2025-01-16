@@ -19,7 +19,7 @@ export NCCL_SOCKET_IFNAME=bond1
 
 export NCCL_IB_DISABLE=1
 export NCCL_P2P_DISABLE=0
-# export NCCL_BUFFSIZE=2097152
+export NCCL_BUFFSIZE=8388608
 # export NCCL_SOCKET_NTHREADS=16
 
 # export NCCL_NET=IB
@@ -64,6 +64,3 @@ export CMD="$LAUNCHER"
 echo ${CMD}
 
 $CMD
-
-
-
