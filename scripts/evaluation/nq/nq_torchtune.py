@@ -279,6 +279,8 @@ def main():
                 max_length,
                 batch['input_ids'].device
             ).unsqueeze(0)
+            import ipdb
+            ipdb.set_trace()
             pad_mask = batch["attention_mask"]
             pad_length = torch.sum(pad_mask == 0)
             block_attenntion_mask[:, :, :pad_length] = float('-inf')
