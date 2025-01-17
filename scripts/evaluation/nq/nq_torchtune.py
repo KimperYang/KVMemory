@@ -191,6 +191,7 @@ class DataCollatorForGeneration():
             'biased_index': torch.LongTensor(biased_index),
             "input_length": torch.LongTensor(input_length),
             'mem_num': torch.LongTensor(mem_num),
+            "attention_mask": torch.LongTensor(attention_mask),
         }
 
 
