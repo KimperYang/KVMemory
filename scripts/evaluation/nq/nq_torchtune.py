@@ -28,7 +28,8 @@ import torch
 from safetensors import safe_open
 from torch.utils.data import DataLoader
 from torchtune.models.convert_weights import tune_to_hf
-from transformers import LlamaForCausalLM
+from tqdm.auto import tqdm as auto_tqdm
+from transformers import LlamaForCausalLM, GenerationConfig
 
 from src.common import move_to_target_device
 from src.data.attention import construct_biased_attention_matrix
@@ -241,6 +242,15 @@ def main():
 
     collate_fn = DataCollatorForGeneration(pad_id=tokenizer.pad_id)
     eval_dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=collate_fn)
+    prog_bar = auto_tqdm(range(len(eval_dataloader)))
+
+    generation_cfg = GenerationConfig(
+        do_sample=False,
+        num_beams=1,
+        max_new_tokens=300,
+        stop_strings=["<|end_of_text|>", "<|eot_id|>"]
+    )
+
     for batch_id, batch in enumerate(eval_dataloader):
         curr_batch_size = batch['input_ids'].size(0)
         batch_answers = all_answers[batch_id * batch_size : batch_id * batch_size + curr_batch_size]
@@ -276,10 +286,9 @@ def main():
 
             outputs = model.generate(
                 input_ids=input_ids,
-                max_new_tokens=200,
-                do_sample=False,
-                # past_key_values=past_key_values,
-                use_cache=True
+                attention_mask=attention_mask,
+                use_cache=True,
+                generation_config=generation_cfg,
             )
         generated_seqs = [tokenizer.decode(
                 outputs[i, input_ids.size(1):].tolist(),
@@ -287,13 +296,15 @@ def main():
             for i in range(input_ids.size(0))
         ]
 
-        print(generated_seqs)
+        for x in generated_seqs:
+            print(x)
         responses = [
             generated_seq.split("<|start_header_id|>assistant<|end_header_id|>")[-1].strip().split("<|eot_id|>")[0]
             for generated_seq in generated_seqs
         ]
-        # responses = generated_seqs
-        print(responses)
+        for x in responses:
+            print(x)
+        # print(responses)
 
         scores = [best_subspan_em(responses[idx], batch_answers[idx]) for idx in range(curr_batch_size)]
         for idx, score in enumerate(scores):
@@ -307,6 +318,7 @@ def main():
                 }
             )
         print("Correct progress", correct_num)
+        prog_bar.update(1)
 
     accuracy = correct_num / total_num
     print(accuracy)
