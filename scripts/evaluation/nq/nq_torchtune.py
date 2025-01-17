@@ -47,7 +47,7 @@ parser.add_argument("--batch_size", type=int, default=1, help="Batch size of the
 args = parser.parse_args()
 
 def load_model_weights(ckpt_path: str):
-    safe_tensor_file = os.path.join(ckpt_path, "adapter_model.safetensors")
+    safe_tensor_file = os.path.join(ckpt_path, "model.safetensors")
     if os.path.exists(safe_tensor_file):
         state_dict = {}
         with safe_open(safe_tensor_file, framework="pt", device="cpu") as f:
