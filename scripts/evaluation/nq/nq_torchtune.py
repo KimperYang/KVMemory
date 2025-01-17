@@ -261,7 +261,7 @@ def main():
             ).unsqueeze(0)
             pad_mask = batch["attention_mask"]
             pad_length = torch.sum(pad_mask == 0)
-            block_attenntion_mask[:, :, :, :pad_length] = float('-inf')
+            block_attenntion_mask[:, :, :pad_length] = float('-inf')
 
             attention_matrices.append(block_attenntion_mask)
 
