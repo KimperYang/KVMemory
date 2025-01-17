@@ -106,7 +106,7 @@ def preprocess_fn(example: Dict[str, str], tokenizer: LLaMA32Tokenizer, target_p
         "respectful and honest assistant.<|eot_id|>"
     )
     question = example["question"]
-    answer = example["answer"]
+    answer = example["answers"]
     memory_list = []
     for j in range(0,10):
         title = example["ctxs"][j]["title"]
