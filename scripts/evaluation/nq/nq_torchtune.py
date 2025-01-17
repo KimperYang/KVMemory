@@ -53,6 +53,7 @@ def load_model_weights(ckpt_path: str):
         with safe_open(safe_tensor_file, framework="pt", device="cpu") as f:
             for key in f.keys():
                 state_dict[key] = f.get_tensor(key)
+        state_dict["output.weight"] = state_dict["tok_embeddings.weight"]
         return state_dict
 
     state_dict = torch.load(ckpt_path, weights_only=False)
