@@ -292,6 +292,7 @@ def main():
         with torch.no_grad():
             input_ids = move_to_target_device(input_ids, device)
             attention_mask_4d = move_to_target_device(attention_mask_4d, device)
+            attention_mask_for_pad = move_to_target_device(attention_mask_for_pad, device)
             # outputs = model(input_ids = input_ids, attention_mask = attention_mask)
             # past_key_values = outputs.past_key_values
 
