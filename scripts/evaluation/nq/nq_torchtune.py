@@ -248,11 +248,15 @@ def main():
     eval_dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=collate_fn)
     prog_bar = auto_tqdm(range(len(eval_dataloader)))
 
+    eot_id = tokenizer.convert_tokens_to_ids("<|eot_id|>")
+    print(eot_id)
     generation_cfg = GenerationConfig(
         do_sample=False,
         num_beams=1,
         max_new_tokens=300,
-        stop_strings=["<|end_of_text|>", "<|eot_id|>"]
+        stop_strings=["<|end_of_text|>", "<|eot_id|>"],
+        pad_token_id=tokenizer.pad_token_id,
+        eos_token_id=eot_id,
     )
     generation_prompt = "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
     # generation_token_ids = tokenizer(generation_prompt, add_special_tokens=False, allowed_special="all")["input_ids"]
@@ -277,15 +281,17 @@ def main():
                 batch['input_length'][idx],
                 biased_ranges,
                 max_length,
-                batch['input_ids'].device
-            ).unsqueeze(0)
+                batch['input_ids'].device,
+                left_padding=True,
+            )
             pad_mask = batch["attention_mask"][idx]
             pad_length = torch.sum(pad_mask == 0)
-            block_attenntion_mask[:, :, :pad_length] = float('-inf')
+            block_attenntion_mask[:, :pad_length] = float('-inf')
 
             attention_matrices.append(block_attenntion_mask)
 
-        attention_mask_4d = torch.stack(attention_matrices)
+        attention_matrices = torch.stack(attention_matrices)
+        attention_mask_4d = attention_matrices.unsqueeze(1)
         input_ids = batch["input_ids"]
         attention_mask_for_pad = batch["attention_mask"]
 
@@ -293,16 +299,31 @@ def main():
             input_ids = move_to_target_device(input_ids, device)
             attention_mask_4d = move_to_target_device(attention_mask_4d, device)
             attention_mask_for_pad = move_to_target_device(attention_mask_for_pad, device)
-            # outputs = model(input_ids = input_ids, attention_mask = attention_mask)
-            # past_key_values = outputs.past_key_values
 
-            prefilling_outputs = model(input_ids=input_ids, attention_mas=attention_mask_4d)
+            # attention_mask_for_pad = attention_mask_for_pad.float()
+            # attention_mask_4d = attention_mask_4d.float()
+            # import ipdb
+            # ipdb.set_trace()
+
+            prefilling_outputs = model(input_ids=input_ids, attention_mask=attention_mask_4d)
             past_key_values = prefilling_outputs.past_key_values
+            # last_layer_cached_values = past_key_values[15][1]
+            # last_layer_cached_keys = past_key_values[15][0]
+            # last_layer_cached_values[0, 0, -1,]
+
+            # input_ids_only_1 = input_ids[:1, ...]
+            # attention_mask_4d_only_1 = attention_mask_4d[:1, ...]
+            # prefilling_outputs_only_1 = model(input_ids=input_ids_only_1, attention_mask=attention_mask_4d_only_1)
+            # past_key_values_only_1 = prefilling_outputs_only_1.past_key_values
+            # last_layer_cached_values_only_1 = past_key_values_only_1[15][1]
+            # last_layer_cached_keys_only_1 = past_key_values_only_1[15][0]
+            # last_layer_cached_values_only_1[0, 0, -1,]
+
+            # import ipdb
+            # ipdb.set_trace()
 
             generation_prefix = generation_token_ids.repeat(curr_batch_size, 1)
             generation_input_ids = torch.cat([input_ids, generation_prefix], axis=1)
-            import ipdb
-            ipdb.set_trace()
             attention_mask_for_pad = torch.cat([attention_mask_for_pad, torch.ones_like(generation_prefix)], axis=1)
             outputs = model.generate(
                 input_ids=generation_input_ids,
