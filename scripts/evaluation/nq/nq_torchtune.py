@@ -142,6 +142,7 @@ def preprocess_fn(example: Dict[str, str], tokenizer: LLaMA32Tokenizer, target_p
     prompt_id = tokenizer(new_prompt, allowed_special="all", disallowed_special = None, add_special_tokens = False)["input_ids"]
     input_ids = id_list + prompt_id
 
+    print(answer)
     answer_ids = tokenizer(answer, add_special_tokens = False)["input_ids"]
     return {
         "input_ids": input_ids,
