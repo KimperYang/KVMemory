@@ -202,7 +202,7 @@ def main():
         data_path = f"data/raw/nq/nq-open-10_{pos}.jsonl"
     else:
         data_path = "data/raw/nq/nq-open-10_0.jsonl"
-    dataset = datasets.load_dataset("json", data_files=data_path, split="eval")
+    dataset = datasets.load_dataset("json", data_files=data_path, split="train")
     print(dataset)
 
     tokenizer = LLaMA32Tokenizer(model_path="training_res/torchtune/tokenizer.model")
