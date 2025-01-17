@@ -296,12 +296,9 @@ def main():
 
             prefilling_outputs = model(input_ids=input_ids, attention_mas=attention_mask)
             past_key_values = prefilling_outputs.past_key_values
-            import ipdb
-
-            ipdb.set_trace()
 
             generation_input_ids = generation_token_ids.repeat(curr_batch_size, 1)
-            print(generation_input_ids.size())
+            generation_input_ids = torch.cat([input_ids, generation_input_ids], axis=1)
             outputs = model.generate(
                 input_ids=generation_input_ids,
                 use_cache=True,
