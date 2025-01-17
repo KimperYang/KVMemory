@@ -299,11 +299,11 @@ def main():
             prefilling_outputs = model(input_ids=input_ids, attention_mas=attention_mask_4d)
             past_key_values = prefilling_outputs.past_key_values
 
-            generation_input_ids = generation_token_ids.repeat(curr_batch_size, 1)
-            generation_input_ids = torch.cat([input_ids, generation_input_ids], axis=1)
+            generation_prefix = generation_token_ids.repeat(curr_batch_size, 1)
+            generation_input_ids = torch.cat([input_ids, generation_prefix], axis=1)
             import ipdb
             ipdb.set_trace()
-            attention_mask_for_pad = torch.cat([attention_mask_for_pad, torch.ones_like(generation_token_ids)], axis=1)
+            attention_mask_for_pad = torch.cat([attention_mask_for_pad, torch.ones_like(generation_prefix)], axis=1)
             outputs = model.generate(
                 input_ids=generation_input_ids,
                 attention_mask=attention_mask_for_pad,
