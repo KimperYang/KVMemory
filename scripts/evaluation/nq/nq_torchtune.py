@@ -241,7 +241,7 @@ def main():
     collate_fn = DataCollatorForGeneration(pad_id=tokenizer.pad_id)
     eval_dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=collate_fn)
     for batch_id, batch in enumerate(eval_dataloader):
-        curr_batch_size = batch['input_ids'].size()
+        curr_batch_size = batch['input_ids'].size(0)
         batch_answers = all_answers[batch_id * batch_size : batch_id * batch_size + curr_batch_size]
         attention_matrices = []
         max_length = max(batch['input_length'])
