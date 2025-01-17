@@ -283,13 +283,15 @@ def main():
             )
         generated_seqs = [tokenizer.decode(
                 outputs[i, input_ids.size(1):],
-                skip_special_tokens=True,
             )
             for i in range(input_ids.size(0))
         ]
 
         print(generated_seqs)
-        # response = generated_seq.split("<|start_header_id|>assistant<|end_header_id|>")[-1].strip().split("<|eot_id|>")[0]
+        response = [
+            generated_seq.split("<|start_header_id|>assistant<|end_header_id|>")[-1].strip().split("<|eot_id|>")[0]
+            for generated_seq in generated_seqs
+        ]
         responses = generated_seqs
         print(responses)
 
