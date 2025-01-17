@@ -250,7 +250,7 @@ def main():
         stop_strings=["<|end_of_text|>", "<|eot_id|>"]
     )
     generation_prompt = "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
-    generation_token_ids = tokenizer(generation_prompt, add_special_tokens=False, allowed_special="all")
+    generation_token_ids = tokenizer(generation_prompt, add_special_tokens=False, allowed_special="all")["input_ids"]
     print(generation_token_ids)
     generation_token_ids = torch.LongTensor(generation_token_ids)
     generation_token_ids: torch.LongTensor = move_to_target_device(generation_token_ids, device)
