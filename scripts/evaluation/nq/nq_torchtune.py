@@ -137,7 +137,6 @@ def preprocess_fn(example: Dict[str, str], tokenizer: LLaMA32Tokenizer, target_p
         "<|reserved_special_token_5|><|start_header_id|>user<|end_header_id|>\n\n"
         "Write a high-quality answer for the given question using only the provided "
         f"search results (some of which might be irrelevant). Question: {question}"
-        "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
     )
     prompt_id = tokenizer(new_prompt, allowed_special="all", disallowed_special = None, add_special_tokens = False)["input_ids"]
     input_ids = id_list + prompt_id
@@ -250,6 +249,11 @@ def main():
         max_new_tokens=300,
         stop_strings=["<|end_of_text|>", "<|eot_id|>"]
     )
+    generation_prompt = "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+    generation_token_ids = tokenizer(generation_prompt, add_special_tokens=False, allowed_special="all")
+    print(generation_token_ids)
+    generation_token_ids = torch.LongTensor(generation_token_ids)
+    generation_token_ids: torch.LongTensor = move_to_target_device(generation_token_ids, device)
 
     for batch_id, batch in enumerate(eval_dataloader):
         curr_batch_size = batch['input_ids'].size(0)
@@ -284,11 +288,15 @@ def main():
             # outputs = model(input_ids = input_ids, attention_mask = attention_mask)
             # past_key_values = outputs.past_key_values
 
+            prefilling_outputs = model(input_ids=input_ids, attention_mas=attention_mask)
+            past_key_values = prefilling_outputs.past_key_values
+
+            generation_input_ids = generation_token_ids.repeat(curr_batch_size, 1)
             outputs = model.generate(
-                input_ids=input_ids,
-                attention_mask=attention_mask,
+                input_ids=generation_input_ids,
                 use_cache=True,
                 generation_config=generation_cfg,
+                past_key_values=past_key_values,
             )
         generated_seqs = [tokenizer.decode(
                 outputs[i, input_ids.size(1):].tolist(),
