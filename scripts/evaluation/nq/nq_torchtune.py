@@ -188,7 +188,7 @@ class DataCollatorForGeneration():
             biased_index.append(converted_biased_index)
 
         return {
-            'input_ids': torch.LongTensor(padded_input_ids),
+            'input_ids': torch.LongTensor(input_ids),
             'biased_index': torch.LongTensor(biased_index),
             "input_length": torch.LongTensor(input_length),
             'mem_num': torch.LongTensor(mem_num),
@@ -281,7 +281,7 @@ def main():
             ).unsqueeze(0)
             # import ipdb
             # ipdb.set_trace()
-            pad_mask = batch["attention_mask"]
+            pad_mask = batch["attention_mask"][idx]
             pad_length = torch.sum(pad_mask == 0)
             block_attenntion_mask[:, :, :pad_length] = float('-inf')
 
