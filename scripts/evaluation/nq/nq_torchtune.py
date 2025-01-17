@@ -106,7 +106,6 @@ def preprocess_fn(example: Dict[str, str], tokenizer: LLaMA32Tokenizer, target_p
         "respectful and honest assistant.<|eot_id|>"
     )
     question = example["question"]
-    answer = example["answers"]
     memory_list = []
     for j in range(0,10):
         title = example["ctxs"][j]["title"]
@@ -141,13 +140,9 @@ def preprocess_fn(example: Dict[str, str], tokenizer: LLaMA32Tokenizer, target_p
     )
     prompt_id = tokenizer(new_prompt, allowed_special="all", disallowed_special = None, add_special_tokens = False)["input_ids"]
     input_ids = id_list + prompt_id
-
-    print(answer)
-    answer_ids = tokenizer(answer, add_special_tokens = False)["input_ids"]
     return {
         "input_ids": input_ids,
         "biased_index": biased_index,
-        "answer": answer_ids
     }
 
 class DataCollatorForGeneration():
@@ -160,7 +155,6 @@ class DataCollatorForGeneration():
         mem_num = []
         input_length = []
         attention_mask = []
-        answer_ids = []
         for item in batch:
             if item['biased_index'] is not None:
                 mem_num.append(len(item['biased_index']))
@@ -170,19 +164,15 @@ class DataCollatorForGeneration():
 
         max_mem_num = max(mem_num)
         max_length = max(input_length)
-        max_answer_length = max([len(x["answer"]) for x in batch])
 
         for item in batch:
             seq_length = len(item['input_ids'])
-            answer_length = len(item["answer"])
             _mem_num = len(item['biased_index']) if item['biased_index'] is not None else 0
 
             residual = max_length - seq_length
             padded_input_ids = [self.pad_id] * residual + item['input_ids']
             curr_attention_mask = [0] * residual + [1] * seq_length
 
-            answer_residual = max_answer_length - answer_length
-            padded_answer_ids = [self.pad_id] * answer_residual + item["answer"]
 
             original_biased_index = item['biased_index']
             converted_biased_index = []
@@ -195,14 +185,12 @@ class DataCollatorForGeneration():
             input_ids.append(padded_input_ids)
             attention_mask.append(curr_attention_mask)
             biased_index.append(converted_biased_index)
-            answer_ids.append(padded_answer_ids)
 
         return {
             'input_ids': torch.LongTensor(input_ids),
             'biased_index': torch.LongTensor(biased_index),
             "input_length": torch.LongTensor(input_length),
             'mem_num': torch.LongTensor(mem_num),
-            "answer_ids": torch.LongTensor(answer_ids)
         }
 
 
@@ -218,6 +206,8 @@ def main():
         data_path = "data/raw/nq/nq-open-10_0.jsonl"
     dataset = datasets.load_dataset("json", data_files=data_path, split="train")
     print(dataset)
+    all_answers = dataset["answers"].tolist()
+    print(all_answers[:10])
 
     tokenizer = LLaMA32Tokenizer(model_path="data/titan_tokenizer/original/tokenizer.model")
     state_dict = load_model_weights(ckpt_path)
@@ -250,7 +240,9 @@ def main():
 
     collate_fn = DataCollatorForGeneration(pad_id=tokenizer.pad_id)
     eval_dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=collate_fn)
-    for _, batch in enumerate(eval_dataloader):
+    for batch_id, batch in enumerate(eval_dataloader):
+        curr_batch_size = batch['input_ids'].size()
+        batch_answers = all_answers[batch_id * batch_size : batch_id * batch_size + curr_batch_size]
         attention_matrices = []
         max_length = max(batch['input_length'])
         for idx in range(len(batch['input_ids'])):
@@ -300,16 +292,14 @@ def main():
         responses = generated_seqs
         print(responses)
 
-        answer_ids = batch["answer_ids"]
-        ground_truth_answers = [tokenizer.decode(answer_ids[i]) for i in range(answer_ids.size(0))]
-        scores = [best_subspan_em(responses[idx], ground_truth_answers[idx]) for idx in range(answer_ids.size(0))]
+        scores = [best_subspan_em(responses[idx], batch_answers[idx]) for idx in range(curr_batch_size)]
         for idx, score in scores:
             correct_num = correct_num + int(score)
             res_list.append(
                 {
                     # "question": question,
                     "response": responses[idx],
-                    "gold_answer": ground_truth_answers[idx],
+                    "gold_answer": batch_answers[idx],
                     "score": scores[idx],
                 }
             )
