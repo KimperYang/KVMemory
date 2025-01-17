@@ -282,7 +282,7 @@ def main():
                 use_cache=True
             )
         generated_seqs = [tokenizer.decode(
-                outputs[i, input_ids.size(1):],
+                outputs[i, input_ids.size(1):].tolist(),
             )
             for i in range(input_ids.size(0))
         ]
