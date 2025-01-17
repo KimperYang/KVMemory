@@ -279,30 +279,33 @@ def main():
                 max_length,
                 batch['input_ids'].device
             ).unsqueeze(0)
-            import ipdb
-            ipdb.set_trace()
             pad_mask = batch["attention_mask"][idx]
             pad_length = torch.sum(pad_mask == 0)
             block_attenntion_mask[:, :, :pad_length] = float('-inf')
 
             attention_matrices.append(block_attenntion_mask)
 
-        attention_mask = torch.stack(attention_matrices)
+        attention_mask_4d = torch.stack(attention_matrices)
         input_ids = batch["input_ids"]
+        attention_mask_for_pad = batch["attention_mask"]
 
         with torch.no_grad():
             input_ids = move_to_target_device(input_ids, device)
-            attention_mask = move_to_target_device(attention_mask, device)
+            attention_mask_4d = move_to_target_device(attention_mask_4d, device)
             # outputs = model(input_ids = input_ids, attention_mask = attention_mask)
             # past_key_values = outputs.past_key_values
 
-            prefilling_outputs = model(input_ids=input_ids, attention_mas=attention_mask)
+            prefilling_outputs = model(input_ids=input_ids, attention_mas=attention_mask_4d)
             past_key_values = prefilling_outputs.past_key_values
 
             generation_input_ids = generation_token_ids.repeat(curr_batch_size, 1)
             generation_input_ids = torch.cat([input_ids, generation_input_ids], axis=1)
+            import ipdb
+            ipdb.set_trace()
+            attention_mask_for_pad = torch.cat([attention_mask_for_pad, torch.ones_like(generation_token_ids)], axis=1)
             outputs = model.generate(
                 input_ids=generation_input_ids,
+                attention_mask=attention_mask_for_pad,
                 use_cache=True,
                 generation_config=generation_cfg,
                 past_key_values=past_key_values,
