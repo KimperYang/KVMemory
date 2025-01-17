@@ -17,6 +17,7 @@ python scripts/evaluation/nq/nq_torchtune.py \
 import argparse
 import datetime
 import json
+import os
 import string
 from typing import Dict, List
 
@@ -24,6 +25,7 @@ import datasets
 import numpy as np
 import regex
 import torch
+from safetensors import safe_open
 from torch.utils.data import DataLoader
 from torchtune.models.convert_weights import tune_to_hf
 from transformers import LlamaForCausalLM
@@ -45,6 +47,15 @@ parser.add_argument("--batch_size", type=int, default=1, help="Batch size of the
 args = parser.parse_args()
 
 def load_model_weights(ckpt_path: str):
+    safe_tensor_file = os.path.join(ckpt_path, "adapter_model.safetensors")
+    if os.path.exists(safe_tensor_file):
+        state_dict = {}
+        with safe_open(safe_tensor_file, framework="pt", device="cpu") as f:
+            for key in f.keys():
+                if "transform" in key:
+                    state_dict[key] = f.get_tensor(key)
+        return state_dict
+
     state_dict = torch.load(ckpt_path, weights_only=False)
 
     state_dict = state_dict["model"]
