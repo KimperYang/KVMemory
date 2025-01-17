@@ -29,7 +29,7 @@ from safetensors import safe_open
 from torch.utils.data import DataLoader
 from torchtune.models.convert_weights import tune_to_hf
 from tqdm.auto import tqdm as auto_tqdm
-from transformers import LlamaForCausalLM, GenerationConfig
+from transformers import AutoTokenizer, GenerationConfig, LlamaForCausalLM
 
 from src.common import move_to_target_device
 from src.data.attention import construct_biased_attention_matrix
@@ -127,7 +127,8 @@ def preprocess_fn(example: Dict[str, str], tokenizer: LLaMA32Tokenizer, target_p
     for st in memory_list:
 
         # tem_id = tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
-        tem_id = tokenizer(st, allowed_special="all", disallowed_special = None, add_special_tokens = False)["input_ids"]
+        # tem_id = tokenizer(st, allowed_special="all", disallowed_special = None, add_special_tokens = False)["input_ids"]
+        tem_id = tokenizer(st, add_special_tokens = False)["input_ids"]
         biased_index.append([idx, idx + len(tem_id)])
 
         id_list += tem_id
@@ -138,7 +139,7 @@ def preprocess_fn(example: Dict[str, str], tokenizer: LLaMA32Tokenizer, target_p
         "Write a high-quality answer for the given question using only the provided "
         f"search results (some of which might be irrelevant). Question: {question}"
     )
-    prompt_id = tokenizer(new_prompt, allowed_special="all", disallowed_special = None, add_special_tokens = False)["input_ids"]
+    prompt_id = tokenizer(new_prompt, add_special_tokens = False)["input_ids"]
     input_ids = id_list + prompt_id
     return {
         "input_ids": input_ids,
@@ -210,7 +211,11 @@ def main():
     all_answers = dataset["answers"]
     print(all_answers[:10])
 
-    tokenizer = LLaMA32Tokenizer(model_path="data/titan_tokenizer/original/tokenizer.model")
+    # tokenizer = LLaMA32Tokenizer(model_path="data/titan_tokenizer/original/tokenizer.model")
+    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+    tokenizer.pad_token_id = 128004
+    tokenizer.pad_token = "<|finetune_right_pad_id|>"
+
     state_dict = load_model_weights(ckpt_path)
 
     model = LlamaForCausalLM.from_pretrained(
@@ -239,7 +244,7 @@ def main():
     correct_num = 0
     res_list = []
 
-    collate_fn = DataCollatorForGeneration(pad_id=tokenizer.pad_id)
+    collate_fn = DataCollatorForGeneration(pad_id=tokenizer.pad_token_id)
     eval_dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=collate_fn)
     prog_bar = auto_tqdm(range(len(eval_dataloader)))
 
@@ -250,7 +255,8 @@ def main():
         stop_strings=["<|end_of_text|>", "<|eot_id|>"]
     )
     generation_prompt = "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
-    generation_token_ids = tokenizer(generation_prompt, add_special_tokens=False, allowed_special="all")["input_ids"]
+    # generation_token_ids = tokenizer(generation_prompt, add_special_tokens=False, allowed_special="all")["input_ids"]
+    generation_token_ids = tokenizer(generation_prompt, add_special_tokens=False)["input_ids"]
     print(generation_token_ids)
     generation_token_ids = torch.LongTensor(generation_token_ids)
     generation_token_ids: torch.LongTensor = move_to_target_device(generation_token_ids, device)
@@ -297,6 +303,7 @@ def main():
                 use_cache=True,
                 generation_config=generation_cfg,
                 past_key_values=past_key_values,
+                tokenizer=tokenizer,
             )
         generated_seqs = [tokenizer.decode(
                 outputs[i, input_ids.size(1):].tolist(),
