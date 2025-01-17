@@ -205,7 +205,7 @@ def main():
     dataset = datasets.load_dataset("json", data_files=data_path, split="train")
     print(dataset)
 
-    tokenizer = LLaMA32Tokenizer(model_path="data/titan_tokenizer")
+    tokenizer = LLaMA32Tokenizer(model_path="data/titan_tokenizer/original/tokenizer.model")
     state_dict = load_model_weights(ckpt_path)
 
     model = LlamaForCausalLM.from_pretrained(
