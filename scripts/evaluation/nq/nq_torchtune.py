@@ -223,7 +223,8 @@ def main():
         "meta-llama/Llama-3.2-1B-Instruct",
         torch_dtype=torch.bfloat16,
     )
-    model.load_state_dict(state_dict, strict=True)
+    # model.load_state_dict(state_dict, strict=True)
+    model.load_state_dict(state_dict, strict=False)
     model = model.to(device)
     model.eval()
 
