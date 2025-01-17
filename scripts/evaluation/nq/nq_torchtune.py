@@ -206,7 +206,7 @@ def main():
         data_path = "data/raw/nq/nq-open-10_0.jsonl"
     dataset = datasets.load_dataset("json", data_files=data_path, split="train")
     print(dataset)
-    all_answers = dataset["answers"].tolist()
+    all_answers = dataset["answers"]
     print(all_answers[:10])
 
     tokenizer = LLaMA32Tokenizer(model_path="data/titan_tokenizer/original/tokenizer.model")
