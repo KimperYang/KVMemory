@@ -52,8 +52,7 @@ def load_model_weights(ckpt_path: str):
         state_dict = {}
         with safe_open(safe_tensor_file, framework="pt", device="cpu") as f:
             for key in f.keys():
-                if "transform" in key:
-                    state_dict[key] = f.get_tensor(key)
+                state_dict[key] = f.get_tensor(key)
         return state_dict
 
     state_dict = torch.load(ckpt_path, weights_only=False)
