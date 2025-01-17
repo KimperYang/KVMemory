@@ -296,7 +296,7 @@ def main():
         print(responses)
 
         scores = [best_subspan_em(responses[idx], batch_answers[idx]) for idx in range(curr_batch_size)]
-        for idx, score in scores:
+        for idx, score in enumerate(scores):
             correct_num = correct_num + int(score)
             res_list.append(
                 {
