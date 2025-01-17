@@ -298,6 +298,7 @@ def main():
             past_key_values = prefilling_outputs.past_key_values
 
             generation_input_ids = generation_token_ids.repeat(curr_batch_size, 1)
+            print(generation_input_ids.size())
             outputs = model.generate(
                 input_ids=generation_input_ids,
                 use_cache=True,
