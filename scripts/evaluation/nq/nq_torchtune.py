@@ -356,6 +356,8 @@ def main():
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
     file_name = f"result/decay/NQ_at{pos}_{accuracy}_{time_str}.jsonl"
+    if not os.path.exists(os.path.dirname(file_name)):
+        os.makedirs(os.path.dirname(file_name))
 
     with open(file_name, "w", encoding="utf-8") as f:
         for entry in res_list:
