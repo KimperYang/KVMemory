@@ -102,21 +102,33 @@ def best_subspan_em(prediction: str, ground_truths: List[str]) -> float:
     return 0.0
 
 def preprocess_fn(example: Dict[str, str], tokenizer: LLaMA32Tokenizer, target_position: int):
+    # template = (
+    #     "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a helpful, "
+    #     "respectful and honest assistant.<|eot_id|>"
+    # )
     template = (
-        "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a helpful, "
-        "respectful and honest assistant.<|eot_id|>"
+        "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant "
+        "who answer the question with the knowledge provided in the prompt<|eot_id|>"
     )
     question = example["question"]
     memory_list = []
-    for j in range(0,10):
-        title = example["ctxs"][j]["title"]
-        text = example["ctxs"][j]["text"]
-        memory_list.append("<|reserved_special_token_3|>" + f"Document [{j+1}](Title: {title}) {text}" + "\n<|reserved_special_token_4|>")
+
+    doc_list = [example["ctxs"][x]["text"] for x in range(10)]
     # If target_position == 1, for example, then the code will read from the data source that
     # always put groud-truth at position 0.
     if target_position not in [0, 4, 9]:
-        ground_truth = memory_list.pop(0)
-        memory_list.insert(target_position, ground_truth)
+        ground_truth_doc = doc_list.pop(0)
+        doc_list.insert(target_position, ground_truth_doc)
+
+    for j in range(0,10):
+        title = example["ctxs"][j]["title"]
+        # text = example["ctxs"][j]["text"]
+        text = doc_list[j]
+        memory_list.append("<|reserved_special_token_3|>" + f"Document [{j+1}](Title: {title}) {text}" + "\n<|reserved_special_token_4|>")
+
+    # if target_position not in [0, 4, 9]:
+    #     ground_truth = memory_list.pop(0)
+    #     memory_list.insert(target_position, ground_truth)
 
     memory_list.insert(0, template)
     biased_index = []
