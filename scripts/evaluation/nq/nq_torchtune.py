@@ -112,15 +112,14 @@ def preprocess_fn(example: Dict[str, str], tokenizer: LLaMA32Tokenizer, target_p
     # )
     question = example["question"]
     memory_list = []
-    title_list = []
 
     doc_list = [example["ctxs"][x]["text"] for x in range(10)]
-    original_title_list  = [example["ctxs"][x]["title"] for x in range(10)]
+    title_list  = [example["ctxs"][x]["title"] for x in range(10)]
     # If target_position == 1, for example, then the code will read from the data source that
     # always put groud-truth at position 0.
     if target_position not in [0, 4, 9]:
         ground_truth_doc = doc_list.pop(0)
-        ground_truth_title = original_title_list.pop(0)
+        ground_truth_title = title_list.pop(0)
         doc_list.insert(target_position, ground_truth_doc)
         title_list.insert(target_position, ground_truth_title)
 
