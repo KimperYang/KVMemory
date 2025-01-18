@@ -9,8 +9,8 @@ label_dict = {0:'abbreviation', 1:'entity', 2:'description', 3:'human', 4:'locat
 
 # Step 1: Load the Pretrained Model and Tokenizer
 # model_name = "/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-30000"
-model_name = "training_res/sum/sum_2/checkpoint-6000"
-reencode_num = 2
+model_name = "training_res/sum/sum_0/checkpoint-6000"
+reencode_num = 0
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
 model.eval()
@@ -37,6 +37,8 @@ def construct_examples(data):
             # asst = f"<|start_header_id|>assistant<|end_header_id|>\n\nType: {label_dict[item['coarse_label']]}<|eot_id|>"
             user = f"<|start_header_id|>user<|end_header_id|>\n\nCategories: abbreviation, entity, description, human, location, numeric.\nWhat category best describes: {item['text']}<|eot_id|>"
             asst = f"<|start_header_id|>assistant<|end_header_id|>\n\nAnswer: {label_dict[item['coarse_label']]}<|eot_id|>"
+            # user = f"Question: {item['text']}"
+            # asst = f"\nType: {label_dict[item['coarse_label']]}\n"        
             context.append(user + asst)
             num_stats[item['coarse_label']] += 1
             num_demo += 1
@@ -75,7 +77,7 @@ print(len(context))
 
 biased_index = []
 id_list = []
-idx = 0
+position = 0
 
 for idx in range(len(context)):
     tem_id = tokenizer(context[idx], add_special_tokens=False).input_ids
@@ -89,14 +91,14 @@ for idx in range(len(context)):
         for sub_idx in range(reencode_num):
             tem_id = tem_id + [special_start_token + mem_idx * reencode_num + sub_idx]
 
-        biased_index.append([idx, idx + len(tem_id) - reencode_num])
+        biased_index.append([position, position + len(tem_id) - reencode_num])
 
     if idx == len(context):
         tem_id += [mem_end]
 
     tem_id = torch.tensor([tem_id])
     id_list.append(tem_id)
-    idx = idx + tem_id.size(1)
+    position = position + tem_id.size(1)
 
 print(biased_index)
 prefix_id = torch.cat(id_list, dim = 1)
@@ -105,6 +107,7 @@ for idx in range(total_num):
     print(idx)
     # Step 2: Prepare the Context and Options
     question = f"<|start_header_id|>user<|end_header_id|>\n\nCategories: abbreviation, entity, description, human, location, numeric.\nWhat category best describes: {data['test'][idx]['text']}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nAnswer: "
+    # question = "Question: " + data['test'][idx]['text'] + "\nType: "
     options = label_dict.values()
 
     # Step 3: Compute Log-Likelihoods for Each Option
