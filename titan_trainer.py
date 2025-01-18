@@ -154,7 +154,7 @@ CONFIG_DICT = {
         job_dump_folder="run_logs/block_datav3_step10k",
         ckpt_config=COMMON_CHECKPOINT_CONFIG,
         training_recipe=bsz64_lr56_steps10k,
-        activation_checkpoint=FULL_ACTIVATION_CHECKPOINT_CONFIG,
+        activation_checkpoint=SELECTIVE_ACTIVATION_CHECKPOINT_CONFIG,
     ),
     "block_datav3_step6k_bsz256_4_node_selective_ckpt": TitanTrainerConfig(
         model_name_or_path="meta-llama/Llama-3.2-1B-Instruct",
