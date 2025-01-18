@@ -55,7 +55,7 @@ def custom_collate_fn(batch):
     # torch.cuda.empty_cache()
 
     return {
-        'input_ids': padded_input_ids,
+        'input_ids': ded_input_ids,
         'attention_mask': padded_attention_mask
     }
 

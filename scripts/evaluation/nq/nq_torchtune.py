@@ -171,18 +171,15 @@ class DataCollatorForGeneration():
             _mem_num = len(item['biased_index']) if item['biased_index'] is not None else 0
 
             residual = max_length - seq_length
-            padded_input_ids = [self.pad_id] * residual + item['input_ids']
-            curr_attention_mask = [0] * residual + [1] * seq_length
+            # padded_input_ids = [self.pad_id] * residual + item['input_ids']
+            # curr_attention_mask = [0] * residual + [1] * seq_length
+            padded_input_ids = item['input_ids'] + [self.pad_id] * residual
+            curr_attention_mask = [1] * seq_length + [0] * residual
 
 
             original_biased_index = item['biased_index']
-            converted_biased_index = []
-            for start_stop_pair in original_biased_index:
-                start = start_stop_pair[0]
-                stop = start_stop_pair[1]
-                converted_biased_index.append([start + residual, stop + residual])
 
-            converted_biased_index = converted_biased_index + [[0,0]] * (max_mem_num - _mem_num)
+            converted_biased_index = original_biased_index + [[0,0]] * (max_mem_num - _mem_num)
             input_ids.append(padded_input_ids)
             attention_mask.append(curr_attention_mask)
             biased_index.append(converted_biased_index)
@@ -220,7 +217,8 @@ def main():
 
     model = LlamaForCausalLM.from_pretrained(
         "meta-llama/Llama-3.2-1B-Instruct",
-        torch_dtype=torch.bfloat16,
+        # torch_dtype=torch.bfloat16,
+        torch_dtype=torch.float32,
     )
     # model.load_state_dict(state_dict, strict=True)
     model.load_state_dict(state_dict, strict=False)
@@ -282,12 +280,14 @@ def main():
                 biased_ranges,
                 max_length,
                 batch['input_ids'].device,
-                left_padding=True,
+                left_padding=False,
             )
             pad_mask = batch["attention_mask"][idx]
-            pad_length = torch.sum(pad_mask == 0)
-            block_attenntion_mask[:, :pad_length] = float('-inf')
+            pad_positions = (pad_mask == 0).view(1, -1)
 
+            # pad_length = torch.sum(pad_mask == 0)
+            # block_attenntion_mask[:, -pad_length:] = float('-inf')
+            block_attenntion_mask = block_attenntion_mask.masked_fill(pad_positions, float('-inf'))
             attention_matrices.append(block_attenntion_mask)
 
         attention_matrices = torch.stack(attention_matrices)
@@ -300,27 +300,12 @@ def main():
             attention_mask_4d = move_to_target_device(attention_mask_4d, device)
             attention_mask_for_pad = move_to_target_device(attention_mask_for_pad, device)
 
-            # attention_mask_for_pad = attention_mask_for_pad.float()
-            # attention_mask_4d = attention_mask_4d.float()
-            # import ipdb
-            # ipdb.set_trace()
+            attention_mask_for_pad = attention_mask_for_pad.float()
+            attention_mask_4d = attention_mask_4d.float()
 
             prefilling_outputs = model(input_ids=input_ids, attention_mask=attention_mask_4d)
             past_key_values = prefilling_outputs.past_key_values
-            # last_layer_cached_values = past_key_values[15][1]
-            # last_layer_cached_keys = past_key_values[15][0]
-            # last_layer_cached_values[0, 0, -1,]
 
-            # input_ids_only_1 = input_ids[:1, ...]
-            # attention_mask_4d_only_1 = attention_mask_4d[:1, ...]
-            # prefilling_outputs_only_1 = model(input_ids=input_ids_only_1, attention_mask=attention_mask_4d_only_1)
-            # past_key_values_only_1 = prefilling_outputs_only_1.past_key_values
-            # last_layer_cached_values_only_1 = past_key_values_only_1[15][1]
-            # last_layer_cached_keys_only_1 = past_key_values_only_1[15][0]
-            # last_layer_cached_values_only_1[0, 0, -1,]
-
-            # import ipdb
-            # ipdb.set_trace()
 
             generation_prefix = generation_token_ids.repeat(curr_batch_size, 1)
             generation_input_ids = torch.cat([input_ids, generation_prefix], axis=1)
@@ -339,14 +324,15 @@ def main():
             for i in range(input_ids.size(0))
         ]
 
-        for x in generated_seqs:
-            print(x)
+        # for x in generated_seqs:
+        #     print(x)
         responses = [
             generated_seq.split("<|start_header_id|>assistant<|end_header_id|>")[-1].strip().split("<|eot_id|>")[0]
             for generated_seq in generated_seqs
         ]
         for x in responses:
             print(x)
+            print("------\n")
         # print(responses)
 
         scores = [best_subspan_em(responses[idx], batch_answers[idx]) for idx in range(curr_batch_size)]
