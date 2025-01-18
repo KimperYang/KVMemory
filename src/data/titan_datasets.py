@@ -69,6 +69,8 @@ def load_data_and_process_fn(
             preprocessor_fn = preprocessor.process_qamem
         else:
             raise NotImplementedError()
+        num_shards = 32
+        remove_columns=['prompt', 'question', 'answers', 'generated', 'inputs', 'documents']
     else:
         raise ValueError(f"Unrecognized dataset name {data_component_name}.")
 
