@@ -233,8 +233,8 @@ def main():
 
     model = LlamaForCausalLM.from_pretrained(
         "meta-llama/Llama-3.2-1B-Instruct",
-        # torch_dtype=torch.bfloat16,
-        torch_dtype=torch.float32,
+        torch_dtype=torch.bfloat16,
+        # torch_dtype=torch.float32,
     )
     # model.load_state_dict(state_dict, strict=True)
     model.load_state_dict(state_dict, strict=False)
@@ -316,8 +316,8 @@ def main():
             attention_mask_4d = move_to_target_device(attention_mask_4d, device)
             attention_mask_for_pad = move_to_target_device(attention_mask_for_pad, device)
 
-            attention_mask_for_pad = attention_mask_for_pad.float()
-            attention_mask_4d = attention_mask_4d.float()
+            # attention_mask_for_pad = attention_mask_for_pad.float()
+            # attention_mask_4d = attention_mask_4d.float()
 
             prefilling_outputs = model(input_ids=input_ids, attention_mask=attention_mask_4d)
             past_key_values = prefilling_outputs.past_key_values
