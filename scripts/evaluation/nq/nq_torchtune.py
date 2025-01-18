@@ -102,14 +102,14 @@ def main():
         for st in memory_list:
 
             # tem_id = global_tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
-            tem_id = global_tokenizer.__call__(st, allowed_special='all', disallowed_special = None, add_special_tokens = False)['input_ids']
+            tem_id = global_tokenizer(st, allowed_special='all', disallowed_special = None, add_special_tokens = False)['input_ids']
             biased_index.append([idx, idx + len(tem_id)])
 
             id_list += tem_id
             idx = idx + len(tem_id)
 
         new_prompt = "<|reserved_special_token_5|><|start_header_id|>user<|end_header_id|>\n\nWrite a high-quality answer for the given question using only the provided search results (some of which might be irrelevant). Question: " + jsonObj["question"][i] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
-        prompt_id = global_tokenizer.__call__(new_prompt, allowed_special='all', disallowed_special = None, add_special_tokens = False)['input_ids']
+        prompt_id = global_tokenizer(new_prompt, allowed_special='all', disallowed_special = None, add_special_tokens = False)['input_ids']
 
         # id_list.append(prompt_id)
 
