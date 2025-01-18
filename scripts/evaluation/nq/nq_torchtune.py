@@ -263,8 +263,8 @@ def main():
     generation_cfg = GenerationConfig(
         do_sample=False,
         num_beams=1,
-        max_new_tokens=300,
-        stop_strings=["<|end_of_text|>", "<|eot_id|>"],
+        max_new_tokens=200,
+        # stop_strings=["<|end_of_text|>", "<|eot_id|>"],
         pad_token_id=tokenizer.pad_token_id,
         eos_token_id=eot_id,
     )
