@@ -32,7 +32,7 @@ def build_hf_data_loader(
     for data_component in data_components:
         dataset_name = data_component.dataset_name
         weight = data_component.weight
-        packing_mode = "packing" if dataset_name in ["sft", "text"] else "padding"
+        packing_mode = "packing" if dataset_name in ["sft", "tulu", "text"] else "padding"
         hf_ds = HuggingFaceDataset(
             dataset_name,
             tokenizer,
