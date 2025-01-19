@@ -6,7 +6,6 @@ KVMemory.egg-info/
 /data/
 result/
 training_res/
-*test.py
 dataset_cache/
 tem.py
 training_res/
