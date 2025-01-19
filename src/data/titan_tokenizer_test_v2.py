@@ -28,7 +28,7 @@ class InputTokenizationTest(parameterized.TestCase):
         )
 
     def compare_processed_datasets(self, data_path, llama_fn, hf_fn):
-        full_ds = datasets.load_from_disk(data_path)
+        full_ds = datasets.load_from_disk(data_path)["train"]
         ds = full_ds.select(range(10))
         del full_ds
 
