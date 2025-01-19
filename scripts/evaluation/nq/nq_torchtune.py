@@ -346,8 +346,9 @@ def main():
             generated_seq.split("<|start_header_id|>assistant<|end_header_id|>")[-1].strip().split("<|eot_id|>")[0]
             for generated_seq in generated_seqs
         ]
-        for x in responses:
+        for idx, x in enumerate(responses):
             print(x)
+            print("Ground-truth: ", batch_answers[idx])
             print("------\n")
         # print(responses)
 
