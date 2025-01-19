@@ -219,8 +219,8 @@ class LLaMA32Tokenizer(Tokenizer):
 
     def __call__(self, text: str, add_special_tokens: bool = True):
         if add_special_tokens:
-            input_ids = self.encode(text, bos=True, eos=False)
+            input_ids = self.encode(text, bos=True, eos=False, allowed_special="all")
         else:
-            input_ids = self.encode(text, bos=False, eos=False)
+            input_ids = self.encode(text, bos=False, eos=False, allowed_special="all")
         return {"input_ids": input_ids}
 
