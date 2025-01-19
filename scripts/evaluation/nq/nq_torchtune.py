@@ -106,10 +106,10 @@ def preprocess_fn(example: Dict[str, str], tokenizer: LLaMA32Tokenizer, target_p
         "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a helpful, "
         "respectful and honest assistant.<|eot_id|>"
     )
-    # template = (
-    #     "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant "
-    #     "who answer the question with the knowledge provided in the prompt<|eot_id|>"
-    # )
+    template = (
+        "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant "
+        "who answer the question with the knowledge provided in the prompt<|eot_id|>"
+    )
     question = example["question"]
     memory_list = []
 
