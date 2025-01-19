@@ -39,7 +39,7 @@ parser = argparse.ArgumentParser(description="Run script with specified ckpt and
 parser.add_argument(
     "--ckpt_path",
     type=str,
-    required=True,
+    default=None,
     help="The path to the `checkpoint.pt` file.",
 )
 parser.add_argument("--pos", type=int, required=True, help="Position value")
@@ -236,15 +236,18 @@ def main():
     tokenizer.pad_token_id = 128004
     tokenizer.pad_token = "<|finetune_right_pad_id|>"
 
-    state_dict = load_model_weights(ckpt_path)
-
     model = LlamaForCausalLM.from_pretrained(
         "meta-llama/Llama-3.2-1B-Instruct",
         torch_dtype=torch.bfloat16,
         # torch_dtype=torch.float32,
     )
     # model.load_state_dict(state_dict, strict=True)
-    model.load_state_dict(state_dict, strict=False)
+
+    if args.ckpt_path is None:
+        print("Will NOT load fine-tuned models!")
+    else:
+        state_dict = load_model_weights(ckpt_path)
+        model.load_state_dict(state_dict, strict=False)
     model = model.to(device)
     model.eval()
 
