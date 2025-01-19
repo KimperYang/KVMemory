@@ -55,6 +55,13 @@ class InputTokenizationTest(parameterized.TestCase):
                 f"Mismatch found in preprocessed examples at index {idx}"
             )
 
+    def test_tokenization(self):
+        data_path = DATASET_NAME_TO_PATH["pretrain_process"]
+        ds = datasets.load_from_disk(data_path)
+        test_examples = ds["text"][:10]
+        for example in test_examples:
+            self.compare_tokenized_outputs(example)
+
     @parameterized.named_parameters(
         ("pretrain_process", "pretrain_process"),
         ("tulu_process", "tulu_process"),
