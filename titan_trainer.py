@@ -399,7 +399,8 @@ def main(config_name: str):
     )
     with maybe_enable_profiling(
         # TODO: check if this works
-        enable_profiling=True,
+        # Bairu: disable profiling to save disk space.
+        enable_profiling=False,
         job_dump_folder=job_dump_folder,
         global_step=train_state.step
     ) as torch_profiler, maybe_enable_memory_snapshot(
