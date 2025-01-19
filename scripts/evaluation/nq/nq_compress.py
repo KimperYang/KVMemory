@@ -43,8 +43,8 @@ def append_kv(kv_list, d):  #d=0 batch size; d=2 sequence length
     concatenated_past_key_values = ()
 
     for layer in range(num_layers):
-        keys_list = [kv[layer][0].detach() for kv in kv_list]
-        values_list = [kv[layer][1].detach() for kv in kv_list]
+        keys_list = [kv[layer][0] for kv in kv_list]
+        values_list = [kv[layer][1] for kv in kv_list]
 
         concatenated_keys = torch.cat(keys_list, dim=d)
         concatenated_values = torch.cat(values_list, dim=d)
@@ -114,24 +114,25 @@ def main():
             text = doc_list[j]["text"]
             memory_list.append(f"Document [{j+1}](Title: {title}) {text}" + "\n")
 
-        memory_list.insert(0, template)
-
-
-        biased_index = []
-        id_list = []
-
-        idx = 0
-
+        kv_list = []
         for st in memory_list:
+            tem_id = global_tokenizer(st, add_special_tokens=False).input_ids
+            tem_id += 
+        # biased_index = []
+        # id_list = []
 
-            tem_id = global_tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
+        # idx = 0
+
+        # for st in memory_list:
+
+        #     tem_id = global_tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
             
-            if "Document" in st:
-                biased_index.append([idx, idx + tem_id.size(1)])
+        #     if "Document" in st:
+        #         biased_index.append([idx, idx + tem_id.size(1)])
 
-            id_list.append(tem_id)
+        #     id_list.append(tem_id)
 
-            idx = idx + tem_id.size(1)
+        #     idx = idx + tem_id.size(1)
 
         new_prompt = "<|start_header_id|>user<|end_header_id|>\n\nWrite a high-quality answer for the given question using only the provided search results (some of which might be irrelevant). Question: " + jsonObj["question"][i] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         prompt_id = global_tokenizer(new_prompt, return_tensors="pt", add_special_tokens=False).input_ids.to(global_model.device)
