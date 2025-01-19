@@ -10,7 +10,8 @@ from src.data.titan_tokenizer import LLaMA32Tokenizer
 
 LLAMA_tokenizer_path="data/titan_tokenizer/original/tokenizer.model"
 
-class InputTokenizationTest(absltest.TestCase):
+# class InputTokenizationTest(absltest.TestCase):
+class InputTokenizationTest(parameterized.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.llama_tokenizer = LLaMA32Tokenizer(LLAMA_tokenizer_path)
