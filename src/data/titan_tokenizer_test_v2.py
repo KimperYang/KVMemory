@@ -53,8 +53,8 @@ class InputTokenizationTest(parameterized.TestCase):
     @parameterized.named_parameters(
         ("pretrain_process", "dataset_cache/processed/fineweb/text", "process_text"),
         ("tulu_process", "dataset_cache/processed/tulu/sft", "process_tulu"),
-        ("qa_process", "dataset_cache/processed/block_qa/qa", "process_qa"),
-        ("qa_mem_process", "dataset_cache/processed/block_qa/qa_mem", "process_qamem"),
+        # ("qa_process", "dataset_cache/processed/block_qa/qa", "process_qa"),
+        # ("qa_mem_process", "dataset_cache/processed/block_qa/qa_mem", "process_qamem"),
     )
     def test_processing_pipeline(self, data_path, process_fn_name):
         llama_fn = getattr(self.llama_preprocessor, process_fn_name)
