@@ -44,6 +44,13 @@ parser.add_argument(
 )
 parser.add_argument("--pos", type=int, required=True, help="Position value")
 parser.add_argument("--batch_size", type=int, default=1, help="Batch size of the evaluation.")
+parser.add_argument(
+    "--attn_type",
+    type=str,
+    required=True,
+    help="attention types.",
+    choices=["standard", "blocked"],
+)
 
 args = parser.parse_args()
 
@@ -319,7 +326,12 @@ def main():
             # attention_mask_for_pad = attention_mask_for_pad.float()
             # attention_mask_4d = attention_mask_4d.float()
 
-            prefilling_outputs = model(input_ids=input_ids, attention_mask=attention_mask_4d)
+            if args.attn_type == "blocked":
+                prefilling_outputs = model(input_ids=input_ids, attention_mask=attention_mask_4d)
+            elif args.attn_type == "standard":
+                prefilling_outputs = model(input_ids=input_ids, attention_mask=attention_mask_for_pad)
+            else:
+                raise ValueError()
             past_key_values = prefilling_outputs.past_key_values
 
 
