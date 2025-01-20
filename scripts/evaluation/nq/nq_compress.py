@@ -60,7 +60,7 @@ def filter_kv(past_key_values, intervals_to_remove):
 
     for layer_id in range(num_layers):
         tem_key = past_key_values[layer_id][0]
-        tem_value = past_key_values[layer_id][0]
+        tem_value = past_key_values[layer_id][1]
 
         filtered_key = tem_key[:, :, mask, :]
         filtered_value = tem_value[:, :, mask, :]
@@ -113,7 +113,7 @@ def main():
     sys_id = global_tokenizer(template, add_special_tokens=False).input_ids
 
     # total_num = len(jsonObj)
-    total_num = 1
+    total_num = 500
     correct_num = 0
     res_list = []
 
@@ -151,7 +151,7 @@ def main():
 
         position_ids = get_position_id(new_ids, new_ranges)
 
-        attention_matrix = construct_compress_attention_matrix(len(new_ids), new_ranges, len(new_ids), global_model.device).unsqueeze(0).unsqueeze(0)       
+        attention_matrix = construct_compress_attention_matrix(len(new_ids), new_ranges, len(new_ids), global_model.device, len(compress_tokens)).unsqueeze(0).unsqueeze(0)       
 
         new_ids = torch.tensor([new_ids], device = global_model.device)
         position_ids = torch.tensor([position_ids], device = global_model.device)
@@ -201,7 +201,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/order/compress_qa_50/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/order/compress/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

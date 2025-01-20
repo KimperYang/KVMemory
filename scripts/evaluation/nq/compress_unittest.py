@@ -29,7 +29,7 @@ else:
 
 global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
 
-global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.float32)
 
 # vocab_size = len(global_tokenizer)
 # base_model.resize_token_embeddings(vocab_size)
@@ -60,7 +60,7 @@ def filter_kv(past_key_values, intervals_to_remove):
 
     for layer_id in range(num_layers):
         tem_key = past_key_values[layer_id][0]
-        tem_value = past_key_values[layer_id][0]
+        tem_value = past_key_values[layer_id][1]
 
         filtered_key = tem_key[:, :, mask, :]
         filtered_value = tem_value[:, :, mask, :]
@@ -187,8 +187,6 @@ def main():
         new_ids = torch.tensor([new_ids], device = global_model.device)
         position_ids = torch.tensor([position_ids], device = global_model.device)
 
-        # print(new_ids)
-        print(attention_matrix[0][0][132])
         with torch.no_grad():
             outputs = global_model(input_ids = new_ids, attention_mask = attention_matrix, position_ids = position_ids)
             past_key_values = outputs.past_key_values
@@ -221,34 +219,34 @@ def main():
 
 # # Calculate loss directly
 
-#         new_ids, new_ranges = insert_mem_tokens(
-#             raw_input_ids, biased_ranges, compress_tokens, mem_start, mem_end
-#         )
+        new_ids, new_ranges = insert_mem_tokens(
+            raw_input_ids, biased_ranges, compress_tokens, mem_start, mem_end
+        )
+        print(len(new_ids))
+        user = "<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n" + example['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        user_id = global_tokenizer(user, add_special_tokens=False).input_ids
+        new_ids += user_id
 
-#         user = "<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n" + example['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
-#         user_id = global_tokenizer(user, add_special_tokens=False).input_ids
-#         new_ids += user_id
+        ans_id = global_tokenizer(example['generated'] + "<|eot_id|>", add_special_tokens=False).input_ids
+        new_ids += ans_id
 
-#         ans_id = global_tokenizer(example['generated'] + "<|eot_id|>", add_special_tokens=False).input_ids
-#         new_ids += ans_id
+        position_ids = get_position_id(new_ids, new_ranges)
 
-#         position_ids = get_position_id(new_ids, new_ranges)
+        attention_matrix = construct_compress_attention_matrix(len(new_ids), new_ranges, len(new_ids), global_model.device).unsqueeze(0).unsqueeze(0)       
 
-#         attention_matrix = construct_compress_attention_matrix(len(new_ids), new_ranges, len(new_ids), global_model.device).unsqueeze(0).unsqueeze(0)       
+        labels = [-100] * (len(new_ids) - len(ans_id)) + ans_id
+        labels = torch.tensor([labels], device = global_model.device)
 
-#         labels = [-100] * (len(new_ids) - len(ans_id)) + ans_id
-#         labels = torch.tensor([labels], device = global_model.device)
+        new_ids = torch.tensor([new_ids], device = global_model.device)
+        position_ids = torch.tensor([position_ids], device = global_model.device)
 
-#         print(labels)
+        with torch.no_grad():
+            outputs = global_model(input_ids = new_ids, attention_mask = attention_matrix, position_ids = position_ids, labels=labels)
+            total_loss += outputs.loss.item()
+            kv2 = outputs.past_key_values
 
-#         new_ids = torch.tensor([new_ids], device = global_model.device)
-#         position_ids = torch.tensor([position_ids], device = global_model.device)
-
-#         with torch.no_grad():
-#             outputs = global_model(input_ids = new_ids, attention_mask = attention_matrix, position_ids = position_ids, labels=labels)
-#             total_loss += outputs.loss.item()
-
-#         print(f"Avg loss {total_loss / (i+1)}")
+        print(torch.sum(filtered_kv[5][1][:,:,-1,:] - kv2[5][1][:,:,749,:]))
+        print(f"Avg loss {total_loss / (i+1)}")
     
     print(f"Final avg loss {total_loss / total_num}")
 
