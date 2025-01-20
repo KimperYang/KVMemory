@@ -56,7 +56,7 @@ export LAUNCHER="torchrun \
     --rdzv_endpoint=${MASTER_ADDR}:29500 \
     --local-ranks-filter ${LOG_RANK} \
     --role rank --tee 3 \
-    titan_trainer.py --config_name block_datav3_step6k_bsz256_4_node_full_ckpt \
+    titan_trainer.py --config_name block_datav5_step4k_bsz256_4_node_full_ckpt \
     "
 
 export CMD="$LAUNCHER"
