@@ -3,10 +3,13 @@ from src.data.compress import insert_mem_tokens, get_position_id, construct_comp
 
 mem_start = 128254
 mem_end = 128255
-compress_tokens = list(range(128011, 128013))
+compress_tokens = list(range(128011, 128031))
 
-input_ids = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-biased_ranges = [[3,5], [5,7]]
+# input_ids = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+# biased_ranges = [[3,5], [5,7]]
+
+input_ids = list(range(1000))
+biased_ranges = [[38, 100], [100, 190], [190, 270], [270, 540], [540,700], [700, 815], [815, 929], [929, 1000]] #must be continuous
 
 def test_insert_mem_tokens(input_ids, biased_ranges):
     new_ids, new_ranges = insert_mem_tokens(input_ids, biased_ranges, compress_tokens, mem_start, mem_end)
