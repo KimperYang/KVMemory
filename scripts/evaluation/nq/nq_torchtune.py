@@ -81,16 +81,24 @@ def main():
     for i in range(total_num):
 
         print("Processing sample:", str(i))
-        memory_list = []
+        # memory_list = []
 
-        for j in range(0,10):
-            title = jsonObj["ctxs"][i][j]["title"]
-            text = jsonObj["ctxs"][i][j]["text"]
-            memory_list.append("<|reserved_special_token_3|>" + f"Document [{j+1}](Title: {title}) {text}" + "\n<|reserved_special_token_4|>")
+        memory_list = []
+        doc_list = []
+
+        for k in range(0,10):
+            title = jsonObj["ctxs"][i][k]["title"]
+            text = jsonObj["ctxs"][i][k]["text"]
+            doc_list.append({'title': title, 'text':text})
 
         if pos not in [0,4,9]:
-            ground_truth = memory_list.pop(0)
-            memory_list.insert(pos, ground_truth)
+            ground_truth = doc_list.pop(0)
+            doc_list.insert(pos, ground_truth)
+
+        for j in range(0,10):
+            title = doc_list[j]["title"]
+            text = doc_list[j]["text"]
+            memory_list.append("<|reserved_special_token_3|>" + f"Document [{j+1}](Title: {title}) {text}" + "\n<|reserved_special_token_4|>")
 
         memory_list.insert(0, template)
 
@@ -152,7 +160,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/decay/NQ_at{pos}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/titan/NQ_at{pos}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
