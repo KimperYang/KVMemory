@@ -109,15 +109,15 @@ def main():
     global_model.to('cuda')
     # template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
 
-    template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a helpful, respectful and honest assistant.<|eot_id|>"
-    sys_id = global_tokenizer(template, add_special_tokens=False).input_ids
-
     # total_num = len(jsonObj)
     total_num = 500
     correct_num = 0
     res_list = []
 
     for i in range(total_num):
+
+        template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a helpful, respectful and honest assistant.<|eot_id|>"
+        sys_id = global_tokenizer(template, add_special_tokens=False).input_ids
 
         print("Processing sample:", str(i))
         memory_list = []

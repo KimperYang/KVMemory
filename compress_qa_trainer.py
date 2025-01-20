@@ -62,7 +62,7 @@ def load_from_disk_then_process(
         remove_columns=["id", "messages", "source"]
         num_shards = 32
     elif data_component_name in ["qa", "qa_mem"]:
-        data_path = f"dataset_cache/processed/block_qa/{data_component_name}"
+        data_path = f"dataset_cache/processed/compress_qa/{data_component_name}"
         if data_component_name == "qa":
             preprocessor_fn = preprocessor.process_qa
         elif data_component_name == "qa_mem":
@@ -116,7 +116,7 @@ def main():
         compress_tokens=compress_tokens
     )
 
-    qa_train, qa_eval = load_from_disk_then_process("qa", preprocessor)
+    # qa_train, qa_eval = load_from_disk_then_process("qa", preprocessor)
     qa_mem_train, qa_mem_eval = load_from_disk_then_process("qa_mem", preprocessor)
 
     train_dataset = qa_mem_train
@@ -155,7 +155,7 @@ def main():
         do_eval=True,
         per_device_eval_batch_size = batch_size_per_device,
         evaluation_strategy="steps",  # Add this line
-        eval_steps=100,
+        eval_steps=20,
         gradient_checkpointing=True,
         # save_total_limit=3,
         # overwrite_output_dir = False

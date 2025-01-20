@@ -40,38 +40,38 @@ def main(argv):
     tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
     max_length = FLAGS.max_length
 
-    def qa_filter(sample):
-        # Extract "Assistant" responses and mask "User" queries
-        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
-        system_input_ids = tokenizer(system, add_special_tokens=False).input_ids
-        input_ids = system_input_ids
+    # def qa_filter(sample):
+    #     # Extract "Assistant" responses and mask "User" queries
+    #     system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
+    #     system_input_ids = tokenizer(system, add_special_tokens=False).input_ids
+    #     input_ids = system_input_ids
 
-        if len(sample['documents']) != 10:
-            print("Context number not right")
-            return False
+    #     if len(sample['documents']) != 10:
+    #         print("Context number not right")
+    #         return False
 
-        for j in range(0,10):
-            title = sample['documents'][j]['title']
-            text = sample['documents'][j]['text']
-            # memory_list.append("<MEM_START>" + f"Document [{j+1}](Title: {title}) {text}" + "\n<MEM_END><MEM_SUM>")
-            tem_id = tokenizer(f"Document [{j+1}](Title: {title}) {text}\n", add_special_tokens=False).input_ids
+    #     for j in range(0,10):
+    #         title = sample['documents'][j]['title']
+    #         text = sample['documents'][j]['text']
+    #         # memory_list.append("<MEM_START>" + f"Document [{j+1}](Title: {title}) {text}" + "\n<MEM_END><MEM_SUM>")
+    #         tem_id = tokenizer(f"Document [{j+1}](Title: {title}) {text}\n", add_special_tokens=False).input_ids
 
-            input_ids += tem_id
+    #         input_ids += tem_id
 
-        user = "<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n" + sample['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n" +  sample['generated']
-        user_id = tokenizer(user, add_special_tokens=False).input_ids
-        input_ids += user_id
+    #     user = "<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n" + sample['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n" +  sample['generated']
+    #     user_id = tokenizer(user, add_special_tokens=False).input_ids
+    #     input_ids += user_id
 
-        if len(input_ids) >= max_length:
-            return False
+    #     if len(input_ids) >= max_length:
+    #         return False
 
-        return True
+    #     return True
 
-    qa = first_half.filter(qa_filter, num_proc=96)
-    qa = qa.train_test_split(test_size=FLAGS.validation_size)
+    # qa = first_half.filter(qa_filter, num_proc=96)
+    # qa = qa.train_test_split(test_size=FLAGS.validation_size)
 
-    qa.save_to_disk("dataset_cache/processed/block_qa/qa", num_shards=shards, num_proc=128)
-    print("qa:", qa)
+    # qa.save_to_disk("dataset_cache/processed/block_qa/qa", num_shards=shards, num_proc=128)
+    # print("qa:", qa)
 
     def qamem_filter(sample):
         # Extract "Assistant" responses and mask "User" queries
@@ -99,10 +99,10 @@ def main(argv):
 
         return True
 
-    qamem = second_half.filter(qamem_filter, num_proc=96)
+    qamem = dataset.filter(qamem_filter, num_proc=96)
     qamem = qamem.train_test_split(test_size=FLAGS.validation_size)
 
-    qamem.save_to_disk("dataset_cache/processed/block_qa/qamem", num_shards=shards, num_proc=128)
+    qamem.save_to_disk("dataset_cache/processed/compress_qa/qamem", num_shards=shards, num_proc=128)
     print("qamem:", qamem)
 
 if __name__ == "__main__":

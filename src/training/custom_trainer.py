@@ -49,10 +49,11 @@ class CustomTrainerCompressAttn(Trainer):
 
             attention_matrices.append(
                 construct_compress_attention_matrix(
-                    inputs['input_length'][idx],
-                    biased_ranges,
-                    max_length,
-                    inputs['input_ids'].device
+                    seq_len=inputs['input_length'][idx],
+                    shift_ranges=biased_ranges,
+                    max_len=max_length,
+                    device=inputs['input_ids'].device,
+                    num_sum_tokens=50
                 ).unsqueeze(0)
             )
 
