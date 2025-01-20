@@ -138,9 +138,9 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir=f"training_res/compress/compress_qa_{len(compress_tokens)}",
+        output_dir=f"training_res/compress/compress_qa_{len(compress_tokens)}_4nodes",
         report_to="wandb",
-        run_name=f"compress_qa_{len(compress_tokens)}_bsz{batch_size_per_device}_5e-6",
+        run_name=f"compress_qa_{len(compress_tokens)}_bsz{batch_size_per_device}_5e-6_4nodes",
         per_device_train_batch_size= batch_size_per_device,
         num_train_epochs=1,
         # max_steps=6000,
