@@ -177,6 +177,26 @@ CONFIG_DICT = {
         training_recipe=bsz64_lr56_steps5k,
         activation_checkpoint=SELECTIVE_ACTIVATION_CHECKPOINT_CONFIG,
     ),
+    "block_datav4_step10k_bsz256_4_node_full_ckpt": TitanTrainerConfig(
+        model_name_or_path="meta-llama/Llama-3.2-1B-Instruct",
+        tokenizer_path="data/titan_tokenizer/original/tokenizer.model",
+        dataset_version="v4",
+        seq_len=4096,
+        job_dump_folder="run_logs/block_bsz256_datav4_step10k",
+        ckpt_config=COMMON_CHECKPOINT_CONFIG,
+        training_recipe=bsz256_lr56_steps10k,
+        activation_checkpoint=FULL_ACTIVATION_CHECKPOINT_CONFIG,
+    ),
+    "block_datav5_step10k_bsz256_4_node_full_ckpt": TitanTrainerConfig(
+        model_name_or_path="meta-llama/Llama-3.2-1B-Instruct",
+        tokenizer_path="data/titan_tokenizer/original/tokenizer.model",
+        dataset_version="v5",
+        seq_len=4096,
+        job_dump_folder="run_logs/block_bsz256_datav4_step10k",
+        ckpt_config=COMMON_CHECKPOINT_CONFIG,
+        training_recipe=bsz256_lr56_steps10k,
+        activation_checkpoint=FULL_ACTIVATION_CHECKPOINT_CONFIG,
+    ),
 }
 
 

@@ -47,11 +47,22 @@ DATA_V4: List[DataComponent] = [
     DataComponent(dataset_name="qa_mem", weight=5.0),
 ]
 
+DATA_V5: List[DataComponent] = [
+    DataComponent(dataset_name="text", weight=15.0),
+    DataComponent(dataset_name="text_mem", weight=15.0),
+    DataComponent(dataset_name="text_inst", weight=0.0),
+    DataComponent(dataset_name="tulu", weight=50.0),
+    DataComponent(dataset_name="sft_mem", weight=20.0),
+    DataComponent(dataset_name="qa", weight=5.0),
+    DataComponent(dataset_name="qa_mem", weight=5.0),
+]
+
 DATASET_MAPPING = {
     "v1": DATA_V1,
     "v2": DATA_V2,
     "v3": DATA_V3,
     "v4": DATA_V4,
+    "v5": DATA_V5,
 }
 
 COMMON_CHECKPOINT_CONFIG = CheckpointConfig(
