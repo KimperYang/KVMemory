@@ -55,6 +55,8 @@ class TitanTrainerConfig:
     activation_checkpoint: ActivationCheckpoint
     ckpt_config: CheckpointConfig
     training_recipe: TrainingRecipe
+    # TODO: (Bairu) temporarily add it here. Need to refactor the code later
+    enable_packing: bool = False
     pass
 
 

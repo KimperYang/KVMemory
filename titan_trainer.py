@@ -196,6 +196,17 @@ CONFIG_DICT = {
         training_recipe=bsz256_lr56_steps4k,
         activation_checkpoint=FULL_ACTIVATION_CHECKPOINT_CONFIG,
     ),
+    "block_datav5_step4k_bsz256_4_node_full_ckpt_packing": TitanTrainerConfig(
+        model_name_or_path="meta-llama/Llama-3.2-1B-Instruct",
+        tokenizer_path="data/titan_tokenizer/original/tokenizer.model",
+        dataset_version="v5",
+        seq_len=4096,
+        job_dump_folder="run_logs/block_bsz256_datav5_step4k",
+        ckpt_config=COMMON_CHECKPOINT_CONFIG,
+        training_recipe=bsz256_lr56_steps4k,
+        activation_checkpoint=FULL_ACTIVATION_CHECKPOINT_CONFIG,
+        enable_packing=True,
+    ),
 }
 
 
@@ -211,6 +222,7 @@ def main(config_name: str):
     train_timeout_seconds = 100
     eval_interval = task_config.training_recipe.eval_every_n_steps
     scheduler_type = "cosine"
+    enable_data_packing = task_config.enable_packing
 
 
     logger.info(f"Starting job: {config_name}")
@@ -280,6 +292,7 @@ def main(config_name: str):
         rank=dp_rank,
         infinite=True,
         collate_fn=custom_collate_bias,
+        enable_packing=enable_data_packing,
     )
     eval_data_loader_dict: Dict[str, DataLoader] = build_hf_eval_data_loader(
         data_components,
@@ -290,20 +303,15 @@ def main(config_name: str):
         rank=dp_rank,
         collate_fn=custom_collate_bias,
     )
+    if enable_data_packing:
+        logger.info(
+            "Note: Packing mode enabled."
+            "Dataset that supported packing will be packed instead of padded."
+        )
 
     logger.info(f"Building {model_name}...")
-    model = llama3_2_1b()
-    ckpt_path = PRETRAINED_MODEL_CKPT_PATH_MAPS[task_config.model_name_or_path]
-    state_dict = load_checkpoint(ckpt_path=ckpt_path, model_name=task_config.model_name_or_path)
-    is_rank_0 = torch.distributed.get_rank() == 0
-    training.load_from_full_model_state_dict(
-        model=model,
-        full_sd=state_dict,
-        device=device_type,
-        is_rank_zero=is_rank_0,
-        strict=True,
-    )
-
+    with torch.device("meta"):
+        model = llama3_2_1b()
     # log model size
     model_param_count = utils.get_num_params(model)
     logger.info(
@@ -320,7 +328,7 @@ def main(config_name: str):
     # init_device = device_type
     # buffer_device = None
 
-    model = model.to(device_type)
+    # model = model.to(device_type)
     # apply PT-D Tensor Parallel, activation checkpointing, torch.compile, Data Parallel
     parallelize_llama(
         model,
@@ -328,9 +336,28 @@ def main(config_name: str):
         parallel_dims,
         activation_checkpoint=task_config.activation_checkpoint,
     )
+    with training.set_default_dtype(torch.bfloat16), device:
+        for m in model.modules():
+            # RoPE is not covered in state dict
+            if hasattr(m, "rope_init"):
+                m.rope_init()
+
     # model.to_empty(device=init_device)
     # with torch.no_grad():
     #     model.init_weights(buffer_device=buffer_device)
+    with torch.no_grad():
+        ckpt_path = PRETRAINED_MODEL_CKPT_PATH_MAPS[task_config.model_name_or_path]
+        state_dict = load_checkpoint(ckpt_path=ckpt_path, model_name=task_config.model_name_or_path)
+        is_rank_0 = torch.distributed.get_rank() == 0
+        training.load_from_full_model_state_dict(
+            model=model,
+            full_sd=state_dict,
+            device=device_type,
+            is_rank_zero=is_rank_0,
+            strict=True,
+        )
+
+
     model.train()
 
     model_parts = [model]
