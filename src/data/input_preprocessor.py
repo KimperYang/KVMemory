@@ -2880,7 +2880,8 @@ def custom_collate_compress(batch):
     for item in batch:
 
         if item['biased_index'] is not None:
-            shift_input_ids, shift_biased_index = insert_mem_tokens(item['input_ids'], item['biased_index'], list(range(128011, 128031)), 128254, 128255)
+            # shift_input_ids, shift_biased_index = insert_mem_tokens(item['input_ids'], item['biased_index'], list(range(128011, 128031)), 128254, 128255)
+            shift_input_ids, shift_biased_index = insert_mem_tokens(item['input_ids'], item['biased_index'], list(range(128011, 128061)), 128254, 128255)
         else:
             shift_input_ids = item['input_ids']
             shift_biased_index = []

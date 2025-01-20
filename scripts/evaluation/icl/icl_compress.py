@@ -96,7 +96,7 @@ for idx in range(total_num):
         # attention_matrices = construct_biased_attention_matrix(concat_ids.size(1), biased_index, concat_ids.size(1), model.device).unsqueeze(0).unsqueeze(0)
         mem_start = 128254
         mem_end = 128255
-        compress_tokens = list(range(128011, 128013))
+        compress_tokens = list(range(128011, 128031))
 
         new_ids, new_ranges = insert_mem_tokens(
             concat_ids, biased_index, compress_tokens, mem_start, mem_end
