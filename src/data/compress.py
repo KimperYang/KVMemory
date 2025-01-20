@@ -84,9 +84,8 @@ def get_position_id(id_list, ranges):
 
     return position_ids
 
-def construct_compress_attention_matrix(seq_len, shift_ranges, max_len, device):
+def construct_compress_attention_matrix(seq_len, shift_ranges, max_len, device, num_sum_tokens=20):
 
-    num_sum_tokens= 20
     attention_matrix = torch.triu(torch.full((max_len, max_len), float('-inf'), dtype=torch.bfloat16, device = device), diagonal= 1)
 
     if shift_ranges is not None:
