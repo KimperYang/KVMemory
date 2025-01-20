@@ -93,6 +93,14 @@ bsz256_lr56_steps10k =replace(
     batch_size=256,
 )
 
+bsz256_lr56_steps4k =replace(
+    DEFUALT_TRAINING_RECIPE,
+    batch_size=256,
+    max_steps=4_000,
+    warmup_steps=400,
+    eval_every_n_steps=500,
+)
+
 bsz64_lr56_steps10k =replace(
     DEFUALT_TRAINING_RECIPE,
     batch_size=64,

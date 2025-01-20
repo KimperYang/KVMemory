@@ -84,13 +84,12 @@ from src.training.titan_trainer_config_utils import (
 from src.training.titan_training_utils import (
     COMMON_CHECKPOINT_CONFIG,
     DATASET_MAPPING,
-    DEFUALT_TRAINING_RECIPE,
     FULL_ACTIVATION_CHECKPOINT_CONFIG,
     PRETRAINED_MODEL_CKPT_PATH_MAPS,
     SELECTIVE_ACTIVATION_CHECKPOINT_CONFIG,
     bsz64_lr56_steps5k,
     bsz64_lr56_steps10k,
-    bsz128_lr56_steps10k,
+    bsz256_lr56_steps4k,
     bsz256_lr56_steps6k,
     bsz256_lr56_steps10k,
 )
@@ -177,24 +176,24 @@ CONFIG_DICT = {
         training_recipe=bsz64_lr56_steps5k,
         activation_checkpoint=SELECTIVE_ACTIVATION_CHECKPOINT_CONFIG,
     ),
-    "block_datav4_step10k_bsz256_4_node_full_ckpt": TitanTrainerConfig(
+    "block_datav4_step4k_bsz256_4_node_full_ckpt": TitanTrainerConfig(
         model_name_or_path="meta-llama/Llama-3.2-1B-Instruct",
         tokenizer_path="data/titan_tokenizer/original/tokenizer.model",
         dataset_version="v4",
         seq_len=4096,
-        job_dump_folder="run_logs/block_bsz256_datav4_step10k",
+        job_dump_folder="run_logs/block_bsz256_datav4_step4k",
         ckpt_config=COMMON_CHECKPOINT_CONFIG,
-        training_recipe=bsz256_lr56_steps10k,
+        training_recipe=bsz256_lr56_steps4k,
         activation_checkpoint=FULL_ACTIVATION_CHECKPOINT_CONFIG,
     ),
-    "block_datav5_step10k_bsz256_4_node_full_ckpt": TitanTrainerConfig(
+    "block_datav5_step4k_bsz256_4_node_full_ckpt": TitanTrainerConfig(
         model_name_or_path="meta-llama/Llama-3.2-1B-Instruct",
         tokenizer_path="data/titan_tokenizer/original/tokenizer.model",
         dataset_version="v5",
         seq_len=4096,
-        job_dump_folder="run_logs/block_bsz256_datav4_step10k",
+        job_dump_folder="run_logs/block_bsz256_datav5_step4k",
         ckpt_config=COMMON_CHECKPOINT_CONFIG,
-        training_recipe=bsz256_lr56_steps10k,
+        training_recipe=bsz256_lr56_steps4k,
         activation_checkpoint=FULL_ACTIVATION_CHECKPOINT_CONFIG,
     ),
 }
