@@ -14,6 +14,7 @@ from typing import Tuple
 import datasets
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
+from functools import partial
 
 from src.data.input_preprocessor import custom_collate_compress, compress_attention_preprocessor
 from src.training.custom_trainer import CustomTrainerCompressAttn
@@ -102,9 +103,9 @@ def main():
     batch_size_per_device = 8
     # compress_tokens=list(range(128011, 128031))
     compress_tokens=list(range(128011, 128061))
-    global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B")
+    global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
     global_model = AutoModelForCausalLM.from_pretrained(
-        "meta-llama/Llama-3.2-1B",
+        "meta-llama/Llama-3.2-1B-Instruct",
         torch_dtype=torch.bfloat16,
         attn_implementation='sdpa',
         # use_flash_attention_2=True,
@@ -138,12 +139,12 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir=f"training_res/compress/compress_qa_{len(compress_tokens)}_4nodes",
+        output_dir=f"training_res/compress/compress_qa_{len(compress_tokens)}_Instruct_2epoch",
         report_to="wandb",
-        run_name=f"compress_qa_{len(compress_tokens)}_bsz{batch_size_per_device}_5e-6_4nodes",
+        run_name=f"compress_qa_{len(compress_tokens)}_bsz{batch_size_per_device}_Instruct_2epoch",
         per_device_train_batch_size= batch_size_per_device,
-        num_train_epochs=1,
-        # max_steps=6000,
+        # num_train_epochs=1,
+        max_steps=1186,
         logging_dir="training_res/logs",
         logging_steps=10,
         # save_steps=2000,
@@ -155,7 +156,7 @@ def main():
         do_eval=True,
         per_device_eval_batch_size = batch_size_per_device,
         evaluation_strategy="steps",  # Add this line
-        eval_steps=20,
+        eval_steps=50,
         gradient_checkpointing=True,
         # save_total_limit=3,
         # overwrite_output_dir = False
@@ -172,7 +173,8 @@ def main():
         args=training_args,
         train_dataset = train_dataset,
         eval_dataset = eval_dataset,
-        data_collator = custom_collate_compress
+        data_collator = partial(custom_collate_compress,compress_tokens=compress_tokens),
+        num_sum_tokens=len(compress_tokens)
     )
 
     trainer.train()

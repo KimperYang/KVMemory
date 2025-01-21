@@ -117,12 +117,6 @@ def main():
     sft_mem_train, sft_mem_eval = load_from_disk_then_process("sft_mem", preprocessor)
     qa_train, qa_eval = load_from_disk_then_process("qa", preprocessor)
     qa_mem_train, qa_mem_eval = load_from_disk_then_process("qa_mem", preprocessor)
-    # train_dataset = datasets.interleave_datasets(
-    #     [sft_mem_train, sft_train, ptr_inst_train, ptr_train, ptr_mem_train],
-    #     probabilities=[0.25, 0.25, 0.2, 0.1, 0.2],
-    #     seed=42,
-    #     stopping_strategy="all_exhausted",
-    # )
 
     train_dataset = datasets.interleave_datasets(
         [sft_mem_train, sft_train, ptr_inst_train, ptr_train, ptr_mem_train, qa_train, qa_mem_train],

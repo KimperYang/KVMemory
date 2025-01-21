@@ -33,8 +33,9 @@ class CustomTrainerBiasAttn(Trainer):
         return (outputs.loss, outputs) if return_outputs else outputs.loss
 
 class CustomTrainerCompressAttn(Trainer):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, num_sum_tokens, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.num_sum_tokens = num_sum_tokens
 
     def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
 
@@ -53,7 +54,7 @@ class CustomTrainerCompressAttn(Trainer):
                     shift_ranges=biased_ranges,
                     max_len=max_length,
                     device=inputs['input_ids'].device,
-                    num_sum_tokens=50
+                    num_sum_tokens=self.num_sum_tokens
                 ).unsqueeze(0)
             )
 

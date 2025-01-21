@@ -15,13 +15,12 @@ import datasets
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
 
-from src.data.input_preprocessor import custom_collate_bias, reencode_attention_preprocessor
+from src.data.input_preprocessor import block_attention_preprocessor, custom_collate_bias
 from src.training.custom_trainer import CustomTrainerBiasAttn
-
 
 def load_from_disk_then_process(
     data_component_name: str,
-    preprocessor: reencode_attention_preprocessor,
+    preprocessor: block_attention_preprocessor,
 ) -> Tuple[datasets.IterableDataset, datasets.Dataset]:
     """
     load the downloaded data from disk and then pair it with the preprocessor
@@ -58,7 +57,7 @@ def load_from_disk_then_process(
         if data_component_name == "qa":
             preprocessor_fn = preprocessor.process_qa
         elif data_component_name == "qa_mem":
-            preprocessor_fn = preprocessor.process_qa
+            preprocessor_fn = preprocessor.process_qamem
         else:
             raise NotImplementedError()
         remove_columns=['prompt', 'question', 'answers', 'generated', 'inputs', 'documents']
@@ -77,9 +76,11 @@ def load_from_disk_then_process(
     # print(data_component.cleanup_cache_files())
 
     streaming_train_dataset = data_component["train"].to_iterable_dataset(num_shards=num_shards)
+    # streaming_train_dataset = data_component["train"]
     training_data = streaming_train_dataset.map(
         preprocessor_fn,
         remove_columns=remove_columns,
+        # num_proc=16,
         batched=False,
     )
 
@@ -97,7 +98,6 @@ def load_from_disk_then_process(
 
 def main():
     batch_size_per_device = 8
-    reencode_num = 5
 
     global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
     global_model = AutoModelForCausalLM.from_pretrained(
@@ -107,14 +107,9 @@ def main():
         # use_flash_attention_2=True,
     )
 
-    new_token = ["<MEM_START>","<MEM_END>", "<MEM_SUM>"]
-    global_tokenizer.add_tokens(new_token)
-    global_model.resize_token_embeddings(len(global_tokenizer))
-
-    preprocessor = reencode_attention_preprocessor(
+    preprocessor = block_attention_preprocessor(
         tokenizer=global_tokenizer,
-        max_len=4096,
-        reencode_num = reencode_num
+        max_len=4096
     )
 
     ptr_train, ptr_eval = load_from_disk_then_process("text", preprocessor)
@@ -146,9 +141,9 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir=f"training_res/new_data/reencode_{reencode_num}",
+        output_dir="training_res/new_data/block",
         report_to="wandb",
-        run_name=f"new_data_reencode{reencode_num}_bsz{batch_size_per_device}_5e-6_full",
+        run_name=f"new_data_block_bsz{batch_size_per_device}_5e-6_full",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
         max_steps=6000,
@@ -183,9 +178,6 @@ def main():
     )
 
     trainer.train()
-
-    # trainer.save_model()
-    # global_tokenizer.save_pretrained(training_args.output_dir)
 
 if __name__ == "__main__":
     main()
