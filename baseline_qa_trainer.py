@@ -13,16 +13,14 @@ from typing import Tuple
 
 import datasets
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
-from functools import partial
+from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments, Trainer
 
-from src.data.input_preprocessor import custom_collate_compress, compress_attention_preprocessor
-from src.training.custom_trainer import CustomTrainerCompressAttn
+from src.data.input_preprocessor import baseline_attention_preprocessor, custom_collate_baseline
 
 
 def load_from_disk_then_process(
     data_component_name: str,
-    preprocessor: compress_attention_preprocessor,
+    preprocessor: baseline_attention_preprocessor,
 ) -> Tuple[datasets.IterableDataset, datasets.Dataset]:
     """
     load the downloaded data from disk and then pair it with the preprocessor
@@ -54,6 +52,16 @@ def load_from_disk_then_process(
             raise NotImplementedError()
         remove_columns=["system", "mask", "dataset", "conversations"]
         num_shards = 32
+    elif data_component_name in ["qa", "qa_mem"]:
+        data_path = f"dataset_cache/processed/compress_qa/{data_component_name}"
+        if data_component_name == "qa":
+            preprocessor_fn = preprocessor.process_qa
+        elif data_component_name == "qa_mem":
+            preprocessor_fn = preprocessor.process_qa
+        else:
+            raise NotImplementedError()
+        remove_columns=['prompt', 'question', 'answers', 'generated', 'inputs', 'documents']
+        num_shards = 32
     elif data_component_name in ["tulu"]:
         data_path = "dataset_cache/processed/tulu/sft"
         if data_component_name == "tulu":
@@ -62,29 +70,17 @@ def load_from_disk_then_process(
             raise NotImplementedError()
         remove_columns=["id", "messages", "source"]
         num_shards = 32
-    elif data_component_name in ["qa", "qa_mem"]:
-        data_path = f"dataset_cache/processed/compress_qa/{data_component_name}"
-        if data_component_name == "qa":
-            preprocessor_fn = preprocessor.process_qa
-        elif data_component_name == "qa_mem":
-            preprocessor_fn = preprocessor.process_qamem
-        else:
-            raise NotImplementedError()
-        remove_columns=['prompt', 'question', 'answers', 'generated', 'inputs', 'documents']
-        num_shards = 32
     else:
         raise NotImplementedError()
     data_component: datasets.DatasetDict = datasets.load_from_disk(data_path)
     # print(data_component.cleanup_cache_files())
 
-    train_dataset = data_component["train"]
-    # streaming_train_dataset = data_component["train"]
-    training_data = train_dataset.map(
+    streaming_train_dataset = data_component["train"]
+    training_data = streaming_train_dataset.map(
         preprocessor_fn,
         remove_columns=remove_columns,
         num_proc=16,
         batched=False,
-        load_from_cache_file=False
     )
 
     eval_dataset = data_component["test"]
@@ -101,37 +97,23 @@ def load_from_disk_then_process(
 
 def main():
     batch_size_per_device = 8
-    # compress_tokens=list(range(128011, 128031))
-    compress_tokens=list(range(128011, 128031))
+
     global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
     global_model = AutoModelForCausalLM.from_pretrained(
         "meta-llama/Llama-3.2-1B-Instruct",
         torch_dtype=torch.bfloat16,
-        attn_implementation='sdpa',
-        # use_flash_attention_2=True,
+        attn_implementation='flash_attention_2',
+        # attn_implementation='sdpa'
     )
 
-    preprocessor = compress_attention_preprocessor(
+    preprocessor = baseline_attention_preprocessor(
         tokenizer=global_tokenizer,
-        max_len=4096,
-        compress_tokens=compress_tokens
+        max_len=4096
     )
 
-    # qa_train, qa_eval = load_from_disk_then_process("qa", preprocessor)
     qa_mem_train, qa_mem_eval = load_from_disk_then_process("qa_mem", preprocessor)
 
     train_dataset = qa_mem_train
-    # train_dataset = datasets.interleave_datasets(
-    #     [qa_train, qa_mem_train],
-    #     probabilities=[0.5, 0.5],
-    #     seed=42,
-    #     stopping_strategy="all_exhausted",
-    # )
-
-    # eval_dataset = datasets.DatasetDict({
-    #     "qa": qa_eval,
-    #     "qamem": qa_mem_eval
-    # })
 
     eval_dataset = qa_mem_eval
 
@@ -139,12 +121,12 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir=f"training_res/compress/compress_qa_{len(compress_tokens)}_Instruct_2epoch",
+        output_dir="training_res/compress/upper_qa",
         report_to="wandb",
-        run_name=f"compress_qa_{len(compress_tokens)}_bsz{batch_size_per_device}_Instruct_2epoch",
+        run_name=f"qa_upper_bsz{batch_size_per_device}_5e-6_full",
         per_device_train_batch_size= batch_size_per_device,
-        # num_train_epochs=1,
-        max_steps=1186,
+        num_train_epochs=1,
+        # max_steps=6000,
         logging_dir="training_res/logs",
         logging_steps=10,
         # save_steps=2000,
@@ -156,7 +138,7 @@ def main():
         do_eval=True,
         per_device_eval_batch_size = batch_size_per_device,
         evaluation_strategy="steps",  # Add this line
-        eval_steps=50,
+        eval_steps=20,
         gradient_checkpointing=True,
         # save_total_limit=3,
         # overwrite_output_dir = False
@@ -164,17 +146,16 @@ def main():
         # split_batches=True,
         dispatch_batches=False,
         eval_on_start=True,
-        seed = 42
+        save_total_limit=2
     )
 
-    trainer = CustomTrainerCompressAttn(
+    trainer = Trainer(
         model=global_model,
         tokenizer=global_tokenizer,
         args=training_args,
         train_dataset = train_dataset,
         eval_dataset = eval_dataset,
-        data_collator = partial(custom_collate_compress,compress_tokens=compress_tokens),
-        num_sum_tokens=len(compress_tokens)
+        data_collator = custom_collate_baseline
     )
 
     trainer.train()

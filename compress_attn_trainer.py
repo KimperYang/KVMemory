@@ -14,6 +14,7 @@ from typing import Tuple
 import datasets
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
+from functools import partial
 
 from src.data.input_preprocessor import custom_collate_compress, compress_attention_preprocessor
 from src.training.custom_trainer import CustomTrainerCompressAttn
@@ -99,6 +100,7 @@ def load_from_disk_then_process(
 
 def main():
     batch_size_per_device = 8
+    compress_tokens = list(range(128011, 128061))
 
     global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
     global_model = AutoModelForCausalLM.from_pretrained(
@@ -111,7 +113,7 @@ def main():
     preprocessor = compress_attention_preprocessor(
         tokenizer=global_tokenizer,
         max_len=4096,
-        compress_tokens=list(range(128011, 128031))
+        compress_tokens=compress_tokens
     )
 
     ptr_train, ptr_eval = load_from_disk_then_process("text", preprocessor)
@@ -150,9 +152,9 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir=f"training_res/compress/compress_20",
+        output_dir=f"training_res/compress/compress_50",
         report_to="wandb",
-        run_name=f"compress_20_bsz{batch_size_per_device}_5e-6",
+        run_name=f"compress_50_bsz{batch_size_per_device}_5e-6",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
         max_steps=6000,
@@ -184,7 +186,8 @@ def main():
         args=training_args,
         train_dataset = train_dataset,
         eval_dataset = eval_dataset,
-        data_collator = custom_collate_compress
+        data_collator = partial(custom_collate_compress,compress_tokens=compress_tokens),
+        num_sum_tokens=len(compress_tokens)
     )
 
     trainer.train()

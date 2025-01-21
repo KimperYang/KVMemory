@@ -5,8 +5,7 @@ import json
 import datetime
 import string
 from typing import List
-# from src.data.attention import construct_biased_attention_matrix
-# from src.data.compress import insert_mem_tokens, get_position_id, construct_compress_attention_matrix
+from src.data.compress import insert_mem_tokens, get_position_id, construct_compress_attention_matrix
 import regex
 
 import argparse
@@ -29,109 +28,7 @@ else:
 
 global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
 
-global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.float32)
-
-def insert_mem_tokens(
-    original_list,    # e.g. [1,2,3,4,5,6,7,8]
-    ranges,           # list of [start, end) half-open intervals
-    new_token,        # e.g. [100, 1000]
-    start_number,     # e.g. -111
-    end_number        # e.g. -999
-):
-    """
-    Insert:
-      - `start_number` before the *first* range slice
-      - `new_token`    after *each* range slice
-      - `end_number`   after the *last* range slice
-    Return (new_list, new_ranges) 
-      where new_ranges are the half-open intervals adjusted in the new list.
-    """
-    result_list = []
-    new_ranges = []
-    offset = 0
-    
-    # Keep track of the last included index from old list.
-    # For half-open [s,e), the last included old index is e-1.
-    prev_included = -1
-    
-    # Sort ranges by their start just in case
-    # sorted_ranges = sorted(ranges, key=lambda x: x[0])
-    sorted_ranges =ranges
-
-    for i, (start, end) in enumerate(sorted_ranges):
-        is_first_range = (i == 0)
-        is_last_range  = (i == len(sorted_ranges) - 1)
-        
-        # 1) Append all elements between the last included and (start-1)
-        result_list.extend(original_list[prev_included + 1 : start])
-        
-        # 2) If this is the first range, insert the start_number
-        if is_first_range:
-            result_list.append(start_number)
-            offset += 1  # We inserted 1 extra item in the new list
-        
-        # 3) Append the slice [start, end)
-        result_list.extend(original_list[start : end])
-        
-        # 4) Record the new half-open range [start+offset, end+offset)
-        new_start = start + offset
-        new_end   = end   + offset
-        new_ranges.append([new_start, new_end])
-        
-        # 5) Insert the token after this range
-        result_list.extend(new_token)
-        offset += len(new_token)
-        
-        # 6) If this is the last range, insert the end_number
-        if is_last_range:
-            result_list.append(end_number)
-            offset += 1
-        
-        # 7) Update prev_included
-        prev_included = end - 1
-    
-    # 8) Append any leftover elements after the last range
-    result_list.extend(original_list[prev_included + 1 : ])
-    
-    return result_list, new_ranges
-
-def get_position_id(id_list, ranges):
-
-    current_position = 0
-    position_ids = []
-    for i, (start, end) in enumerate(ranges):
-
-        inter_chunk_length = start - len(position_ids)
-
-        position_ids += list(range(current_position, current_position + inter_chunk_length))
-        current_position += inter_chunk_length
-
-        chunk_length = end - start
-
-        position_ids += list(range(current_position - chunk_length, current_position))
-
-    position_ids += list(range(current_position, current_position + len(id_list) - len(position_ids)))
-
-    return position_ids
-
-def construct_compress_attention_matrix(seq_len, shift_ranges, max_len, device, num_sum_tokens=20):
-
-    attention_matrix = torch.triu(torch.full((max_len, max_len), float('-inf'), dtype=torch.float32, device = device), diagonal= 1)
-
-    if shift_ranges is not None:
-
-        mem_end_position = shift_ranges[-1][-1] + num_sum_tokens
-        for indices in shift_ranges:
-            i = indices[0]
-            j = indices[1]
-
-            attention_matrix[i : j + num_sum_tokens, 0 : i] = float('-inf')
-            attention_matrix[mem_end_position: , i : j] = float('-inf')
-
-    attention_matrix[seq_len :, :] = float('-inf')
-    attention_matrix[: ,seq_len :] = float('-inf')
-
-    return attention_matrix
+global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
 
 def filter_id(input_ids, intervals_to_remove):  
 
@@ -199,10 +96,9 @@ def main():
 
     mem_start = 128254
     mem_end = 128255
-    compress_tokens = list(range(128011, 128031))
+    compress_tokens = list(range(128011, 128061))
 
     global_model.to('cuda')
-    # template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
 
     # total_num = len(jsonObj)
     total_num = 500
@@ -298,7 +194,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/order/compress/NQ_float32_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/order/compress_qa_50_2epoch/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
