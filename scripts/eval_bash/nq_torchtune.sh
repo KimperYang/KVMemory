@@ -1,5 +1,7 @@
 
 #!/bin/bash
+source /u/shiyuucsb/.bashrc
+conda activate /dccstor/scllm/envs/torchtune
 
 # Number of GPUs available
 NUM_GPUS=8
