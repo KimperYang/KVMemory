@@ -9,7 +9,7 @@ NUM_PROCESSES=10
 
 # Command template
 # COMMAND="python scripts/evaluation/nq/nq_torchtune.py --ckpt_path run_logs/decay --batch_size 8"
-COMMAND="python scripts/evaluation/nq/nq_torchtune.py --ckpt_path titan.pt --batch_size 8 --attn_type blocked"
+COMMAND="python scripts/evaluation/nq/nq_torchtune.py --ckpt_path training_res/remove_textinst.pt --batch_size 8 --attn_type blocked"
 
 # Array to keep track of running processes (1 per GPU)
 declare -a GPU_PROCESS
