@@ -72,6 +72,11 @@ def load_from_disk_then_process(
             raise NotImplementedError()
         remove_columns=['prompt', 'question', 'answers', 'generated', 'inputs', 'documents']
         num_shards = 32
+    elif data_component_name in ["xsum"]:
+        data_path = f"dataset_cache/processed/xsum/{data_component_name}"
+        preprocessor_fn = preprocessor.process_xsum
+        remove_columns=['document', 'summary', 'id']
+        num_shards = 32
     else:
         raise NotImplementedError()
     data_component: datasets.DatasetDict = datasets.load_from_disk(data_path)
@@ -101,7 +106,7 @@ def load_from_disk_then_process(
 
 def main():
     batch_size_per_device = 8
-    # compress_tokens=list(range(128011, 128031))
+    
     compress_tokens=list(range(128011, 128031))
     global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
     global_model = AutoModelForCausalLM.from_pretrained(
@@ -119,32 +124,33 @@ def main():
 
     # qa_train, qa_eval = load_from_disk_then_process("qa", preprocessor)
     qa_mem_train, qa_mem_eval = load_from_disk_then_process("qa_mem", preprocessor)
+    xsum_train, xsum_eval = load_from_disk_then_process("xsum", preprocessor)
 
-    train_dataset = qa_mem_train
-    # train_dataset = datasets.interleave_datasets(
-    #     [qa_train, qa_mem_train],
-    #     probabilities=[0.5, 0.5],
-    #     seed=42,
-    #     stopping_strategy="all_exhausted",
-    # )
+    # train_dataset = qa_mem_train
+    train_dataset = datasets.interleave_datasets(
+        [xsum_train, qa_mem_train],
+        probabilities=[0.5, 0.5],
+        seed=42,
+        stopping_strategy="all_exhausted",
+    )
 
-    # eval_dataset = datasets.DatasetDict({
-    #     "qa": qa_eval,
-    #     "qamem": qa_mem_eval
-    # })
+    eval_dataset = datasets.DatasetDict({
+        "xsum": xsum_eval,
+        "qamem": qa_mem_eval
+    })
 
-    eval_dataset = qa_mem_eval
+    # eval_dataset = qa_mem_eval
 
     os.environ["WANDB_PROJECT"]="kvmemory"
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir=f"training_res/compress/compress_qa_{len(compress_tokens)}_Instruct_2epoch",
+        output_dir=f"training_res/compress/compress_sum_{len(compress_tokens)}",
         report_to="wandb",
-        run_name=f"compress_qa_{len(compress_tokens)}_bsz{batch_size_per_device}_Instruct_2epoch",
+        run_name=f"compress_sum_{len(compress_tokens)}_bsz{batch_size_per_device}",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=1,
-        max_steps=1186,
+        max_steps=1500,
         logging_dir="training_res/logs",
         logging_steps=10,
         # save_steps=2000,
@@ -156,12 +162,9 @@ def main():
         do_eval=True,
         per_device_eval_batch_size = batch_size_per_device,
         evaluation_strategy="steps",  # Add this line
-        eval_steps=50,
+        eval_steps=100,
         gradient_checkpointing=True,
-        # save_total_limit=3,
-        # overwrite_output_dir = False
         remove_unused_columns=False,
-        # split_batches=True,
         dispatch_batches=False,
         eval_on_start=True,
         seed = 42
@@ -178,9 +181,6 @@ def main():
     )
 
     trainer.train()
-
-    # trainer.save_model()
-    # global_tokenizer.save_pretrained(training_args.output_dir)
 
 if __name__ == "__main__":
     main()

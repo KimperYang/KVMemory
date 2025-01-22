@@ -2858,6 +2858,50 @@ class compress_attention_preprocessor():
             'labels': labels,
             'biased_index': None
         }
+    
+    def process_xsum(
+        self,
+        example: Dict[str, str],
+    ):
+        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please summarize the text based on the information given.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+        system_input_ids = self.tokenizer(system, add_special_tokens=False).input_ids
+        system_input_ids = system_input_ids
+        input_ids = system_input_ids
+        sys_len = len(system_input_ids)
+
+        document_id = self.tokenizer(example['document'], add_special_tokens=False).input_ids
+        chunks = [document_id[i:i+100] for i in range(0, len(document_id), 100)]
+
+        current_index = sys_len
+        biased_index = []
+
+        for j in range(len(chunks)):
+
+            tem_id = chunks[j]
+
+            biased_index.append([current_index, current_index + len(tem_id)])
+            current_index += len(tem_id)
+
+            input_ids += tem_id
+
+        user =  "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        user_id = self.tokenizer(user, add_special_tokens=False).input_ids
+        input_ids += user_id
+
+        ans_id = self.tokenizer(example['summary'] + "<|eot_id|>", add_special_tokens=False).input_ids
+        input_ids += ans_id
+
+        new_input_len = len(input_ids) + 2 + len(biased_index) * self.compress_len
+        labels = [-100] * (new_input_len - len(ans_id)) + ans_id
+
+        if len(input_ids)>4096:
+            print(f"xsum Exceed: {len(input_ids)}")
+
+        return {
+            'input_ids': input_ids,
+            'labels': labels,
+            'biased_index': biased_index
+        }
 
 def custom_collate_compress(batch, compress_tokens):
 
