@@ -71,6 +71,11 @@ def load_from_disk_then_process(
             raise NotImplementedError()
         remove_columns=['prompt', 'question', 'answers', 'generated', 'inputs', 'documents']
         num_shards = 32
+    elif data_component_name in ["xsum"]:
+        data_path = f"dataset_cache/processed/xsum/{data_component_name}"
+        preprocessor_fn = preprocessor.process_xsum
+        remove_columns=['document', 'summary', 'id']
+        num_shards = 32
     else:
         raise NotImplementedError()
     data_component: datasets.DatasetDict = datasets.load_from_disk(data_path)
@@ -125,38 +130,49 @@ def main():
     sft_mem_train, sft_mem_eval = load_from_disk_then_process("sft_mem", preprocessor)
     qa_train, qa_eval = load_from_disk_then_process("qa", preprocessor)
     qa_mem_train, qa_mem_eval = load_from_disk_then_process("qa_mem", preprocessor)
-
-    train_dataset = datasets.interleave_datasets(
-        [sft_mem_train, sft_train, ptr_inst_train, ptr_train, ptr_mem_train, qa_train, qa_mem_train],
-        probabilities=[0.2, 0.25, 0.1, 0.25, 0.1, 0.05, 0.05],
-        seed=42,
-        stopping_strategy="all_exhausted",
-    )
+    xsum_train, xsum_eval = load_from_disk_then_process("xsum", preprocessor)
 
     # train_dataset = datasets.interleave_datasets(
-    #     [sft_mem_train, sft_train, ptr_inst_train, ptr_train, ptr_mem_train],
-    #     probabilities=[0.25, 0.25, 0.2, 0.1, 0.2],
+    #     [sft_mem_train, sft_train, ptr_inst_train, ptr_train, ptr_mem_train, qa_train, qa_mem_train],
+    #     probabilities=[0.2, 0.25, 0.1, 0.25, 0.1, 0.05, 0.05],
     #     seed=42,
     #     stopping_strategy="all_exhausted",
     # )
 
+    train_dataset = datasets.interleave_datasets(
+        [sft_mem_train, sft_train, ptr_train, qa_train, qa_mem_train, xsum_train],
+        probabilities=[0.25, 0.30, 0.20, 0.10, 0.10, 0.05],
+        seed=42,
+        stopping_strategy="all_exhausted",
+    )
+
+
+    # eval_dataset = datasets.DatasetDict({
+    #     "text": ptr_eval,
+    #     "textmem": ptr_mem_eval,
+    #     "textinst": ptr_inst_eval,
+    #     "sft": sft_eval,
+    #     "sftmem": sft_mem_eval,
+    #     "qa": qa_eval,
+    #     "qamem": qa_mem_eval
+    # })
+
     eval_dataset = datasets.DatasetDict({
         "text": ptr_eval,
-        "textmem": ptr_mem_eval,
-        "textinst": ptr_inst_eval,
         "sft": sft_eval,
         "sftmem": sft_mem_eval,
         "qa": qa_eval,
-        "qamem": qa_mem_eval
+        "qamem": qa_mem_eval,
+        "xsum": xsum_eval
     })
 
     os.environ["WANDB_PROJECT"]="kvmemory"
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir=f"training_res/sum/sum_{reencode_num}",
+        output_dir=f"training_res/sum/sum_{reencode_num}_new_mix",
         report_to="wandb",
-        run_name=f"sum_{reencode_num}_bsz{batch_size_per_device}_5e-6_full",
+        run_name=f"sum_{reencode_num}_bsz{batch_size_per_device}_5e-6_new_mix",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
         max_steps=6000,
@@ -171,7 +187,7 @@ def main():
         do_eval=True,
         per_device_eval_batch_size = batch_size_per_device,
         evaluation_strategy="steps",  # Add this line
-        eval_steps=2000,
+        eval_steps=1000,
         gradient_checkpointing=True,
         # save_total_limit=3,
         # overwrite_output_dir = False

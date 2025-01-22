@@ -48,7 +48,7 @@ export LAUNCHER="accelerate launch \
     --main_process_ip $MASTER_ADDR \
     --main_process_port $MASTER_PORT \
     --machine_rank $NODE_RANK \
-    --num_processes 32 \
+    --num_processes 8 \
     --num_machines $NNODES \
     "
 

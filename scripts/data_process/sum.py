@@ -2,7 +2,7 @@
 Generate the block_qa subsets with and without memory
 
 ```
-python scripts/data_process/sum.py --max_length=4096 --validation_size=2000
+python scripts/data_process/sum.py --max_length=4096 --validation_size=1000
 ```
 """
 import json
@@ -54,7 +54,7 @@ def main(argv):
         user_id = tokenizer(user, add_special_tokens=False).input_ids
         input_ids = sys_id + user_id
 
-        if len(input_ids) >= max_length:
+        if len(input_ids) >= 3000:
             return False
 
         return True

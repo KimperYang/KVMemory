@@ -105,12 +105,12 @@ def load_from_disk_then_process(
 
 
 def main():
-    batch_size_per_device = 8
+    batch_size_per_device = 4
     
-    compress_tokens=list(range(128011, 128031))
-    global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+    compress_tokens=list(range(128011, 128061))
+    global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B-Instruct")
     global_model = AutoModelForCausalLM.from_pretrained(
-        "meta-llama/Llama-3.2-1B-Instruct",
+        "meta-llama/Llama-3.2-3B-Instruct",
         torch_dtype=torch.bfloat16,
         attn_implementation='sdpa',
         # use_flash_attention_2=True,
@@ -145,16 +145,16 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir=f"training_res/compress/compress_sum_{len(compress_tokens)}",
+        output_dir=f"training_res/compress/compress_sum_{len(compress_tokens)}_3B",
         report_to="wandb",
-        run_name=f"compress_sum_{len(compress_tokens)}_bsz{batch_size_per_device}",
+        run_name=f"compress_sum_{len(compress_tokens)}_bsz{batch_size_per_device}_3B",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=1,
-        max_steps=1500,
+        max_steps=1186,
         logging_dir="training_res/logs",
         logging_steps=10,
-        # save_steps=2000,
-        gradient_accumulation_steps=1,
+        save_total_limit=1,
+        gradient_accumulation_steps=2,
         warmup_ratio=0.1,
         lr_scheduler_type='cosine',
         bf16=True,

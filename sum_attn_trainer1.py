@@ -13,14 +13,15 @@ from typing import Tuple
 
 import datasets
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments, Trainer
+from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
 
-from src.data.input_preprocessor import baseline_attention_preprocessor, custom_collate_baseline
+from src.data.input_preprocessor import custom_collate_bias, sum_attention_preprocessor
+from src.training.custom_trainer import CustomTrainerBiasAttn
 
 
 def load_from_disk_then_process(
     data_component_name: str,
-    preprocessor: baseline_attention_preprocessor,
+    preprocessor: sum_attention_preprocessor,
 ) -> Tuple[datasets.IterableDataset, datasets.Dataset]:
     """
     load the downloaded data from disk and then pair it with the preprocessor
@@ -52,16 +53,6 @@ def load_from_disk_then_process(
             raise NotImplementedError()
         remove_columns=["system", "mask", "dataset", "conversations"]
         num_shards = 32
-    elif data_component_name in ["qa", "qa_mem"]:
-        data_path = f"dataset_cache/processed/compress_qa/{data_component_name}"
-        if data_component_name == "qa":
-            preprocessor_fn = preprocessor.process_qa
-        elif data_component_name == "qa_mem":
-            preprocessor_fn = preprocessor.process_qa
-        else:
-            raise NotImplementedError()
-        remove_columns=['prompt', 'question', 'answers', 'generated', 'inputs', 'documents']
-        num_shards = 32
     elif data_component_name in ["tulu"]:
         data_path = "dataset_cache/processed/tulu/sft"
         if data_component_name == "tulu":
@@ -69,6 +60,16 @@ def load_from_disk_then_process(
         else:
             raise NotImplementedError()
         remove_columns=["id", "messages", "source"]
+        num_shards = 32
+    elif data_component_name in ["qa", "qa_mem"]:
+        data_path = f"dataset_cache/processed/block_qa/{data_component_name}"
+        if data_component_name == "qa":
+            preprocessor_fn = preprocessor.process_qa
+        elif data_component_name == "qa_mem":
+            preprocessor_fn = preprocessor.process_qamem
+        else:
+            raise NotImplementedError()
+        remove_columns=['prompt', 'question', 'answers', 'generated', 'inputs', 'documents']
         num_shards = 32
     elif data_component_name in ["xsum"]:
         data_path = f"dataset_cache/processed/xsum/{data_component_name}"
@@ -80,11 +81,12 @@ def load_from_disk_then_process(
     data_component: datasets.DatasetDict = datasets.load_from_disk(data_path)
     # print(data_component.cleanup_cache_files())
 
-    streaming_train_dataset = data_component["train"]
+    streaming_train_dataset = data_component["train"].to_iterable_dataset(num_shards=num_shards)
+    # streaming_train_dataset = data_component["train"]
     training_data = streaming_train_dataset.map(
         preprocessor_fn,
         remove_columns=remove_columns,
-        num_proc=16,
+        # num_proc=16,
         batched=False,
     )
 
@@ -101,57 +103,83 @@ def load_from_disk_then_process(
 
 
 def main():
-    batch_size_per_device = 4
+    batch_size_per_device = 8
+    reencode_num = 1
 
-    global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B-Instruct")
+    global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
     global_model = AutoModelForCausalLM.from_pretrained(
-        "meta-llama/Llama-3.2-3B-Instruct",
+        "meta-llama/Llama-3.2-1B-Instruct",
         torch_dtype=torch.bfloat16,
-        attn_implementation='flash_attention_2',
-        # attn_implementation='sdpa'
+        attn_implementation='sdpa',
+        # use_flash_attention_2=True,
     )
 
-    preprocessor = baseline_attention_preprocessor(
+    preprocessor = sum_attention_preprocessor(
         tokenizer=global_tokenizer,
-        max_len=4096
+        max_len=4096,
+        special_token_start=128011,
+        mem_start=128254,
+        mem_end=128255,
+        reencode_num=reencode_num
     )
 
-    # qa_mem_train, qa_mem_eval = load_from_disk_then_process("qa_mem", preprocessor)
-
-    # train_dataset = qa_mem_train
-
-    # eval_dataset = qa_mem_eval
-
+    ptr_train, ptr_eval = load_from_disk_then_process("text", preprocessor)
+    ptr_mem_train, ptr_mem_eval = load_from_disk_then_process("text_mem", preprocessor)
+    ptr_inst_train, ptr_inst_eval = load_from_disk_then_process("text_inst", preprocessor)
+    sft_train, sft_eval = load_from_disk_then_process("tulu", preprocessor)
+    sft_mem_train, sft_mem_eval = load_from_disk_then_process("sft_mem", preprocessor)
+    qa_train, qa_eval = load_from_disk_then_process("qa", preprocessor)
     qa_mem_train, qa_mem_eval = load_from_disk_then_process("qa_mem", preprocessor)
     xsum_train, xsum_eval = load_from_disk_then_process("xsum", preprocessor)
 
-    # train_dataset = qa_mem_train
+    # train_dataset = datasets.interleave_datasets(
+    #     [sft_mem_train, sft_train, ptr_inst_train, ptr_train, ptr_mem_train, qa_train, qa_mem_train],
+    #     probabilities=[0.2, 0.25, 0.1, 0.25, 0.1, 0.05, 0.05],
+    #     seed=42,
+    #     stopping_strategy="all_exhausted",
+    # )
+
     train_dataset = datasets.interleave_datasets(
-        [xsum_train, qa_mem_train],
-        probabilities=[0.5, 0.5],
+        [sft_mem_train, sft_train, ptr_train, qa_train, qa_mem_train, xsum_train],
+        probabilities=[0.25, 0.30, 0.20, 0.10, 0.10, 0.05],
         seed=42,
         stopping_strategy="all_exhausted",
     )
 
+
+    # eval_dataset = datasets.DatasetDict({
+    #     "text": ptr_eval,
+    #     "textmem": ptr_mem_eval,
+    #     "textinst": ptr_inst_eval,
+    #     "sft": sft_eval,
+    #     "sftmem": sft_mem_eval,
+    #     "qa": qa_eval,
+    #     "qamem": qa_mem_eval
+    # })
+
     eval_dataset = datasets.DatasetDict({
-        "xsum": xsum_eval,
-        "qamem": qa_mem_eval
+        "text": ptr_eval,
+        "sft": sft_eval,
+        "sftmem": sft_mem_eval,
+        "qa": qa_eval,
+        "qamem": qa_mem_eval,
+        "xsum": xsum_eval
     })
 
     os.environ["WANDB_PROJECT"]="kvmemory"
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir="training_res/compress/upper_sum_3B",
+        output_dir=f"training_res/sum/sum_{reencode_num}_new_mix",
         report_to="wandb",
-        run_name=f"upper_sum_bsz{batch_size_per_device}_3B",
+        run_name=f"sum_{reencode_num}_bsz{batch_size_per_device}_5e-6_new_mix",
         per_device_train_batch_size= batch_size_per_device,
-        # num_train_epochs=1,
-        max_steps=1186,
+        # num_train_epochs=2,
+        max_steps=6000,
         logging_dir="training_res/logs",
         logging_steps=10,
-        # save_steps=2000,
-        gradient_accumulation_steps=2,
+        save_steps=2000,
+        gradient_accumulation_steps=1,
         warmup_ratio=0.1,
         lr_scheduler_type='cosine',
         bf16=True,
@@ -159,24 +187,24 @@ def main():
         do_eval=True,
         per_device_eval_batch_size = batch_size_per_device,
         evaluation_strategy="steps",  # Add this line
-        eval_steps=100,
+        eval_steps=1000,
         gradient_checkpointing=True,
-        save_total_limit=1,
+        # save_total_limit=3,
         # overwrite_output_dir = False
         remove_unused_columns=False,
         # split_batches=True,
         dispatch_batches=False,
         eval_on_start=True,
-        seed=42
+        seed = 42
     )
 
-    trainer = Trainer(
+    trainer = CustomTrainerBiasAttn(
         model=global_model,
         tokenizer=global_tokenizer,
         args=training_args,
         train_dataset = train_dataset,
         eval_dataset = eval_dataset,
-        data_collator = custom_collate_baseline
+        data_collator = custom_collate_bias
     )
 
     trainer.train()

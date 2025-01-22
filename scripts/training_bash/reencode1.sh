@@ -6,10 +6,11 @@ cd /dccstor/scllm/KVMemory
 
 export LD_LIBRARY_PATH=$CONDA_PREFIX/lib
 export CUDA_HOME="$CONDA_PREFIX"
-
+export CUDA_LAUNCH_BLOCKING=1
 # export NCCL_DEBUG=INFO
 # export NCCL_SOCKET_IFNAME="ib,bond"
 # export NCCL_IB_CUDA_SUPPORT=1
+# export NCCL_IB_GID_INDEX=3
 # export NCCL_IB_DISABLE=0
 # export CUDA_DEVICE_MAX_CONNECTIONS=1
 
@@ -51,7 +52,7 @@ export LAUNCHER="accelerate launch \
     --num_machines $NNODES \
     "
 
-export SCRIPT="compress_qa_trainer.py"
+export SCRIPT="sum_attn_trainer1.py"
 
 export CMD="$LAUNCHER $SCRIPT"
 
