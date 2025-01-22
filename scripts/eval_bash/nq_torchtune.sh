@@ -4,14 +4,14 @@ source /u/shiyuucsb/.bashrc
 conda activate /dccstor/scllm/envs/torchtune
 
 # Number of GPUs available
-NUM_GPUS=8
+NUM_GPUS=2
 
 # Number of processes to run (for pos=0 to pos=9)
 NUM_PROCESSES=10
 
 # Command template
 # COMMAND="python scripts/evaluation/nq/nq_torchtune.py --ckpt_path run_logs/decay --batch_size 8"
-COMMAND="python scripts/evaluation/nq/nq_torchtune.py --ckpt_path training_res/remove_textinst.pt --batch_size 8 --attn_type blocked"
+COMMAND="python scripts/evaluation/nq/nq_torchtune.py --ckpt_path training_res/v4.pt --batch_size 8 --attn_type blocked"
 
 # Array to keep track of running processes (1 per GPU)
 declare -a GPU_PROCESS
