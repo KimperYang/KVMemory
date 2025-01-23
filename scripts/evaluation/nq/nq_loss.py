@@ -282,26 +282,8 @@ def main():
     eval_dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=collate_fn)
     prog_bar = auto_tqdm(range(len(eval_dataloader)))
 
-    eot_id = tokenizer.convert_tokens_to_ids("<|eot_id|>")
-    print(eot_id)
-    generation_cfg = GenerationConfig(
-        do_sample=False,
-        num_beams=1,
-        max_new_tokens=200,
-        stop_strings=["<|end_of_text|>", "<|eot_id|>"],
-        pad_token_id=tokenizer.pad_token_id,
-        eos_token_id=eot_id,
-    )
-    generation_prompt = "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
-    # generation_token_ids = tokenizer(generation_prompt, add_special_tokens=False, allowed_special="all")["input_ids"]
-    generation_token_ids = tokenizer(generation_prompt, add_special_tokens=False)["input_ids"]
-    print(generation_token_ids)
-    generation_token_ids = torch.LongTensor(generation_token_ids)
-    generation_token_ids: torch.LongTensor = move_to_target_device(generation_token_ids, device)
-
     for batch_id, batch in enumerate(eval_dataloader):
         curr_batch_size = batch['input_ids'].size(0)
-        batch_answers = all_answers[batch_id * batch_size : batch_id * batch_size + curr_batch_size]
         attention_matrices = []
         max_length = max(batch['input_length'])
         for idx in range(len(batch['input_ids'])):
@@ -329,6 +311,7 @@ def main():
         attention_matrices = torch.stack(attention_matrices)
         attention_mask_4d = attention_matrices.unsqueeze(1)
         input_ids = batch["input_ids"]
+        labels = batch["labels"]
         attention_mask_for_pad = batch["attention_mask"]
 
         with torch.no_grad():
@@ -340,38 +323,13 @@ def main():
             # attention_mask_4d = attention_mask_4d.float()
 
             if args.attn_type == "blocked":
-                prefilling_outputs = model(input_ids=input_ids, attention_mask=attention_mask_4d)
+                outputs = model(input_ids=input_ids, attention_mask=attention_mask_4d, labels=labels)
             elif args.attn_type == "standard":
-                prefilling_outputs = model(input_ids=input_ids, attention_mask=attention_mask_for_pad)
+                outputs = model(input_ids=input_ids, attention_mask=attention_mask_for_pad, labels=labels)
             else:
                 raise ValueError()
-            past_key_values = prefilling_outputs.past_key_values
 
-
-            generation_prefix = generation_token_ids.repeat(curr_batch_size, 1)
-            generation_input_ids = torch.cat([input_ids, generation_prefix], axis=1)
-            attention_mask_for_pad = torch.cat([attention_mask_for_pad, torch.ones_like(generation_prefix)], axis=1)
-            outputs = model.generate(
-                input_ids=generation_input_ids,
-                attention_mask=attention_mask_for_pad,
-                use_cache=True,
-                generation_config=generation_cfg,
-                past_key_values=past_key_values,
-                tokenizer=tokenizer,
-            )
-        generated_seqs = [tokenizer.decode(
-                outputs[i, input_ids.size(1):].tolist(),
-            )
-            for i in range(input_ids.size(0))
-        ]
-
-        # for x in generated_seqs:
-        #     print(x)
-        responses = [
-            generated_seq.split("<|start_header_id|>assistant<|end_header_id|>")[-1].strip().split("<|eot_id|>")[0]
-            for generated_seq in generated_seqs
-        ]
-        for idx, x in enumerate(responses):
+        for idx, x in enumerate(outputs.loss):
             print(x)
             print("Ground-truth: ", batch_answers[idx])
             print("------\n")
