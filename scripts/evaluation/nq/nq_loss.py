@@ -232,6 +232,8 @@ def main():
     batch_size: int = args.batch_size
     device = torch.device("cuda")
 
+    total_loss = 0
+
     if pos in [0, 4, 9]:
         data_path = f"data/raw/nq/nq-open-10_{pos}.jsonl"
     else:
@@ -275,8 +277,6 @@ def main():
 
     total_num = 500
     dataset = dataset.select(np.arange(total_num))
-    correct_num = 0
-    res_list = []
 
     collate_fn = DataCollatorForGeneration(pad_id=tokenizer.pad_token_id)
     eval_dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=collate_fn)
@@ -329,42 +329,26 @@ def main():
             else:
                 raise ValueError()
 
-        for idx, x in enumerate(outputs.loss):
-            print(x)
-            print("Ground-truth: ", batch_answers[idx])
-            print("------\n")
-        # print(responses)
+        total_loss += torch.sum(outputs.loss).item()
 
-        scores = [best_subspan_em(responses[idx], batch_answers[idx]) for idx in range(curr_batch_size)]
-        for idx, score in enumerate(scores):
-            correct_num = correct_num + int(score)
-            res_list.append(
-                {
-                    # "question": question,
-                    "response": responses[idx],
-                    "gold_answer": batch_answers[idx],
-                    "score": scores[idx],
-                }
-            )
-        print("Correct progress", correct_num)
+        # print("Correct average loss", total_loss / ((batch_id + 1) * batch_size))
         prog_bar.update(1)
 
-    accuracy = correct_num / total_num
-    print(accuracy)
+    print("Final average loss", total_loss / total_num)
 
-    current_time = datetime.datetime.now()
-    time_str = current_time.strftime("%Y%m%d-%H%M%S")
+    # current_time = datetime.datetime.now()
+    # time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/titan/v4/NQ_at{pos}_{accuracy}_{time_str}.jsonl"
-    if not os.path.exists(os.path.dirname(file_name)):
-        os.makedirs(os.path.dirname(file_name))
+    # file_name = f"result/titan/v4/NQ_at{pos}_{accuracy}_{time_str}.jsonl"
+    # if not os.path.exists(os.path.dirname(file_name)):
+    #     os.makedirs(os.path.dirname(file_name))
 
-    with open(file_name, "w", encoding="utf-8") as f:
-        for entry in res_list:
-            json_line = json.dumps(entry)
-            f.write(json_line + "\n")
+    # with open(file_name, "w", encoding="utf-8") as f:
+    #     for entry in res_list:
+    #         json_line = json.dumps(entry)
+    #         f.write(json_line + "\n")
 
-    print(f"Dumped at {file_name}")
+    # print(f"Dumped at {file_name}")
 
 if __name__ == "__main__":
     main()
