@@ -25,13 +25,13 @@ if pos in [0, 4, 9]:
 else:
     jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
 
-global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/new_data/block/checkpoint-{ckpt}")
+# global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/new_data/block/checkpoint-{ckpt}")
 
-global_model = AutoModelForCausalLM.from_pretrained(f"training_res/new_data/block/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+# global_model = AutoModelForCausalLM.from_pretrained(f"training_res/new_data/block/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
 
-# global_tokenizer = AutoTokenizer.from_pretrained(f"/dccstor/scllm/Block-Attention/training_res/checkpoint-{ckpt}")
+global_tokenizer = AutoTokenizer.from_pretrained(f"/dccstor/scllm/Block-Attention/training_res/checkpoint-{ckpt}")
 
-# global_model = AutoModelForCausalLM.from_pretrained(f"/dccstor/scllm/Block-Attention/training_res/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+global_model = AutoModelForCausalLM.from_pretrained(f"/dccstor/scllm/Block-Attention/training_res/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
 
 # vocab_size = len(global_tokenizer)
 # base_model.resize_token_embeddings(vocab_size)
@@ -100,7 +100,8 @@ def main():
         for j in range(0,10):
             title = doc_list[j]["title"]
             text = doc_list[j]["text"]
-            memory_list.append("<MEM_START>" + f"Document [{j+1}](Title: {title}) {text}" + "\n<MEM_END>")
+            # memory_list.append(f"Document [{j+1}](Title: {title}) {text}\n")
+            memory_list.append(f"- Title: {title}\n{text}\n") #same as training setting in blockqa data
 
         memory_list.insert(0, template)
 
@@ -162,7 +163,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/order/block/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/order/block_model/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
