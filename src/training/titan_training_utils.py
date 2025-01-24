@@ -57,12 +57,24 @@ DATA_V5: List[DataComponent] = [
     DataComponent(dataset_name="qa_mem", weight=5.0),
 ]
 
+DATA_V6: List[DataComponent] = [
+    DataComponent(dataset_name="text", weight=10.0),
+    DataComponent(dataset_name="text_mem", weight=10.0),
+    DataComponent(dataset_name="text_inst", weight=10.0),
+    DataComponent(dataset_name="tulu", weight=30.0),
+    DataComponent(dataset_name="sft_mem", weight=20.0),
+    DataComponent(dataset_name="qa", weight=5.0),
+    DataComponent(dataset_name="qa_mem", weight=5.0),
+    DataComponent(dataset_name="xsum", weight=10.0),
+]
+
 DATASET_MAPPING = {
     "v1": DATA_V1,
     "v2": DATA_V2,
     "v3": DATA_V3,
     "v4": DATA_V4,
     "v5": DATA_V5,
+    "v6": DATA_V6,
 }
 
 COMMON_CHECKPOINT_CONFIG = CheckpointConfig(
@@ -111,6 +123,13 @@ bsz64_lr56_steps5k =replace(
     batch_size=64,
     max_steps=5000,
     warmup_steps=500,
+    eval_every_n_steps=500,
+)
+bsz64_lr56_steps6k =replace(
+    DEFUALT_TRAINING_RECIPE,
+    batch_size=64,
+    max_steps=6000,
+    warmup_steps=600,
     eval_every_n_steps=500,
 )
 
