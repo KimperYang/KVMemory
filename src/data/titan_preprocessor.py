@@ -526,6 +526,9 @@ class SumAttentionPreprocessor():
         qa_system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
         self.qa_system_input_ids = self.tokenizer(qa_system, add_special_tokens=False)["input_ids"]
 
+        xsum_system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please summarize the text based on the information given.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+        self.xsum_system_input_ids = self.tokenizer(xsum_system, add_special_tokens=False)["input_ids"]
+
     def process_sftmem(
         self,
         example: Dict[str, str],
@@ -930,6 +933,43 @@ class SumAttentionPreprocessor():
                 input_ids += assist_msg_input_ids
 
         segment_ids = [0] * len(input_ids)
+        return {
+            "input_ids": input_ids,
+            "labels": labels,
+            "segment_ids": segment_ids
+        }
+
+    def process_xsum(
+        self,
+        example: Dict[str, str],
+    ):
+        text_ids = self.tokenizer(example['document'], add_special_tokens=False)["input_ids"]
+        chunks = [text_ids[i:i+100] for i in range(0, len(text_ids), 100)]
+        segment_ids = []
+        input_ids = self.xsum_system_input_ids[:] + [self.mem_start]
+        segment_ids = [0] * len(input_ids)
+
+        for j in range(len(chunks)):
+            input_ids = input_ids + chunks[j] + self.all_memory_sum_tokens[j]
+            segment_ids = segment_ids + [j+1] * len(chunks[j]) + [0] * self.reencode_num
+
+        user_input_ids = self.tokenizer(
+            example['summary'] + "<|eot_id|>",
+            add_special_tokens=False,
+        )["input_ids"]
+        user_input_ids = (
+            [self.mem_end, self.eot_token_id] + self.user_start_token_ids
+            + user_input_ids + [self.eot_token_id]
+        )
+        ans_id = self.tokenizer(
+            example['summary'] + "<|eot_id|>",
+            add_special_tokens=False,
+        )["input_ids"]
+
+        input_ids = input_ids + user_input_ids + ans_id
+        labels = [-100] * (len(input_ids) - len(ans_id)) + ans_id
+        segment_ids = segment_ids + [0] * len(user_input_ids + ans_id)
+
         return {
             "input_ids": input_ids,
             "labels": labels,

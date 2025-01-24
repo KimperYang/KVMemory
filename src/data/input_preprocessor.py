@@ -2449,3 +2449,54 @@ class sum_attention_preprocessor():
             'labels': labels,
             'biased_index': None
         }
+
+    def process_xsum(
+        self,
+        example: Dict[str, str],
+    ):
+        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please summarize the text based on the information given.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+        system_input_ids = self.tokenizer(system, add_special_tokens=False).input_ids
+        system_input_ids = system_input_ids + [self.mem_start]
+        input_ids = system_input_ids
+        sys_len = len(system_input_ids)
+
+        document_id = self.tokenizer(example['document'], add_special_tokens=False).input_ids
+        chunks = [document_id[i:i+100] for i in range(0, len(document_id), 100)]
+
+        current_index = sys_len
+        biased_index = []
+
+        for j in range(len(chunks)):
+            
+            tem_id = chunks[j]
+
+            for sub_idx in range(self.reencode_num):
+                tem_id = tem_id + [self.special_token_start + self.reencode_num * j + sub_idx]
+
+            biased_index.append([current_index, current_index + len(tem_id) - self.reencode_num])
+
+            current_index += len(tem_id)
+
+            input_ids += tem_id
+
+        user =  "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        user_id = self.tokenizer(user, add_special_tokens=False).input_ids
+        user_id = [self.mem_end] + user_id
+        input_ids += user_id
+
+        ans_id = self.tokenizer(example['summary'] + "<|eot_id|>", add_special_tokens=False).input_ids
+        input_ids += ans_id
+
+        labels = [-100] * (len(input_ids) - len(ans_id)) + ans_id
+
+        if len(input_ids)>4096:
+            print(f"xsum Exceed: {len(input_ids)}")
+
+        return {
+            'input_ids': input_ids,
+            'labels': labels,
+            'biased_index': biased_index
+        }
+
+
+
