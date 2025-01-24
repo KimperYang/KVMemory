@@ -55,6 +55,7 @@ import tqdm
 from torch.distributed.elastic.multiprocessing.errors import record
 from torch.utils.data import DataLoader
 from torchtune.models.llama3_2 import llama3_2_1b
+from transformers import AutoTokenizer
 
 from src.data.attention import construct_biased_attention_matrix
 from src.data.titan_data_utils import (
@@ -168,6 +169,8 @@ def main(config_name: str):
     eval_interval = task_config.training_recipe.eval_every_n_steps
     scheduler_type = "cosine"
     enable_data_packing = task_config.enable_packing
+    # Empicially this is faster than the tokenizer from torchtitan
+    use_hf_tokenizer = True
 
 
     logger.info(f"Starting job: {config_name}")
@@ -224,7 +227,10 @@ def main(config_name: str):
     tokenizer_path = task_config.tokenizer_path
 
     # build tokenizer
-    tokenizer = LLaMA32Tokenizer(tokenizer_path)
+    if use_hf_tokenizer:
+        tokenizer = LLaMA32Tokenizer(tokenizer_path)
+    else:
+        tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
     # build dataloader
     data_components = DATASET_MAPPING[task_config.dataset_version]
     data_collator = BlockAttnCollator(pad_token_idx=tokenizer.pad_id)

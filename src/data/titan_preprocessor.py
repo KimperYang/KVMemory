@@ -863,7 +863,7 @@ class SumAttentionPreprocessor():
                 return_offsets_mapping=False,
                 return_special_tokens_mask=False,
                 return_length=False,
-            )
+            )["input_ids"]
         else:
             formated_input_ids = [
                 self.tokenizer(x, add_special_tokens=False)["input_ids"]
@@ -995,7 +995,6 @@ class SumAttentionPreprocessor():
     ):
         text_ids = self.tokenizer(example['document'], add_special_tokens=False)["input_ids"]
         chunks = [text_ids[i:i+100] for i in range(0, len(text_ids), 100)]
-        segment_ids = []
         input_ids = self.xsum_system_input_ids[:] + [self.mem_start]
         segment_ids = [0] * len(input_ids)
 
@@ -1110,32 +1109,24 @@ def make_segment_mask(
 
     # Create masks for tokens belonging to segment 0
     # Shape [batch, ..., 1, source_length]
-    source_is_zero = (source_segments == 0).unsqueeze(-2)
     target_is_zero = (target_segments == 0).unsqueeze(-1)
 
-    # Tokens in segment 0 can attend to any token and be attended by any token
-    # zero_mask = source_is_zero | target_is_zero
+    # Tokens in segment 0 can be attended by any token
     zero_mask = target_is_zero
 
     # masks that indicates the token is a pad token
     # Shape [batch, ..., 1, source_length]
     source_invalid_mask = (source_segments == -1).unsqueeze(-2)
     target_invalid_mask = (target_segments == -1).unsqueeze(-1)
-
     # Combine invalid masks: pad tokens
     invalid_mask = source_invalid_mask | target_invalid_mask
 
-    # same_segment_logit_bias = NEG_INF * (~bool_mask & ~zero_mask)
-    # same_segment_logit_bias = NEG_INF * ~bool_mask
-    # pad_logit_bias = NEG_INF * invalid_mask
-    # segment_logit_bias = same_segment_logit_bias + pad_logit_bias
-
-    # all_masks = invalid_mask | (~bool_mask)
+    # all_masks = (~bool_mask) & (~zero_mask)
     all_masks = invalid_mask | ((~bool_mask) & (~zero_mask))
     segment_logit_bias = segment_logit_bias.masked_fill_(all_masks, min_dtype)
 
-    if dtype is torch.bfloat16:
-        segment_logit_bias = segment_logit_bias.bfloat16()
+    # if dtype is torch.bfloat16:
+    #     segment_logit_bias = segment_logit_bias.bfloat16()
     return segment_logit_bias
 
 def custom_collate_bias(batch):
