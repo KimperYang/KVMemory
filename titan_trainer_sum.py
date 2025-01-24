@@ -58,6 +58,7 @@ from torchtune.models.llama3_2 import llama3_2_1b
 
 from src.data.attention import construct_biased_attention_matrix
 from src.data.titan_data_utils import (
+    SumAttentionPreprocessor,
     build_hf_data_loader,
     build_hf_eval_data_loader,
 )
@@ -96,22 +97,23 @@ from src.training.titan_training_utils import (
 from src.training.torchtune_model_checkpointer import load_checkpoint
 
 CONFIG_DICT = {
-    "block_datav3_step6k_bsz256_4_node_full_ckpt": TitanTrainerConfig(
+    "datav3_step6k_bsz256_4_node_full_ckpt": TitanTrainerConfig(
         model_name_or_path="meta-llama/Llama-3.2-1B-Instruct",
         tokenizer_path="data/titan_tokenizer/original/tokenizer.model",
         dataset_version="v3",
         seq_len=4096,
-        job_dump_folder="run_logs/block_datav3_step6k",
+        job_dump_folder="run_logs/datav3_step6k",
         ckpt_config=COMMON_CHECKPOINT_CONFIG,
         training_recipe=bsz256_lr56_steps6k,
         activation_checkpoint=FULL_ACTIVATION_CHECKPOINT_CONFIG,
     ),
-    "block_datav3_step10k_bsz64_single_node_selective_ckpt": TitanTrainerConfig(
+    "datav3_step10k_bsz64_reencode_5_selective_ckpt": TitanTrainerConfig(
         model_name_or_path="meta-llama/Llama-3.2-1B-Instruct",
         tokenizer_path="data/titan_tokenizer/original/tokenizer.model",
         dataset_version="v3",
         seq_len=4096,
-        job_dump_folder="run_logs/block_datav3_step10k",
+        reencode_num=5,
+        job_dump_folder="run_logs/datav3_step10k_bsz64_reencode_5",
         ckpt_config=COMMON_CHECKPOINT_CONFIG,
         training_recipe=bsz64_lr56_steps10k,
         activation_checkpoint=SELECTIVE_ACTIVATION_CHECKPOINT_CONFIG,
@@ -191,9 +193,18 @@ def main(config_name: str):
     # build dataloader
     data_components = DATASET_MAPPING[task_config.dataset_version]
     data_collator = BlockAttnCollator(pad_token_idx=tokenizer.pad_id)
+    preprocessor = SumAttentionPreprocessor(
+        tokenizer=tokenizer,
+        max_len=task_config.seq_len,
+        special_token_start=128011,
+        mem_start=128254,
+        mem_end=128255,
+        reencode_num=task_config.reencode_num,
+    )
     data_loader = build_hf_data_loader(
         data_components,
         tokenizer,
+        preprocessor=preprocessor,
         seed=common_cfg.seed,
         batch_size=local_batch_size,
         seq_len=task_config.seq_len,
@@ -206,6 +217,7 @@ def main(config_name: str):
     eval_data_loader_dict: Dict[str, DataLoader] = build_hf_eval_data_loader(
         data_components,
         tokenizer,
+        preprocessor=preprocessor,
         batch_size=local_batch_size,
         seq_len=task_config.seq_len,
         world_size=dp_degree,

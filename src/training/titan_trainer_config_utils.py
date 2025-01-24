@@ -57,6 +57,8 @@ class TitanTrainerConfig:
     training_recipe: TrainingRecipe
     # TODO: (Bairu) temporarily add it here. Need to refactor the code later
     enable_packing: bool = False
+    # TODO: (Bairu) temporarily add it here. Need to refactor the code later
+    reencode_num: int = 0
     pass
 
 

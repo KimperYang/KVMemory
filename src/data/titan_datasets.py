@@ -4,7 +4,7 @@ Reference: torchtitan/datasets/hf_dataset.py
 """
 import pickle
 import random
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Union
 
 import datasets
 from datasets.distributed import split_dataset_by_node
@@ -12,14 +12,17 @@ from torch.distributed.checkpoint.stateful import Stateful
 from torch.utils.data import IterableDataset
 from torchdata.stateful_dataloader import StatefulDataLoader
 
-from src.data.titan_preprocessor import bias_attention_preprocessor
+from src.data.titan_preprocessor import (
+    SumAttentionPreprocessor,
+    bias_attention_preprocessor,
+)
 from src.data.titan_tokenizer import Tokenizer
 from src.torchtitan.logging import logger
 
 
 def load_data_and_process_fn(
     data_component_name: str,
-    preprocessor: bias_attention_preprocessor,
+    preprocessor: Union[SumAttentionPreprocessor, bias_attention_preprocessor],
     training: bool = True,
 ) -> Tuple[datasets.IterableDataset, datasets.Dataset]:
     """
@@ -85,6 +88,7 @@ class HuggingFaceDataset(IterableDataset, Stateful):
         self,
         dataset_name: str,
         tokenizer: Tokenizer,
+        preprocessor: Union[bias_attention_preprocessor, bias_attention_preprocessor],
         seq_len: int = 4096,
         world_size: int = 1,
         rank: int = 0,
@@ -93,7 +97,6 @@ class HuggingFaceDataset(IterableDataset, Stateful):
     ) -> None:
         self.packing_mode = packing_mode
         assert self.packing_mode in ["padding", "packing"]
-        preprocessor = bias_attention_preprocessor(tokenizer=tokenizer, max_len=seq_len)
         ds, preprocess_fn, columns_to_remove = load_data_and_process_fn(
             data_component_name=dataset_name,
             preprocessor=preprocessor,

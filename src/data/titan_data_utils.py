@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 from torch.utils.data import DataLoader, DistributedSampler
 
@@ -7,6 +7,10 @@ from src.data.titan_datasets import (
     HuggingFaceDataset,
     WeightedAggregatorDataset,
     load_data_and_process_fn,
+)
+from src.data.titan_preprocessor import (
+    SumAttentionPreprocessor,
+    bias_attention_preprocessor,
 )
 from src.data.titan_preprocessor import bias_attention_preprocessor
 from src.data.titan_tokenizer import LLaMA32Tokenizer
@@ -18,6 +22,7 @@ from src.training.titan_trainer_config_utils import (
 def build_hf_data_loader(
     data_components: List[DataComponent],
     tokenizer: LLaMA32Tokenizer,
+    preprocessor: Union[SumAttentionPreprocessor, bias_attention_preprocessor],
     seed: int,
     batch_size: int,
     seq_len: int,
@@ -41,6 +46,7 @@ def build_hf_data_loader(
             dataset_name,
             tokenizer,
             seq_len=seq_len,
+            preprocessor=preprocessor,
             world_size=world_size,
             rank=rank,
             infinite=infinite,
@@ -61,6 +67,7 @@ def build_hf_data_loader(
 def build_hf_eval_data_loader(
     data_components: List[DataComponent],
     tokenizer: LLaMA32Tokenizer,
+    preprocessor: Union[SumAttentionPreprocessor, bias_attention_preprocessor],
     batch_size: int,
     seq_len: int,
     world_size: int,
@@ -68,7 +75,6 @@ def build_hf_eval_data_loader(
     collate_fn,
 ):
     """Build a data loader for HuggingFace datasets."""
-    preprocessor = bias_attention_preprocessor(tokenizer=tokenizer, max_len=seq_len)
     dataloader_dict = {}
     for data_component in data_components:
         dataset_name = data_component.dataset_name
