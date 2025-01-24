@@ -118,6 +118,7 @@ def preprocess_fn(example: Dict[str, str], tokenizer: LLaMA32Tokenizer, target_p
         "who answer the question with the knowledge provided in the prompt<|eot_id|>"
     )
     question = example["question"]
+    answer = example['generated'] + "<|eot_id|>"
     memory_list = []
 
     doc_list = [example["ctxs"][x]["text"] for x in range(10)]
@@ -160,13 +161,18 @@ def preprocess_fn(example: Dict[str, str], tokenizer: LLaMA32Tokenizer, target_p
     new_prompt = (
         "<|reserved_special_token_5|><|start_header_id|>user<|end_header_id|>\n\n"
         "Write a high-quality answer for the given question using only the provided "
-        f"search results (some of which might be irrelevant). Question: {question}"
+        f"search results (some of which might be irrelevant). Question: {question}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
     )
     prompt_id = tokenizer(new_prompt, add_special_tokens = False)["input_ids"]
-    input_ids = id_list + prompt_id
+    answer_id = tokenizer(answer, add_special_tokens=False)["input_ids"]
+
+    input_ids = id_list + prompt_id + answer_id
+    labels = [-100] * (len(input_ids) - len(answer_id)) + answer_id
+
     return {
         "input_ids": input_ids,
         "biased_index": biased_index,
+        "labels": labels
     }
 
 class DataCollatorForGeneration():
@@ -179,6 +185,7 @@ class DataCollatorForGeneration():
         mem_num = []
         input_length = []
         attention_mask = []
+        labels = []
         for item in batch:
             if item['biased_index'] is not None:
                 mem_num.append(len(item['biased_index']))
@@ -197,6 +204,7 @@ class DataCollatorForGeneration():
             # padded_input_ids = [self.pad_id] * residual + item['input_ids']
             # curr_attention_mask = [0] * residual + [1] * seq_length
             padded_input_ids = item['input_ids'] + [self.pad_id] * residual
+            padded_labels = item["labels"] + [-100] * residual
             curr_attention_mask = [1] * seq_length + [0] * residual
 
 
@@ -204,11 +212,13 @@ class DataCollatorForGeneration():
 
             converted_biased_index = original_biased_index + [[0,0]] * (max_mem_num - _mem_num)
             input_ids.append(padded_input_ids)
+            labels.append(padded_labels)
             attention_mask.append(curr_attention_mask)
             biased_index.append(converted_biased_index)
 
         return {
             'input_ids': torch.LongTensor(input_ids),
+            'labels': torch.LongTensor(labels),
             'biased_index': torch.LongTensor(biased_index),
             "input_length": torch.LongTensor(input_length),
             'mem_num': torch.LongTensor(mem_num),
@@ -221,6 +231,8 @@ def main():
     pos = args.pos
     batch_size: int = args.batch_size
     device = torch.device("cuda")
+
+    total_loss = 0
 
     if pos in [0, 4, 9]:
         data_path = f"data/raw/nq/nq-open-10_{pos}.jsonl"
@@ -265,33 +277,13 @@ def main():
 
     total_num = 500
     dataset = dataset.select(np.arange(total_num))
-    correct_num = 0
-    res_list = []
 
     collate_fn = DataCollatorForGeneration(pad_id=tokenizer.pad_token_id)
     eval_dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=collate_fn)
     prog_bar = auto_tqdm(range(len(eval_dataloader)))
 
-    eot_id = tokenizer.convert_tokens_to_ids("<|eot_id|>")
-    print(eot_id)
-    generation_cfg = GenerationConfig(
-        do_sample=False,
-        num_beams=1,
-        max_new_tokens=200,
-        stop_strings=["<|end_of_text|>", "<|eot_id|>"],
-        pad_token_id=tokenizer.pad_token_id,
-        eos_token_id=eot_id,
-    )
-    generation_prompt = "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
-    # generation_token_ids = tokenizer(generation_prompt, add_special_tokens=False, allowed_special="all")["input_ids"]
-    generation_token_ids = tokenizer(generation_prompt, add_special_tokens=False)["input_ids"]
-    print(generation_token_ids)
-    generation_token_ids = torch.LongTensor(generation_token_ids)
-    generation_token_ids: torch.LongTensor = move_to_target_device(generation_token_ids, device)
-
     for batch_id, batch in enumerate(eval_dataloader):
         curr_batch_size = batch['input_ids'].size(0)
-        batch_answers = all_answers[batch_id * batch_size : batch_id * batch_size + curr_batch_size]
         attention_matrices = []
         max_length = max(batch['input_length'])
         for idx in range(len(batch['input_ids'])):
@@ -319,6 +311,7 @@ def main():
         attention_matrices = torch.stack(attention_matrices)
         attention_mask_4d = attention_matrices.unsqueeze(1)
         input_ids = batch["input_ids"]
+        labels = batch["labels"]
         attention_mask_for_pad = batch["attention_mask"]
 
         with torch.no_grad():
@@ -330,73 +323,32 @@ def main():
             # attention_mask_4d = attention_mask_4d.float()
 
             if args.attn_type == "blocked":
-                prefilling_outputs = model(input_ids=input_ids, attention_mask=attention_mask_4d)
+                outputs = model(input_ids=input_ids, attention_mask=attention_mask_4d, labels=labels)
             elif args.attn_type == "standard":
-                prefilling_outputs = model(input_ids=input_ids, attention_mask=attention_mask_for_pad)
+                outputs = model(input_ids=input_ids, attention_mask=attention_mask_for_pad, labels=labels)
             else:
                 raise ValueError()
-            past_key_values = prefilling_outputs.past_key_values
 
+        total_loss += torch.sum(outputs.loss).item()
 
-            generation_prefix = generation_token_ids.repeat(curr_batch_size, 1)
-            generation_input_ids = torch.cat([input_ids, generation_prefix], axis=1)
-            attention_mask_for_pad = torch.cat([attention_mask_for_pad, torch.ones_like(generation_prefix)], axis=1)
-            outputs = model.generate(
-                input_ids=generation_input_ids,
-                attention_mask=attention_mask_for_pad,
-                use_cache=True,
-                generation_config=generation_cfg,
-                past_key_values=past_key_values,
-                tokenizer=tokenizer,
-            )
-        generated_seqs = [tokenizer.decode(
-                outputs[i, input_ids.size(1):].tolist(),
-            )
-            for i in range(input_ids.size(0))
-        ]
-
-        # for x in generated_seqs:
-        #     print(x)
-        responses = [
-            generated_seq.split("<|start_header_id|>assistant<|end_header_id|>")[-1].strip().split("<|eot_id|>")[0]
-            for generated_seq in generated_seqs
-        ]
-        for idx, x in enumerate(responses):
-            print(x)
-            print("Ground-truth: ", batch_answers[idx])
-            print("------\n")
-        # print(responses)
-
-        scores = [best_subspan_em(responses[idx], batch_answers[idx]) for idx in range(curr_batch_size)]
-        for idx, score in enumerate(scores):
-            correct_num = correct_num + int(score)
-            res_list.append(
-                {
-                    # "question": question,
-                    "response": responses[idx],
-                    "gold_answer": batch_answers[idx],
-                    "score": scores[idx],
-                }
-            )
-        print("Correct progress", correct_num)
+        # print("Correct average loss", total_loss / ((batch_id + 1) * batch_size))
         prog_bar.update(1)
 
-    accuracy = correct_num / total_num
-    print(accuracy)
+    print("Final average loss", total_loss / total_num)
 
-    current_time = datetime.datetime.now()
-    time_str = current_time.strftime("%Y%m%d-%H%M%S")
+    # current_time = datetime.datetime.now()
+    # time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/titan/v4/NQ_at{pos}_{accuracy}_{time_str}.jsonl"
-    if not os.path.exists(os.path.dirname(file_name)):
-        os.makedirs(os.path.dirname(file_name))
+    # file_name = f"result/titan/v4/NQ_at{pos}_{accuracy}_{time_str}.jsonl"
+    # if not os.path.exists(os.path.dirname(file_name)):
+    #     os.makedirs(os.path.dirname(file_name))
 
-    with open(file_name, "w", encoding="utf-8") as f:
-        for entry in res_list:
-            json_line = json.dumps(entry)
-            f.write(json_line + "\n")
+    # with open(file_name, "w", encoding="utf-8") as f:
+    #     for entry in res_list:
+    #         json_line = json.dumps(entry)
+    #         f.write(json_line + "\n")
 
-    print(f"Dumped at {file_name}")
+    # print(f"Dumped at {file_name}")
 
 if __name__ == "__main__":
     main()

@@ -18,7 +18,7 @@ export NCCL_IB_DISABLE=0
 # export NCCL_SOCKET_IFNAME="eth0,en,eth,em,bond"
 
 # export NCCL_IB_DISABLE=1
-export NCCL_P2P_DISABLE=0
+# export NCCL_P2P_DISABLE=0
 # export NCCL_BUFFSIZE=8388608
 # export NCCL_SOCKET_NTHREADS=16
 
@@ -56,7 +56,7 @@ export LAUNCHER="torchrun \
     --rdzv_endpoint=${MASTER_ADDR}:29500 \
     --local-ranks-filter ${LOG_RANK} \
     --role rank --tee 3 \
-    titan_trainer.py --config_name block_datav3_step6k_bsz256_4_node_full_ckpt \
+    titan_trainer.py --config_name block_datav4_step4k_bsz256_4_node_full_ckpt \
     "
 
 export CMD="$LAUNCHER"

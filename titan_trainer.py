@@ -36,6 +36,12 @@ ssh -L 6006:localhost:6006 satori1
 
 Run the command in the remote server:
 tensorboard --logdir=/nobackup/users/bairu/repos/KVMemory/run_logs/block_datav1_step10k/tensorboard/20250105-1953 --port=6006
+tensorboard --logdir_spec=\
+NoPacking:/dccstor/scllm/KVMemory/run_logs/block_bsz256_datav5_step4k_nopacking/tensorboard/20250120-2133,\
+Packing:/dccstor/scllm/KVMemory/run_logs/block_bsz256_datav5_step4k_packing/tensorboard/20250121-0331,\
+V3:/dccstor/scllm/KVMemory/run_logs/block_datav3_step6k/tensorboard/20250119-1418,\
+V4:/dccstor/scllm/KVMemory/run_logs/block_bsz256_datav4_step4k/tensorboard/20250121-1832\
+--port=6006
 
 Now open http://localhost:6006/ in the local machine.
 
