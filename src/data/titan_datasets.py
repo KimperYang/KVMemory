@@ -73,6 +73,11 @@ def load_data_and_process_fn(
             raise NotImplementedError()
         remove_columns=['prompt', 'question', 'answers', 'generated', 'inputs', 'documents']
         num_shards = 32
+    elif data_component_name in ["xsum"]:
+        data_path = f"dataset_cache/processed/xsum/{data_component_name}"
+        preprocessor_fn = preprocessor.process_xsum
+        remove_columns=['document', 'summary', 'id']
+        num_shards = 32
     else:
         raise ValueError(f"Unrecognized dataset name {data_component_name}.")
 
