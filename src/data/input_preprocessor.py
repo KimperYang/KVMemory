@@ -1636,10 +1636,12 @@ class block_attention_preprocessor():
     def __init__(
         self,
         tokenizer: PreTrainedTokenizerBase,
-        max_len: int
+        max_len: int,
+        do_shuffle: bool
     ) -> None:
         self.tokenizer = tokenizer
         self.max_len = max_len
+        self.do_shuffle = do_shuffle
 
     def process_sftmem(
         self,
@@ -1914,9 +1916,19 @@ class block_attention_preprocessor():
         current_index = sys_len
         biased_index = []
 
+        doc_list = []
+
+        for k in range(0,10):
+            title = example['documents'][k]['title']
+            text = example['documents'][k]['text']
+            doc_list.append({'title': title, 'text':text})
+
+        if self.do_shuffle:
+            random.shuffle(doc_list)
+
         for j in range(0,10):
-            title = example['documents'][j]['title']
-            text = example['documents'][j]['text']
+            title = doc_list[j]['title']
+            text = doc_list[j]['text']
             tem_id = self.tokenizer(f"Document [{j+1}](Title: {title}) {text}\n", add_special_tokens=False).input_ids
 
             biased_index.append([current_index, current_index + len(tem_id)])
@@ -1953,9 +1965,19 @@ class block_attention_preprocessor():
         system_input_ids = self.tokenizer(system, add_special_tokens=False).input_ids
         input_ids = system_input_ids
 
+        doc_list = []
+
+        for k in range(0,10):
+            title = example['documents'][k]['title']
+            text = example['documents'][k]['text']
+            doc_list.append({'title': title, 'text':text})
+
+        if self.do_shuffle:
+            random.shuffle(doc_list)
+
         for j in range(0,10):
-            title = example['documents'][j]['title']
-            text = example['documents'][j]['text']
+            title = doc_list[j]['title']
+            text = doc_list[j]['text']
             tem_id = self.tokenizer(f"Document [{j+1}](Title: {title}) {text}\n", add_special_tokens=False).input_ids
 
             input_ids += tem_id
@@ -2033,6 +2055,49 @@ class block_attention_preprocessor():
             'biased_index': None
         }
 
+    def process_xsum(
+        self,
+        example: Dict[str, str],
+    ):
+        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please summarize the text based on the information given.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+        system_input_ids = self.tokenizer(system, add_special_tokens=False).input_ids
+        input_ids = system_input_ids
+        sys_len = len(system_input_ids)
+
+        document_id = self.tokenizer(example['document'], add_special_tokens=False).input_ids
+        chunks = [document_id[i:i+100] for i in range(0, len(document_id), 100)]
+
+        current_index = sys_len
+        biased_index = []
+
+        for j in range(len(chunks)):
+            
+            tem_id = chunks[j]
+
+            biased_index.append([current_index, current_index + len(tem_id)])
+
+            current_index += len(tem_id)
+
+            input_ids += tem_id
+
+        user =  "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        user_id = self.tokenizer(user, add_special_tokens=False).input_ids
+        input_ids += user_id
+
+        ans_id = self.tokenizer(example['summary'] + "<|eot_id|>", add_special_tokens=False).input_ids
+        input_ids += ans_id
+
+        labels = [-100] * (len(input_ids) - len(ans_id)) + ans_id
+
+        if len(input_ids)>4096:
+            print(f"xsum Exceed: {len(input_ids)}")
+
+        return {
+            'input_ids': input_ids,
+            'labels': labels,
+            'biased_index': biased_index
+        }
+
 class sum_attention_preprocessor():
     '''
     Apply one piece of memory to non-memory use samples to enable batch forward pass for calculating KV.
@@ -2044,7 +2109,8 @@ class sum_attention_preprocessor():
         special_token_start: int,
         mem_start: int,
         mem_end: int,
-        reencode_num: int
+        reencode_num: int,
+        do_shuffle: bool
     ) -> None:
         self.tokenizer = tokenizer
         self.max_len = max_len
@@ -2052,6 +2118,7 @@ class sum_attention_preprocessor():
         self.mem_start = mem_start
         self.mem_end = mem_end
         self.reencode_num = reencode_num
+        self.do_shuffle = do_shuffle
 
     def process_sftmem(
         self,
@@ -2353,9 +2420,19 @@ class sum_attention_preprocessor():
         current_index = sys_len
         biased_index = []
 
+        doc_list = []
+
+        for k in range(0,10):
+            title = example['documents'][k]['title']
+            text = example['documents'][k]['text']
+            doc_list.append({'title': title, 'text':text})
+
+        if self.do_shuffle:
+            random.shuffle(doc_list)
+
         for j in range(0,10):
-            title = example['documents'][j]['title']
-            text = example['documents'][j]['text']
+            title = doc_list[j]['title']
+            text = doc_list[j]['text']
             tem_id = self.tokenizer(f"Document [{j+1}](Title: {title}) {text}\n", add_special_tokens=False).input_ids
 
             for sub_idx in range(self.reencode_num):
@@ -2396,9 +2473,19 @@ class sum_attention_preprocessor():
         system_input_ids = self.tokenizer(system, add_special_tokens=False).input_ids
         input_ids = system_input_ids
 
+        doc_list = []
+
+        for k in range(0,10):
+            title = example['documents'][k]['title']
+            text = example['documents'][k]['text']
+            doc_list.append({'title': title, 'text':text})
+
+        if self.do_shuffle:
+            random.shuffle(doc_list)
+
         for j in range(0,10):
-            title = example['documents'][j]['title']
-            text = example['documents'][j]['text']
+            title = doc_list[j]['title']
+            text = doc_list[j]['text']
             tem_id = self.tokenizer(f"Document [{j+1}](Title: {title}) {text}\n", add_special_tokens=False).input_ids
 
             input_ids += tem_id

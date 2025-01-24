@@ -15,12 +15,13 @@ import datasets
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
 
-from src.data.input_preprocessor import block_attention_preprocessor, custom_collate_bias
+from src.data.input_preprocessor import custom_collate_bias, sum_attention_preprocessor
 from src.training.custom_trainer import CustomTrainerBiasAttn
+
 
 def load_from_disk_then_process(
     data_component_name: str,
-    preprocessor: block_attention_preprocessor,
+    preprocessor: sum_attention_preprocessor,
 ) -> Tuple[datasets.IterableDataset, datasets.Dataset]:
     """
     load the downloaded data from disk and then pair it with the preprocessor
@@ -52,6 +53,14 @@ def load_from_disk_then_process(
             raise NotImplementedError()
         remove_columns=["system", "mask", "dataset", "conversations"]
         num_shards = 32
+    elif data_component_name in ["tulu"]:
+        data_path = "dataset_cache/processed/tulu/sft"
+        if data_component_name == "tulu":
+            preprocessor_fn = preprocessor.process_tulu
+        else:
+            raise NotImplementedError()
+        remove_columns=["id", "messages", "source"]
+        num_shards = 32
     elif data_component_name in ["qa", "qa_mem"]:
         data_path = f"dataset_cache/processed/block_qa/{data_component_name}"
         if data_component_name == "qa":
@@ -61,14 +70,6 @@ def load_from_disk_then_process(
         else:
             raise NotImplementedError()
         remove_columns=['prompt', 'question', 'answers', 'generated', 'inputs', 'documents']
-        num_shards = 32
-    elif data_component_name in ["tulu"]:
-        data_path = "dataset_cache/processed/tulu/sft"
-        if data_component_name == "tulu":
-            preprocessor_fn = preprocessor.process_tulu
-        else:
-            raise NotImplementedError()
-        remove_columns=["id", "messages", "source"]
         num_shards = 32
     elif data_component_name in ["xsum"]:
         data_path = f"dataset_cache/processed/xsum/{data_component_name}"
@@ -93,7 +94,7 @@ def load_from_disk_then_process(
     eval_data = eval_dataset.map(
         preprocessor_fn,
         remove_columns=remove_columns,
-        num_proc=96,
+        num_proc=16,
         batched=False,
         load_from_cache_file=False
     )
@@ -103,6 +104,7 @@ def load_from_disk_then_process(
 
 def main():
     batch_size_per_device = 8
+    reencode_num = 5
 
     global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
     global_model = AutoModelForCausalLM.from_pretrained(
@@ -112,9 +114,13 @@ def main():
         # use_flash_attention_2=True,
     )
 
-    preprocessor = block_attention_preprocessor(
+    preprocessor = sum_attention_preprocessor(
         tokenizer=global_tokenizer,
         max_len=4096,
+        special_token_start=128011,
+        mem_start=128254,
+        mem_end=128255,
+        reencode_num=reencode_num,
         do_shuffle=True
     )
 
@@ -141,6 +147,7 @@ def main():
         stopping_strategy="all_exhausted",
     )
 
+
     # eval_dataset = datasets.DatasetDict({
     #     "text": ptr_eval,
     #     "textmem": ptr_mem_eval,
@@ -164,9 +171,9 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir="training_res/new_data/block_shuffle",
+        output_dir=f"training_res/sum/sum_{reencode_num}_shuffle",
         report_to="wandb",
-        run_name=f"block_bsz{batch_size_per_device}_shuffle",
+        run_name=f"sum_{reencode_num}_bsz{batch_size_per_device}_shuffle",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
         max_steps=6000,
@@ -181,7 +188,7 @@ def main():
         do_eval=True,
         per_device_eval_batch_size = batch_size_per_device,
         evaluation_strategy="steps",  # Add this line
-        eval_steps=2000,
+        eval_steps=1000,
         gradient_checkpointing=True,
         save_total_limit=1,
         # overwrite_output_dir = False
@@ -189,7 +196,7 @@ def main():
         # split_batches=True,
         dispatch_batches=False,
         eval_on_start=True,
-        seed=42
+        seed = 42
     )
 
     trainer = CustomTrainerBiasAttn(
@@ -202,6 +209,9 @@ def main():
     )
 
     trainer.train()
+
+    # trainer.save_model()
+    # global_tokenizer.save_pretrained(training_args.output_dir)
 
 if __name__ == "__main__":
     main()

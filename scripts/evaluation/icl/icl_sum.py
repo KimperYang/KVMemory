@@ -24,8 +24,8 @@ mem_end = 128055
 special_start_token = 128011
 
 def construct_examples(data):
-    num_each_class = 2
-    max_demonstration = 10
+    num_each_class = 4
+    max_demonstration = 20
     num_demo = 0
     num_stats = [0] * len(label_dict)
     context = ["<|begin_of_text|>"]
@@ -79,7 +79,7 @@ biased_index = []
 id_list = []
 position = 0
 
-for idx in range(len(context)):
+for idx in range(len(context)-2):
     tem_id = tokenizer(context[idx], add_special_tokens=False).input_ids
 
     if idx == 0:
@@ -106,7 +106,7 @@ prefix_id = torch.cat(id_list, dim = 1)
 for idx in range(total_num):
     print(idx)
     # Step 2: Prepare the Context and Options
-    question = f"<|start_header_id|>user<|end_header_id|>\n\nCategories: abbreviation, entity, description, human, location, numeric.\nWhat category best describes: {data['test'][idx]['text']}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nAnswer: "
+    question = "".join(context[-2:]) + f"<|start_header_id|>user<|end_header_id|>\n\nCategories: abbreviation, entity, description, human, location, numeric.\nWhat category best describes: {data['test'][idx]['text']}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nAnswer: "
     # question = "Question: " + data['test'][idx]['text'] + "\nType: "
     options = label_dict.values()
 

@@ -20,23 +20,15 @@ def calculate_rouge_l_score(candidate, reference):
 def main():
 
     parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
-    parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
     parser.add_argument('--run', type=str, required=True, help='Run name')
 
     args = parser.parse_args()
 
-    ckpt = args.ckpt
     run_name = args.run
 
-    if "meta" in run_name:
-        global_tokenizer = AutoTokenizer.from_pretrained(f"{run_name}")
+    global_tokenizer = AutoTokenizer.from_pretrained(run_name)
 
-        global_model = AutoModelForCausalLM.from_pretrained(f"{run_name}", torch_dtype=torch.bfloat16)
-
-    else:
-        global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
-
-        global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+    global_model = AutoModelForCausalLM.from_pretrained(run_name, torch_dtype=torch.bfloat16)
 
     global_model.to('cuda')
 
@@ -105,9 +97,9 @@ def main():
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
     if "meta" in run_name:
-        file_name = f"result/new_data/upper/Samsum_original_demon{num_demon}_{avg_score}_{time_str}.jsonl"
+        file_name = f"result/order/upper_new_mix/Samsum_original_demon{num_demon}_{avg_score}_{time_str}.jsonl"
     else:
-        file_name = f"result/{run_name}/Samsum_demon{num_demon}_ckpt{ckpt}_{avg_score}_{time_str}.jsonl"
+        file_name = f"result/order/upper_new_mix/Samsum_demon{num_demon}_{avg_score}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

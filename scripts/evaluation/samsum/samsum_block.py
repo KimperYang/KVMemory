@@ -104,9 +104,9 @@ def main():
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
     if "meta" in run_name:
-        file_name = f"result/new_data/block/Samsum_promptcache_demon{num_demon}_{avg_score}_{time_str}.jsonl"
+        file_name = f"result/order/promptcache/Samsum_promptcache_demon{num_demon}_{avg_score}_{time_str}.jsonl"
     else:
-        file_name = f"result/new_data/block/Samsum_demon{num_demon}_{avg_score}_{time_str}.jsonl"
+        file_name = f"result/order/block_new_mix/Samsum_demon{num_demon}_{avg_score}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

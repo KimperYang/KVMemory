@@ -4,13 +4,14 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 from datasets import load_dataset
 from src.data.attention import construct_biased_attention_matrix
 
-data = load_dataset("CogComp/trec")
-label_dict = {0:'abbreviation', 1:'entity', 2:'description', 3:'human', 4:'location', 5:'numeric'}
+data = load_dataset("stanfordnlp/sst2")
+label_dict = {0:'negative', 1:'positive'}
 
 # Step 1: Load the Pretrained Model and Tokenizer
-# model_name = "/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-30000"
 # model_name = "training_res/new_data/block_new_mix/checkpoint-6000"
-model_name = "meta-llama/Llama-3.2-1B-Instruct"
+# model_name = "meta-llama/Llama-3.2-1B-Instruct"
+model_name = "/dccstor/scllm/Block-Attention/training_res/checkpoint-624"
+reencode_num = 0
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
 model.eval()
@@ -20,7 +21,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
 
 def construct_examples(data):
-    num_each_class = 4
+    num_each_class = 10
     max_demonstration = 20
     num_demo = 0
     num_stats = [0] * len(label_dict)
@@ -28,11 +29,13 @@ def construct_examples(data):
     for item in data['train']:
         if all(num == num_each_class for num in num_stats) or num_demo == max_demonstration:
             break
-        if num_stats[item['coarse_label']] < num_each_class:
-            user = f"<|start_header_id|>user<|end_header_id|>\n\nCategories: abbreviation, entity, description, human, location, numeric.\nWhat category best describes: {item['text']}<|eot_id|>"
-            asst = f"<|start_header_id|>assistant<|end_header_id|>\n\nAnswer: {label_dict[item['coarse_label']]}<|eot_id|>"
+        if num_stats[item['label']] < num_each_class:
+            # user = f"<|start_header_id|>user<|end_header_id|>\n\nQuestion: {item['text']}\nTask: Classify this question into one of the following six types: abbreviation, entity, description, human, location, numeric.<|eot_id|>"
+            # asst = f"<|start_header_id|>assistant<|end_header_id|>\n\nType: {label_dict[item['coarse_label']]}<|eot_id|>"
+            user = f"<|start_header_id|>user<|end_header_id|>\n\nText: {item['sentence']}\nIs the text positive or negative?<|eot_id|>"
+            asst = f"<|start_header_id|>assistant<|end_header_id|>\n\nAnswer: {label_dict[item['label']]}<|eot_id|>"
             context.append(user + asst)
-            num_stats[item['coarse_label']] += 1
+            num_stats[item['label']] += 1
             num_demo += 1
     return context
 
@@ -61,7 +64,7 @@ def compute_log_likelihood(input_ids, attention_matrix, option):
     # print(option_length)
     return total_log_likelihood, option_length
 
-total_num = len(data['test'])
+total_num = len(data['validation'])
 correct_num = 0
 context = construct_examples(data)
 
@@ -69,24 +72,27 @@ print(len(context))
 
 biased_index = []
 id_list = []
-idx = 0
+position = 0
 
-for st in context:
-    tem_id = tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
+for idx in range(len(context)):
+    tem_id = tokenizer(context[idx], add_special_tokens=False).input_ids
+
+    if "<|begin_of_text|>" not in context[idx]:
+
+        biased_index.append([position, position + len(tem_id) - reencode_num])
+
+    tem_id = torch.tensor([tem_id])
     id_list.append(tem_id)
-    if "<|begin_of_text|>" not in st:
-        biased_index.append([idx, idx + tem_id.size(1)])
-    idx = idx + tem_id.size(1)
+    position = position + tem_id.size(1)
+
 print(biased_index)
 prefix_id = torch.cat(id_list, dim = 1)
 
 for idx in range(total_num):
     print(idx)
-    # Step 2: Prepare the Context and Options
-    question = f"<|start_header_id|>user<|end_header_id|>\n\nCategories: abbreviation, entity, description, human, location, numeric.\nWhat category best describes: {data['test'][idx]['text']}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nAnswer: "
+    question = f"<|start_header_id|>user<|end_header_id|>\n\nText: {data['validation'][idx]['sentence']}\nIs the text positive or negative?<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nAnswer: "
     options = label_dict.values()
 
-    # Step 3: Compute Log-Likelihoods for Each Option
     results = []
     for option in options:
         question_id = tokenizer(question + option, return_tensors="pt", add_special_tokens=False).input_ids
@@ -95,22 +101,11 @@ for idx in range(total_num):
 
         ll, length = compute_log_likelihood(concat_ids, attention_matrices, option)
         results.append(ll / length)
-        # results.append({
-        #     'option': option.strip(),
-        #     'log_likelihood': ll,
-        #     'length': length,
-        #     'avg_log_likelihood': ll / length  # For length normalization
-        # })
-    if  results.index(max(results)) == data['test'][idx]['coarse_label']:
+
+    if  results.index(max(results)) == data['validation'][idx]['label']:
         correct_num += 1
         print('correct')
-    # Display the Results
-    # print(question)
-    # for res in results:
-    #     print(f"Option: {res['option']}")
-    #     print(f"  Log-Likelihood: {res['log_likelihood']:.4f}")
-    #     print(f"  Length: {res['length']}")
-    #     print(f"  Avg Log-Likelihood (Normalized): {res['avg_log_likelihood']:.4f}\n")
 
 print('correct_num: ', correct_num)
 print('accuracy: ', correct_num / total_num)
+

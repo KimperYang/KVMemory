@@ -6,18 +6,17 @@ cd /dccstor/scllm/KVMemory
 
 export LD_LIBRARY_PATH=$CONDA_PREFIX/lib
 export CUDA_HOME="$CONDA_PREFIX"
-
+export CUDA_LAUNCH_BLOCKING=1
 # export NCCL_DEBUG=INFO
 # export NCCL_SOCKET_IFNAME="ib,bond"
 # export NCCL_IB_CUDA_SUPPORT=1
+# export NCCL_IB_GID_INDEX=3
 # export NCCL_IB_DISABLE=0
 # export CUDA_DEVICE_MAX_CONNECTIONS=1
 
 export NCCL_SOCKET_IFNAME=bond1
 export NCCL_IB_DISABLE=1
 export NCCL_P2P_DISABLE=0
-# export NCCL_P2P_LEVEL=NVL
-export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 # export NCCL_SOCKET_NTHREADS=16
 
 # export NCCL_NET=IB
@@ -49,14 +48,16 @@ export LAUNCHER="accelerate launch \
     --main_process_ip $MASTER_ADDR \
     --main_process_port $MASTER_PORT \
     --machine_rank $NODE_RANK \
-    --num_processes 32 \
+    --num_processes 8 \
     --num_machines $NNODES \
     "
 
-export SCRIPT="baseline_attn_trainer.py"
+export SCRIPT="sum_attn_trainer5.py"
 
 export CMD="$LAUNCHER $SCRIPT"
 
 echo ${CMD}
 
 $CMD
+
+# echo ${MASTER_PORT}

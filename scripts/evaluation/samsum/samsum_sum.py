@@ -22,20 +22,18 @@ def main():
     mem_start = 128054
     mem_end = 128055
 
-    parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
-    parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
+    parser = argparse.ArgumentParser(description="Run script with specified clinic and pos.")
     parser.add_argument('--run', type=str, required=True, help='Run name')
     parser.add_argument('--reencode', type=int, required=True, help='Checkpoint number')
 
     args = parser.parse_args()
 
-    ckpt = args.ckpt
     run_name = args.run
     reencode_num = args.reencode
 
-    global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
+    global_tokenizer = AutoTokenizer.from_pretrained(run_name)
 
-    global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+    global_model = AutoModelForCausalLM.from_pretrained(run_name, torch_dtype=torch.bfloat16)
     global_model.to('cuda')
 
     samsum = load_dataset("Samsung/samsum")
@@ -119,7 +117,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/{run_name}/Samsum_demon{num_demon}_ckpt{ckpt}_{avg_score}_{time_str}.jsonl"
+    file_name = f"result/order/sum_{reencode_num}_new_mix_bsz64/Samsum_demon{num_demon}_{avg_score}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

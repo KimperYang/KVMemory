@@ -120,7 +120,8 @@ def main():
         special_token_start=128011,
         mem_start=128254,
         mem_end=128255,
-        reencode_num=reencode_num
+        reencode_num=reencode_num,
+        do_shuffle=True
     )
 
     ptr_train, ptr_eval = load_from_disk_then_process("text", preprocessor)
@@ -170,9 +171,9 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir=f"training_res/sum/sum_{reencode_num}_new_mix",
+        output_dir=f"training_res/sum/sum_{reencode_num}_shuffle",
         report_to="wandb",
-        run_name=f"sum_{reencode_num}_bsz{batch_size_per_device}_5e-6_new_mix",
+        run_name=f"sum_{reencode_num}_bsz{batch_size_per_device}_shuffle",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
         max_steps=6000,
@@ -189,7 +190,7 @@ def main():
         evaluation_strategy="steps",  # Add this line
         eval_steps=1000,
         gradient_checkpointing=True,
-        # save_total_limit=3,
+        save_total_limit=1,
         # overwrite_output_dir = False
         remove_unused_columns=False,
         # split_batches=True,

@@ -113,7 +113,7 @@ def main():
 
         generate_id = torch.cat([cache_id, prompt_id], dim = 1)
 
-        print(cache_id.size(1))
+        # print(cache_id.size(1))
         with torch.no_grad():
             outputs = global_model(input_ids = cache_id)
             past_key_values = outputs.past_key_values
@@ -147,7 +147,8 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/{run_name}/wiki_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
+    # file_name = f"result/{run_name}/wiki_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/order/upper_new_mix/wiki_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
