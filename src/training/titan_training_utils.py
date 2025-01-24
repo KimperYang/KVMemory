@@ -61,10 +61,10 @@ DATA_V6: List[DataComponent] = [
     DataComponent(dataset_name="text", weight=10.0),
     DataComponent(dataset_name="text_mem", weight=10.0),
     DataComponent(dataset_name="text_inst", weight=10.0),
-    DataComponent(dataset_name="tulu", weight=30.0),
-    DataComponent(dataset_name="sft_mem", weight=20.0),
-    DataComponent(dataset_name="qa", weight=5.0),
-    DataComponent(dataset_name="qa_mem", weight=5.0),
+    DataComponent(dataset_name="tulu", weight=25.0),
+    DataComponent(dataset_name="sft_mem", weight=15.0),
+    DataComponent(dataset_name="qa", weight=10.0),
+    DataComponent(dataset_name="qa_mem", weight=10.0),
     DataComponent(dataset_name="xsum", weight=10.0),
 ]
 
