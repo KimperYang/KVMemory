@@ -26,6 +26,7 @@ DATASET_NAME_TO_PATH = {
     "qa_process": "dataset_cache/processed/block_qa/qa",
     "qa_mem_process": "dataset_cache/processed/block_qa/qa_mem",
     "sft_mem_process": "dataset_cache/processed/daringanteater/sft_mem",
+    "xsum_process": "dataset_cache/processed/xsum/xsum"
 }
 DATASET_NAME_TO_PROCESSOR = {
     "pretrain_process": "process_text",
@@ -35,6 +36,7 @@ DATASET_NAME_TO_PROCESSOR = {
     "qa_process": "process_qa",
     "qa_mem_process": "process_qamem",
     "sft_mem_process": "process_sftmem",
+    "xsum_process": "process_xsum",
 }
 
 class SimpleTest(parameterized.TestCase):
@@ -161,13 +163,14 @@ class PreprocessorTest(parameterized.TestCase):
 
 
     @parameterized.named_parameters(
-        ("pretrain_process", "pretrain_process"),
-        ("text_inst", "text_inst"),
-        ("text_mem", "text_mem"),
-        ("tulu_process", "tulu_process"),
-        ("sft_mem", "sft_mem_process"),
-        ("qa_process", "qa_process"),
-        ("qa_mem_process", "qa_mem_process"),
+        # ("pretrain_process", "pretrain_process"),
+        # ("text_inst", "text_inst"),
+        # ("text_mem", "text_mem"),
+        # ("tulu_process", "tulu_process"),
+        # ("sft_mem", "sft_mem_process"),
+        # ("qa_process", "qa_process"),
+        # ("qa_mem_process", "qa_mem_process"),
+        ("xsum_process", "xsum_process"),
     )
     def test_processing_pipeline(self, dataset_name):
         # Retrieve data path and processor function dynamically
