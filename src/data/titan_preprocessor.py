@@ -724,7 +724,7 @@ class SumAttentionPreprocessor():
         input_ids = input_ids[:self.max_len - user_len - sys_len]
 
         mem_len = random.randint(500, 1500)
-        mem_num = random.randint(5,40)
+        mem_num = random.randint(5,self.max_memory_num)
 
         breaks = sorted(random.sample(range(1, mem_len), mem_num - 1))
         breaks = [0] + breaks + [mem_len]
@@ -803,7 +803,7 @@ class SumAttentionPreprocessor():
         input_ids = input_ids[:self.max_len - user_len - sys_len]
 
         mem_len = random.randint(500, 1500)
-        mem_num = random.randint(5,40)
+        mem_num = random.randint(5,self.max_memory_num)
 
         breaks = sorted(random.sample(range(1, mem_len), mem_num - 1))
         breaks = [0] + breaks + [mem_len]
