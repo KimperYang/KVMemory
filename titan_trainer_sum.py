@@ -149,6 +149,7 @@ CONFIG_DICT = {
         dataset_version="v6",
         seq_len=4096,
         reencode_num=10,
+        max_memory_num=20,
         job_dump_folder="run_logs/datav6_step10k_bsz64_reencode_10",
         ckpt_config=COMMON_CHECKPOINT_CONFIG,
         training_recipe=bsz64_lr56_steps6k,
@@ -241,6 +242,7 @@ def main(config_name: str):
         mem_start=128254,
         mem_end=128255,
         reencode_num=task_config.reencode_num,
+        max_memory_num=task_config.max_memory_num,
     )
     data_loader = build_hf_data_loader(
         data_components,

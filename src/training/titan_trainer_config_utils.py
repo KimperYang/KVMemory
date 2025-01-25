@@ -59,6 +59,7 @@ class TitanTrainerConfig:
     enable_packing: bool = False
     # TODO: (Bairu) temporarily add it here. Need to refactor the code later
     reencode_num: int = 0
+    max_memory_num: int = 40
     pass
 
 

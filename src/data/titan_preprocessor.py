@@ -506,7 +506,8 @@ class SumAttentionPreprocessor():
         special_token_start: int,
         mem_start: int,
         mem_end: int,
-        reencode_num: int
+        reencode_num: int,
+        max_memory_num: int = 40,
     ) -> None:
         self.tokenizer = tokenizer
         self.max_len = max_len
@@ -514,7 +515,7 @@ class SumAttentionPreprocessor():
         self.mem_start = mem_start
         self.mem_end = mem_end
         self.reencode_num = reencode_num
-        self.max_memory_num = 40
+        self.max_memory_num = max_memory_num
 
         if isinstance(tokenizer, LLaMA32Tokenizer):
         # self.bos_token_id = self.tokenizer("<|begin_of_text|>")["input_ids"][0]
