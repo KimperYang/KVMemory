@@ -1,24 +1,50 @@
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, DynamicCache
-import pandas as pd    
-import json
+import argparse
 import datetime
+import json
+import os
 import string
 from typing import List
-from src.data.attention import construct_biased_attention_matrix
-import regex
 
-import argparse
+import pandas as pd
+import regex
+import torch
+from safetensors import safe_open
+from torchtune.models.convert_weights import tune_to_hf
+from transformers import AutoModelForCausalLM, AutoTokenizer, LlamaForCausalLM
+
+from src.data.attention import construct_biased_attention_matrix
 
 parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
-parser.add_argument('--run', type=str, required=True, help='Path under training_res')
-parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
+parser.add_argument('--ckpt', type=str, required=True, help='Checkpoint number')
 parser.add_argument('--pos', type=int, required=True, help='Position value')
 parser.add_argument('--reencode', type=int, required=True, help='Reencode num')
 
 args = parser.parse_args()
 
-run_name = args.run
+def load_model_weights(ckpt_path: str):
+    safe_tensor_file = os.path.join(ckpt_path, "model.safetensors")
+    if os.path.exists(safe_tensor_file):
+        state_dict = {}
+        with safe_open(safe_tensor_file, framework="pt", device="cpu") as f:
+            for key in f.keys():
+                state_dict[key] = f.get_tensor(key)
+        # state_dict["output.weight"] = state_dict["tok_embeddings.weight"]
+        return state_dict
+
+    state_dict = torch.load(ckpt_path, weights_only=False)
+
+    state_dict = state_dict["model"]
+    state_dict["output.weight"] = state_dict["tok_embeddings.weight"]
+
+    converted_state_dict = tune_to_hf(
+        state_dict=state_dict,
+        num_heads=32,
+        num_kv_heads=8,
+        dim=2048,
+    )
+    return converted_state_dict
+
+
 ckpt = args.ckpt
 pos = args.pos
 reencode_num = args.reencode
@@ -28,16 +54,25 @@ if pos in [0, 4, 9]:
 else:
     jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
 
-global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
+device = torch.device("cuda")
+global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+global_tokenizer.pad_token_id = 128004
+global_tokenizer.pad_token = "<|finetune_right_pad_id|>"
 
-global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+global_model = LlamaForCausalLM.from_pretrained(
+    "meta-llama/Llama-3.2-1B-Instruct",
+    torch_dtype=torch.bfloat16,
+    # torch_dtype=torch.float32,
+)
+# model.load_state_dict(state_dict, strict=True)
 
-# vocab_size = len(global_tokenizer)
-# base_model.resize_token_embeddings(vocab_size)
-
-# peft_config_path = "/mnt/data/jingbo/kv_dump_combine_mix5_5000steps_5e-6_full/checkpoint-5000"  # Path to the directory where LoRA weights are stored
-
-# global_model = PeftModel.from_pretrained(base_model, peft_config_path)
+if args.ckpt_path is None:
+    print("Will NOT load fine-tuned models!")
+else:
+    state_dict = load_model_weights(args.ckpt_path)
+    global_model.load_state_dict(state_dict, strict=False)
+global_model = global_model.to(device)
+global_model.eval()
 
 def normalize_answer(s: str) -> str:
     """Normalization from the SQuAD evaluation script.
@@ -88,15 +123,21 @@ def main():
 
         print("Processing sample:", str(i))
         memory_list = []
+        doc_list = []
 
-        for j in range(0,10):
-            title = jsonObj["ctxs"][i][j]["title"]
-            text = jsonObj["ctxs"][i][j]["text"]
-            memory_list.append(f"Document [{j+1}](Title: {title}) {text}\n")
+        for k in range(0,10):
+            title = jsonObj["ctxs"][i][k]["title"]
+            text = jsonObj["ctxs"][i][k]["text"]
+            doc_list.append({'title': title, 'text':text})
 
         if pos not in [0,4,9]:
-            ground_truth = memory_list.pop(0)
-            memory_list.insert(pos, ground_truth)
+            ground_truth = doc_list.pop(0)
+            doc_list.insert(pos, ground_truth)
+
+        for j in range(0,10):
+            title = doc_list[j]["title"]
+            text = doc_list[j]["text"]
+            memory_list.append(f"Document [{j+1}](Title: {title}) {text}\n")
 
         # memory_list.insert(0, template)
         sys_id = global_tokenizer(template, add_special_tokens=False).input_ids
@@ -162,7 +203,9 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/sum/sum_{reencode_num}/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/shuffle/sum_{reencode_num}/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
+    if not os.path.exists(os.path.dirname(file_name)):
+        os.makedirs(os.path.dirname(file_name))
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
