@@ -66,10 +66,10 @@ global_model = LlamaForCausalLM.from_pretrained(
 )
 # model.load_state_dict(state_dict, strict=True)
 
-if args.ckpt_path is None:
+if args.ckpt is None:
     print("Will NOT load fine-tuned models!")
 else:
-    state_dict = load_model_weights(args.ckpt_path)
+    state_dict = load_model_weights(args.ckpt)
     global_model.load_state_dict(state_dict, strict=False)
 global_model = global_model.to(device)
 global_model.eval()
