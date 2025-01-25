@@ -387,7 +387,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/titan/v4/NQ_at{pos}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/decay/NQ_at{pos}_{accuracy}_{time_str}.jsonl"
     if not os.path.exists(os.path.dirname(file_name)):
         os.makedirs(os.path.dirname(file_name))
 
