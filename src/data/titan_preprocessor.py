@@ -995,7 +995,11 @@ class SumAttentionPreprocessor():
         example: Dict[str, str],
     ):
         text_ids = self.tokenizer(example['document'], add_special_tokens=False)["input_ids"]
-        chunks = [text_ids[i:i+100] for i in range(0, len(text_ids), 100)]
+        if len(text_ids) > 1900:
+            chunk_size = 220
+        else:
+            chunk_size = 100
+        chunks = [text_ids[i:i+chunk_size] for i in range(0, len(text_ids), chunk_size)]
         input_ids = self.xsum_system_input_ids[:] + [self.mem_start]
         segment_ids = [0] * len(input_ids)
 
