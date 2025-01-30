@@ -100,19 +100,20 @@ def load_from_disk_then_process(
 
 
 def main():
-    batch_size_per_device = 2
+    batch_size_per_device = 8
 
     global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
     global_model = AutoModelForCausalLM.from_pretrained(
         "meta-llama/Llama-3.2-1B-Instruct",
         torch_dtype=torch.bfloat16,
-        attn_implementation='flash_attention_2',
-        # attn_implementation='sdpa'
+        # attn_implementation='flash_attention_2',
+        attn_implementation='sdpa'
     )
 
     preprocessor = baseline_attention_preprocessor(
         tokenizer=global_tokenizer,
-        max_len=4096
+        max_len=4096,
+        do_shuffle=True
     )
 
     ptr_train, ptr_eval = load_from_disk_then_process("text", preprocessor)
@@ -161,9 +162,9 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir="training_res/new_data/upper_new_mix",
+        output_dir="training_res/new_data/upper_prompt",
         report_to="wandb",
-        run_name=f"upper_bsz{batch_size_per_device}_5e-6_new_mix",
+        run_name=f"upper_bsz{batch_size_per_device}_prompt",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
         max_steps=6000,
@@ -180,13 +181,12 @@ def main():
         evaluation_strategy="steps",  # Add this line
         eval_steps=2000,
         gradient_checkpointing=True,
-        # save_total_limit=3,
         # overwrite_output_dir = False
         remove_unused_columns=False,
         # split_batches=True,
         dispatch_batches=False,
         eval_on_start=True,
-        save_total_limit=2,
+        save_total_limit=1,
         seed=42
     )
 
@@ -200,9 +200,6 @@ def main():
     )
 
     trainer.train()
-
-    # trainer.save_model()
-    # global_tokenizer.save_pretrained(training_args.output_dir)
 
 if __name__ == "__main__":
     main()

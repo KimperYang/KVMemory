@@ -171,9 +171,9 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir=f"training_res/sum/sum_{reencode_num}_shuffle",
+        output_dir=f"training_res/sum/sum_{reencode_num}_prompt",
         report_to="wandb",
-        run_name=f"sum_{reencode_num}_bsz{batch_size_per_device}_shuffle",
+        run_name=f"sum_{reencode_num}_bsz{batch_size_per_device}_prompt",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
         max_steps=6000,
@@ -209,9 +209,6 @@ def main():
     )
 
     trainer.train()
-
-    # trainer.save_model()
-    # global_tokenizer.save_pretrained(training_args.output_dir)
 
 if __name__ == "__main__":
     main()

@@ -13,7 +13,7 @@ args = parser.parse_args()
 
 reencode_num = args.reencode
 
-model_name = f"training_res/sum/sum_{reencode_num}_new_mix_bsz64/checkpoint-6000"
+model_name = f"training_res/sum/sum_{reencode_num}_prompt/checkpoint-6000"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
 model.eval()

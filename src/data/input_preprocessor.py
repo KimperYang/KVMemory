@@ -5,6 +5,25 @@ import torch
 from transformers import PreTrainedTokenizerBase
 from src.data.compress import insert_mem_tokens, get_position_id
 
+general_prompts = [
+    "You are an AI assistant. Provide helpful, accurate, and clear answers. When uncertain, explain your reasoning or request clarification.",
+    "You are an AI assistant. Focus on achieving the user's goal in each interaction. Use concise yet informative explanations.",
+    "You are an AI assistant. Speak clearly and stay consistent with prior statements. If you need more information, politely ask for it.",
+    "You are an AI assistant. Provide truthful, well-sourced information whenever possible. Acknowledge any limitations and avoid speculation if unsure."
+]
+qa_prompts = [
+    "You are an AI assistant. Use the provided documents to answer the user’s question. If the information is insufficient, acknowledge the gap or request clarification.",
+    "You are an AI assistant. Always ground your answers in the retrieved documents and do not add unsupported details. If the documents lack sufficient information, indicate that.",
+    "You are an AI assistant. Rely solely on the given documents for evidence when answering questions. When necessary, cite or paraphrase the document content accurately.",
+    "You are an AI assistant. Base your replies on the retrieved documents, ensuring completeness and correctness. Ask for more details if the documents do not cover the question fully."
+]
+summary_prompts = [
+    "You are an AI assistant. Read the provided text and produce a concise summary. Capture the main points without unnecessary detail.",
+    "You are an AI assistant. Summarize the essential ideas from the given text. Avoid minor details and focus on critical insights.",
+    "You are an AI assistant. Provide a brief, high-level overview of the text. Ensure clarity and coherence, prioritizing key themes.",
+    "You are an AI assistant. Summarize the text clearly and logically. Organize the main ideas in a coherent sequence."
+]
+
 class bias_attention_preprocessor():
     '''
     Apply one piece of memory to non-memory use samples to enable batch forward pass for calculating KV.
@@ -889,21 +908,24 @@ class baseline_attention_preprocessor():
     def __init__(
         self,
         tokenizer: PreTrainedTokenizerBase,
-        max_len: int
+        max_len: int,
+        do_shuffle: bool
     ) -> None:
         self.tokenizer = tokenizer
         self.max_len = max_len
+        self.do_shuffle = do_shuffle
 
     def process_sftmem(
         self,
         example: Dict[str, str],
     ):
         conversation = example["conversations"]
-        sys = (
-            "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n"
-            "You're an assistant who answer the question with the knowledge provided "
-            "in the prompt<|eot_id|>"
-        )
+        # sys = (
+        #     "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n"
+        #     "You're an assistant who answer the question with the knowledge provided "
+        #     "in the prompt<|eot_id|>"
+        # )
+        sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n" + random.choice(general_prompts) + "<|eot_id|>"
         sys_tokens = self.tokenizer(sys, add_special_tokens= False)['input_ids']
         sys_len = len(sys_tokens)
 
@@ -958,7 +980,8 @@ class baseline_attention_preprocessor():
     ):
         conversation = example['conversations']
         # Extract "Assistant" responses and mask "User" queries
-        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who answer the question with the knowledge provided in the prompt<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+        # system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who answer the question with the knowledge provided in the prompt<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n" + random.choice(general_prompts) + "<|eot_id|>"
         system_tokenized = self.tokenizer(system, add_special_tokens=False)
         system_input_ids = system_tokenized.input_ids
         sys_len = len(system_input_ids)
@@ -968,10 +991,8 @@ class baseline_attention_preprocessor():
         for i in range(len(conversation)):
 
             if conversation[i]["from"] == "User":
-                if i==0:
-                    t = conversation[i]["value"] + "<|eot_id|>"
-                else:
-                    t = "<|start_header_id|>user<|end_header_id|>\n\n" + conversation[i]["value"]  + "<|eot_id|>" 
+
+                t = "<|start_header_id|>user<|end_header_id|>\n\n" + conversation[i]["value"]  + "<|eot_id|>" 
 
                 tokenized = self.tokenizer(t)
 
@@ -1083,13 +1104,23 @@ class baseline_attention_preprocessor():
         self,
         example: Dict[str, str],
     ):
-        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
+        # system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
+        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n" + random.choice(qa_prompts)
         system_input_ids = self.tokenizer(system, add_special_tokens=False).input_ids
         input_ids = system_input_ids
+        doc_list = []
+
+        for k in range(0,10):
+            title = example['documents'][k]['title']
+            text = example['documents'][k]['text']
+            doc_list.append({'title': title, 'text':text})
+
+        if self.do_shuffle:
+            random.shuffle(doc_list)
 
         for j in range(0,10):
-            title = example['documents'][j]['title']
-            text = example['documents'][j]['text']
+            title = doc_list[j]['title']
+            text = doc_list[j]['text']
             tem_id = self.tokenizer(f"Document [{j+1}](Title: {title}) {text}\n", add_special_tokens=False).input_ids
 
             input_ids += tem_id
@@ -1120,7 +1151,8 @@ class baseline_attention_preprocessor():
     ):
         conversation = example['messages']
         # Extract "Assistant" responses and mask "User" queries
-        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who answer the question with the knowledge provided in the prompt<|eot_id|>"
+        # system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who answer the question with the knowledge provided in the prompt<|eot_id|>"
+        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n" + random.choice(general_prompts) + "<|eot_id|>"
         system_tokenized = self.tokenizer(system, add_special_tokens=False)
         system_input_ids = system_tokenized.input_ids
         sys_len = len(system_input_ids)
@@ -1168,7 +1200,8 @@ class baseline_attention_preprocessor():
         self,
         example: Dict[str, str],
     ):
-        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please summarize the text based on the information given.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+        # system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please summarize the text based on the information given.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n" + random.choice(summary_prompts) + "<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
         system_input_ids = self.tokenizer(system, add_special_tokens=False).input_ids
         system_input_ids = system_input_ids
 
@@ -1648,11 +1681,12 @@ class block_attention_preprocessor():
         example: Dict[str, str],
     ):
         conversation = example["conversations"]
-        sys = (
-            "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n"
-            "You're an assistant who answer the question with the knowledge provided "
-            "in the prompt<|eot_id|>"
-        )
+        # sys = (
+        #     "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n"
+        #     "You're an assistant who answer the question with the knowledge provided "
+        #     "in the prompt<|eot_id|>"
+        # )
+        sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n" + random.choice(general_prompts) + "<|eot_id|>"
         sys_tokens = self.tokenizer(sys, add_special_tokens= False)['input_ids']
         sys_len = len(sys_tokens)
 
@@ -1718,7 +1752,8 @@ class block_attention_preprocessor():
     ):
         conversation = example['conversations']
         # Extract "Assistant" responses and mask "User" queries
-        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who answer the question with the knowledge provided in the prompt<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+        # system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who answer the question with the knowledge provided in the prompt<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n" + random.choice(general_prompts) + "<|eot_id|>"
         system_tokenized = self.tokenizer(system, add_special_tokens=False)
         system_input_ids = system_tokenized.input_ids
         sys_len = len(system_input_ids)
@@ -1728,10 +1763,8 @@ class block_attention_preprocessor():
         for i in range(len(conversation)):
 
             if conversation[i]["from"] == "User":
-                if i==0:
-                    t = conversation[i]["value"] + "<|eot_id|>"
-                else:
-                    t = "<|start_header_id|>user<|end_header_id|>\n\n" + conversation[i]["value"]  + "<|eot_id|>" 
+
+                t = "<|start_header_id|>user<|end_header_id|>\n\n" + conversation[i]["value"]  + "<|eot_id|>" 
 
                 tokenized = self.tokenizer(t)
 
@@ -1908,7 +1941,8 @@ class block_attention_preprocessor():
         self,
         example: Dict[str, str],
     ):
-        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
+        # system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
+        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n" + random.choice(qa_prompts)
         system_input_ids = self.tokenizer(system, add_special_tokens=False).input_ids
         input_ids = system_input_ids
         sys_len = len(system_input_ids)
@@ -1961,7 +1995,8 @@ class block_attention_preprocessor():
         self,
         example: Dict[str, str],
     ):
-        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
+        # system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
+        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n" + random.choice(qa_prompts)
         system_input_ids = self.tokenizer(system, add_special_tokens=False).input_ids
         input_ids = system_input_ids
 
@@ -2010,7 +2045,8 @@ class block_attention_preprocessor():
     ):
         conversation = example['messages']
         # Extract "Assistant" responses and mask "User" queries
-        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who answer the question with the knowledge provided in the prompt<|eot_id|>"
+        # system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who answer the question with the knowledge provided in the prompt<|eot_id|>"
+        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n" + random.choice(general_prompts) + "<|eot_id|>"
         system_tokenized = self.tokenizer(system, add_special_tokens=False)
         system_input_ids = system_tokenized.input_ids
         sys_len = len(system_input_ids)
@@ -2059,7 +2095,8 @@ class block_attention_preprocessor():
         self,
         example: Dict[str, str],
     ):
-        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please summarize the text based on the information given.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+        # system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please summarize the text based on the information given.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n" + random.choice(summary_prompts) + "<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
         system_input_ids = self.tokenizer(system, add_special_tokens=False).input_ids
         input_ids = system_input_ids
         sys_len = len(system_input_ids)
@@ -2125,11 +2162,13 @@ class sum_attention_preprocessor():
         example: Dict[str, str],
     ):
         conversation = example["conversations"]
-        sys = (
-            "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n"
-            "You're an assistant who answer the question with the knowledge provided "
-            "in the prompt<|eot_id|>"
-        )
+        # sys = (
+        #     "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n"
+        #     "You're an assistant who answer the question with the knowledge provided "
+        #     "in the prompt<|eot_id|>"
+        # )
+        sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n" + random.choice(general_prompts) + "<|eot_id|>"
+
         sys_tokens = self.tokenizer(sys, add_special_tokens= False)['input_ids']
         sys_tokens += [self.mem_start]
         sys_len = len(sys_tokens)
@@ -2203,7 +2242,8 @@ class sum_attention_preprocessor():
     ):
         conversation = example['conversations']
         # Extract "Assistant" responses and mask "User" queries
-        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who answer the question with the knowledge provided in the prompt<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+        # system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who answer the question with the knowledge provided in the prompt<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n" + random.choice(general_prompts) + "<|eot_id|>"
         system_tokenized = self.tokenizer(system, add_special_tokens=False)
         system_input_ids = system_tokenized.input_ids
         sys_len = len(system_input_ids)
@@ -2213,10 +2253,8 @@ class sum_attention_preprocessor():
         for i in range(len(conversation)):
 
             if conversation[i]["from"] == "User":
-                if i==0:
-                    t = conversation[i]["value"] + "<|eot_id|>"
-                else:
-                    t = "<|start_header_id|>user<|end_header_id|>\n\n" + conversation[i]["value"]  + "<|eot_id|>" 
+
+                t = "<|start_header_id|>user<|end_header_id|>\n\n" + conversation[i]["value"]  + "<|eot_id|>" 
 
                 tokenized = self.tokenizer(t)
 
@@ -2411,7 +2449,8 @@ class sum_attention_preprocessor():
         self,
         example: Dict[str, str],
     ):
-        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
+        # system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
+        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n" + random.choice(qa_prompts)
         system_input_ids = self.tokenizer(system, add_special_tokens=False).input_ids
         system_input_ids = system_input_ids + [self.mem_start]
         input_ids = system_input_ids
@@ -2469,7 +2508,8 @@ class sum_attention_preprocessor():
         self,
         example: Dict[str, str],
     ):
-        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
+        # system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
+        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n" + random.choice(qa_prompts)
         system_input_ids = self.tokenizer(system, add_special_tokens=False).input_ids
         input_ids = system_input_ids
 
@@ -2518,7 +2558,8 @@ class sum_attention_preprocessor():
     ):
         conversation = example['messages']
         # Extract "Assistant" responses and mask "User" queries
-        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who answer the question with the knowledge provided in the prompt<|eot_id|>"
+        # system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who answer the question with the knowledge provided in the prompt<|eot_id|>"
+        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n" + random.choice(general_prompts) + "<|eot_id|>"
         system_tokenized = self.tokenizer(system, add_special_tokens=False)
         system_input_ids = system_tokenized.input_ids
         sys_len = len(system_input_ids)
@@ -2567,7 +2608,8 @@ class sum_attention_preprocessor():
         self,
         example: Dict[str, str],
     ):
-        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please summarize the text based on the information given.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+        # system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please summarize the text based on the information given.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n" + random.choice(summary_prompts) + "<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
         system_input_ids = self.tokenizer(system, add_special_tokens=False).input_ids
         system_input_ids = system_input_ids + [self.mem_start]
         input_ids = system_input_ids
@@ -2619,11 +2661,13 @@ class compress_attention_preprocessor():
         self,
         tokenizer: PreTrainedTokenizerBase,
         max_len: int,
-        compress_tokens: list[int]
+        compress_tokens: list[int],
+        do_shuffle: bool
     ) -> None:
         self.tokenizer = tokenizer
         self.max_len = max_len
         self.compress_len = len(compress_tokens)
+        self.do_shuffle = do_shuffle
 
     def process_sftmem(
         self,
@@ -2903,9 +2947,19 @@ class compress_attention_preprocessor():
         current_index = sys_len
         biased_index = []
 
+        doc_list = []
+
+        for k in range(0,10):
+            title = example['documents'][k]['title']
+            text = example['documents'][k]['text']
+            doc_list.append({'title': title, 'text':text})
+
+        if self.do_shuffle:
+            random.shuffle(doc_list)
+
         for j in range(0,10):
-            title = example['documents'][j]['title']
-            text = example['documents'][j]['text']
+            title = doc_list[j]['title']
+            text = doc_list[j]['text']
             tem_id = self.tokenizer(f"Document [{j+1}](Title: {title}) {text}\n", add_special_tokens=False).input_ids
 
             biased_index.append([current_index, current_index + len(tem_id)])
@@ -2940,9 +2994,19 @@ class compress_attention_preprocessor():
         system_input_ids = self.tokenizer(system, add_special_tokens=False).input_ids
         input_ids = system_input_ids
 
+        doc_list = []
+
+        for k in range(0,10):
+            title = example['documents'][k]['title']
+            text = example['documents'][k]['text']
+            doc_list.append({'title': title, 'text':text})
+
+        if self.do_shuffle:
+            random.shuffle(doc_list)
+
         for j in range(0,10):
-            title = example['documents'][j]['title']
-            text = example['documents'][j]['text']
+            title = doc_list[j]['title']
+            text = doc_list[j]['text']
             tem_id = self.tokenizer(f"Document [{j+1}](Title: {title}) {text}\n", add_special_tokens=False).input_ids
 
             input_ids += tem_id

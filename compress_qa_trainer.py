@@ -105,12 +105,12 @@ def load_from_disk_then_process(
 
 
 def main():
-    batch_size_per_device = 4
+    batch_size_per_device = 8
     
     compress_tokens=list(range(128011, 128061))
-    global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B-Instruct")
+    global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
     global_model = AutoModelForCausalLM.from_pretrained(
-        "meta-llama/Llama-3.2-3B-Instruct",
+        "meta-llama/Llama-3.2-1B-Instruct",
         torch_dtype=torch.bfloat16,
         attn_implementation='sdpa',
         # use_flash_attention_2=True,
@@ -119,7 +119,8 @@ def main():
     preprocessor = compress_attention_preprocessor(
         tokenizer=global_tokenizer,
         max_len=4096,
-        compress_tokens=compress_tokens
+        compress_tokens=compress_tokens,
+        do_shuffle=True
     )
 
     # qa_train, qa_eval = load_from_disk_then_process("qa", preprocessor)
@@ -145,16 +146,16 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir=f"training_res/compress/compress_sum_{len(compress_tokens)}_3B",
+        output_dir=f"training_res/compress/compress_shuffle_{len(compress_tokens)}",
         report_to="wandb",
-        run_name=f"compress_sum_{len(compress_tokens)}_bsz{batch_size_per_device}_3B",
+        run_name=f"compress_shuffle_{len(compress_tokens)}_bsz{batch_size_per_device}",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=1,
         max_steps=1186,
         logging_dir="training_res/logs",
         logging_steps=10,
         save_total_limit=1,
-        gradient_accumulation_steps=2,
+        gradient_accumulation_steps=1,
         warmup_ratio=0.1,
         lr_scheduler_type='cosine',
         bf16=True,
@@ -162,7 +163,7 @@ def main():
         do_eval=True,
         per_device_eval_batch_size = batch_size_per_device,
         evaluation_strategy="steps",  # Add this line
-        eval_steps=100,
+        eval_steps=200,
         gradient_checkpointing=True,
         remove_unused_columns=False,
         dispatch_batches=False,

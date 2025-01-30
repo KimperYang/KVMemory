@@ -26,9 +26,9 @@ def main():
 
     run_name = args.run
 
-    global_tokenizer = AutoTokenizer.from_pretrained(f"{run_name}")
+    global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-6000")
 
-    global_model = AutoModelForCausalLM.from_pretrained(f"{run_name}", torch_dtype=torch.bfloat16)
+    global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-6000", torch_dtype=torch.bfloat16)
     global_model.to('cuda')
 
     samsum = load_dataset("Samsung/samsum")
@@ -106,7 +106,7 @@ def main():
     if "meta" in run_name:
         file_name = f"result/order/promptcache/Samsum_promptcache_demon{num_demon}_{avg_score}_{time_str}.jsonl"
     else:
-        file_name = f"result/order/block_new_mix/Samsum_demon{num_demon}_{avg_score}_{time_str}.jsonl"
+        file_name = f"result/{run_name}/Samsum_demon{num_demon}_{avg_score}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

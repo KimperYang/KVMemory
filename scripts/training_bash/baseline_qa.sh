@@ -53,7 +53,7 @@ export LAUNCHER="accelerate launch \
     --num_machines $NNODES \
     "
 
-export SCRIPT="baseline_attn_trainer.py"
+export SCRIPT="baseline_qa_trainer.py"
 
 export CMD="$LAUNCHER $SCRIPT"
 
