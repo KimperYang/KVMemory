@@ -44,7 +44,7 @@ JOB_ID=${LSB_JOBID}
 
 
 export LAUNCHER="accelerate launch \
-    --config_file /dccstor/scllm/.cache/accelerate/default_config.yaml \
+    --config_file /dccstor/scllm/.cache/accelerate/step2.yaml \
     --main_process_ip $MASTER_ADDR \
     --main_process_port $MASTER_PORT \
     --machine_rank $NODE_RANK \
