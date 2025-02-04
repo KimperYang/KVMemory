@@ -87,7 +87,7 @@ kv_attention_matrix = torch.full((prompt_length, sum(mem_len)), float(0), dtype=
 kv_attention_matrix[0:sys_len, :] = float('-inf')
 
 for i in range(mem_num):
-        
+
     kv_attention_matrix[sys_len + i][sum(mem_len[:i + 1]):] = float('-inf')
 
 final_attention_matrix = torch.cat([kv_attention_matrix, q_attention_matrix], dim = 1)
@@ -140,7 +140,7 @@ baseline_output = model(input_ids = concat_id.to(model.device), attention_mask =
 
 hidden_states1 = prefill_output.hidden_states
 hidden_states2 = baseline_output.hidden_states
-loss_id_len = 2 
+loss_id_len = 2
 # print(loss_id_len)
 # print(hidden_states1[-1][:, -loss_id_len:, :].shape)
 # print(hidden_states2[-1].shape)

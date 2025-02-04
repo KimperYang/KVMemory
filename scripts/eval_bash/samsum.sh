@@ -1,8 +1,8 @@
 #!/bin/bash
 
-source /u/shiyuucsb/.bashrc
-conda activate kvm
-cd /dccstor/scllm/KVMemory
+source /home/jingbo/.bashrc
+conda activate unlearning
+cd /home/jingbo/KVMemory
 
 CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/samsum/samsum_sum.py --run "sum/sum_0_prompt" --reencode 0 &
 CUDA_VISIBLE_DEVICES=1 python scripts/evaluation/samsum/samsum_sum.py --run "sum/sum_1_prompt" --reencode 1 &

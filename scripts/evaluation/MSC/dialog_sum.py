@@ -167,7 +167,7 @@ def main():
     res_list = []
     score_list = []
 
-    sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYour task is to answer a question from the user about your prior conversations.<|eot_id|>"
+    sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYour task is to answer a question from the user about your prior conversations.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
     sys_id = global_tokenizer(sys, add_special_tokens=False).input_ids
     sys_id += [mem_start]
 
@@ -199,7 +199,7 @@ def main():
         concat_id += [mem_end]
         concat_id = sys_id + concat_id
 
-        question = "<|start_header_id|>user<|end_header_id|>\n\n Answer from the perspective of the conversation summaries provided (do not say that you are an AI assistant)." + dataset["train"]["self_instruct"][i]["B"] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        question = "Answer from the perspective of the conversation summaries provided (do not say that you are an AI assistant)." + dataset["train"]["self_instruct"][i]["B"] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         question_ids = global_tokenizer(question, add_special_tokens=False).input_ids
 
 
@@ -208,7 +208,7 @@ def main():
         attention_matrix = construct_biased_attention_matrix(len(concat_id), biased_index, len(concat_id), global_model.device).unsqueeze(0).unsqueeze(0)
         concat_id = torch.tensor([concat_id], device = global_model.device)
         generate_id = torch.tensor([generate_id], device = global_model.device)
-    
+
         with torch.no_grad():
             outputs = global_model(input_ids = concat_id, attention_mask = attention_matrix)
             past_key_values = outputs.past_key_values
@@ -240,7 +240,7 @@ def main():
 
     final_score = sum(score_list) / len(score_list)
 
-    file_name = f"result/sum/sum_{reencode_num}/MSC_ckpt{ckpt}_{final_score}_{time_str}.jsonl"
+    file_name = f"result/{run_name}/MSC2_ckpt{ckpt}_{final_score}_{time_str}.jsonl"
 
     with open(file_name, 'w') as f:
         for entry in res_list:

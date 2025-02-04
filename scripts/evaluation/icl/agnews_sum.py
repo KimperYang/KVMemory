@@ -9,7 +9,7 @@ label_dict = {1:'World', 2:'Sports', 3:'Business', 4:'Sci/Tech'}
 
 # Step 1: Load the Pretrained Model and Tokenizer
 # model_name = "/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-30000"
-model_name = "training_res/sum/sum_5_new_mix_bsz64/checkpoint-6000"
+model_name = "training_res/sum/sum_5_prompt/checkpoint-6000"
 reencode_num = 5
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
@@ -33,10 +33,10 @@ def construct_examples(data):
         if all(num == num_each_class for num in num_stats) or num_demo == max_demonstration:
             break
         if num_stats[item['label'] - 1] < num_each_class:
-            # user = f"<|start_header_id|>user<|end_header_id|>\n\nQuestion: {item['text']}\nTask: Classify this question into one of the following six types: abbreviation, entity, description, human, location, numeric.<|eot_id|>"
-            # asst = f"<|start_header_id|>assistant<|end_header_id|>\n\nType: {label_dict[item['coarse_label']]}<|eot_id|>"
-            user = f"<|start_header_id|>user<|end_header_id|>\n\nCategories: World, Sports, Business, Sci/Tech.\nWhat category best describes:\nTitle:{item['title']}\nDescription:{item['description']}<|eot_id|>"
-            asst = f"<|start_header_id|>assistant<|end_header_id|>\n\nAnswer: {label_dict[item['label']]}<|eot_id|>"
+            # user = f"<|start_header_id|>user<|end_header_id|>\n\nCategories: World, Sports, Business, Sci/Tech.\nWhat category best describes:\nTitle:{item['title']}\nDescription:{item['description']}<|eot_id|>"
+            # asst = f"<|start_header_id|>assistant<|end_header_id|>\n\nAnswer: {label_dict[item['label']]}<|eot_id|>"
+            user = f"<|start_header_id|>user<|end_header_id|>\n\nInput: Title:{item['title']}\nDescription:{item['description']}<|eot_id|>"
+            asst = f"<|start_header_id|>assistant<|end_header_id|>\n\nType: {label_dict[item['label']]}<|eot_id|>"
             context.append(user + asst)
             num_stats[item['label'] - 1] += 1
             num_demo += 1
@@ -78,7 +78,7 @@ biased_index = []
 id_list = []
 position = 0
 
-for idx in range(len(context[:-2])):
+for idx in range(len(context)):
     tem_id = tokenizer(context[idx], add_special_tokens=False).input_ids
 
     if idx == 0:
@@ -105,7 +105,8 @@ prefix_id = torch.cat(id_list, dim = 1)
 for idx in range(total_num):
     print(idx)
     # Step 2: Prepare the Context and Options
-    question = "".join(context[-2:]) + f"<|start_header_id|>user<|end_header_id|>\n\nCategories: World, Sports, Business, Sci/Tech.\nWhat category best describes:\nTitle:{data['test'][idx]['title']}\nDescription:{data['test'][idx]['description']}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nAnswer: "
+    # question = f"<|start_header_id|>user<|end_header_id|>\n\nCategories: World, Sports, Business, Sci/Tech.\nWhat category best describes:\nTitle:{data['test'][idx]['title']}\nDescription:{data['test'][idx]['description']}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nAnswer: "
+    question = f"<|start_header_id|>user<|end_header_id|>\n\nInput: Title:{data['test'][idx]['title']}\nDescription:{data['test'][idx]['description']}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nType: "
     options = label_dict.values()
     # print(question)
     # Step 3: Compute Log-Likelihoods for Each Option
