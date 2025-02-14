@@ -1,8 +1,8 @@
 #!/bin/bash
 
-source /u/shiyuucsb/.bashrc
+# source /u/shiyuucsb/.bashrc
 conda activate kvm
-cd /dccstor/scllm/KVMemory
+# cd /dccstor/scllm/KVMemory
 
 CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_promptcache.py --pos 0 &
 CUDA_VISIBLE_DEVICES=1 python scripts/evaluation/nq/nq_promptcache.py --pos 1 &

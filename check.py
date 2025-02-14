@@ -1,20 +1,25 @@
-# import torch
-# import transformers
-# from torchtune.models.convert_weights import tune_to_hf
+from datasets import load_dataset
+from transformers import AutoTokenizer
 
-# model = torch.load("titan.pt", weights_only=False)
+# data=load_dataset("dgslibisey/MuSiQue", split='validation')
+tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B-Instruct")
+# idx = 88
+# prompt = ""
+# for i in range(len(data[idx]['paragraphs'])):
+#     prompt += f"Document [{i+1}] Title: {data[idx]['paragraphs'][i]['title']}, Text: {data[idx]['paragraphs'][i]['paragraph_text']}"
 
-# model = model['model']
+# print(len(tokenizer(prompt, add_special_tokens=False).input_ids))
+# print(data[idx]['question'])
+# print(data[idx]['answer'])
+idx = 2284
+data = load_dataset("alexfabbri/multi_news", split="validation")
 
-# model['output.weight'] = model['tok_embeddings.weight']
+summary_len = []
 
-# converted_state_dict = tune_to_hf(state_dict=model, num_heads=32, num_kv_heads=8,dim=2048)
+# for idx in range(500):
 
-# config = transformers.AutoConfig.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
-# model = transformers.AutoModelForCausalLM.from_config(config)
-# model.load_state_dict(converted_state_dict)
-
-# model.save_pretrained("/dccstor/scllm/KVMemory/training_res/titan")
-
-from datasets import load_from_disk
-
+print(len(tokenizer(data[idx]['document']).input_ids), len(tokenizer(data[idx]['summary']).input_ids))
+print(data[idx]['document'])
+#     summary_len.append(len(tokenizer(data[idx]['summary']).input_ids))
+# print(max(summary_len))
+# print(sum(summary_len) / len(summary_len))

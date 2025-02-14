@@ -9,8 +9,8 @@ label_dict = {0:'abbreviation', 1:'entity', 2:'description', 3:'human', 4:'locat
 
 # Step 1: Load the Pretrained Model and Tokenizer
 # model_name = "/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-30000"
-model_name = "training_res/sum/sum_5_prompt/checkpoint-6000"
-reencode_num = 5
+model_name = "training_res/sum/sum_1_3B/checkpoint-6000"
+reencode_num = 1
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
 model.eval()
@@ -79,7 +79,7 @@ biased_index = []
 id_list = []
 position = 0
 
-for idx in range(len(context)-2):
+for idx in range(len(context)):
     tem_id = tokenizer(context[idx], add_special_tokens=False).input_ids
 
     if idx == 0:
@@ -106,7 +106,7 @@ prefix_id = torch.cat(id_list, dim = 1)
 for idx in range(total_num):
     print(idx)
     # Step 2: Prepare the Context and Options
-    question = "".join(context[-2:]) + f"<|start_header_id|>user<|end_header_id|>\n\nCategories: abbreviation, entity, description, human, location, numeric.\nWhat category best describes: {data['test'][idx]['text']}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nAnswer: "
+    question = f"<|start_header_id|>user<|end_header_id|>\n\nCategories: abbreviation, entity, description, human, location, numeric.\nWhat category best describes: {data['test'][idx]['text']}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nAnswer: "
     # question = "Question: " + data['test'][idx]['text'] + "\nType: "
     options = label_dict.values()
 

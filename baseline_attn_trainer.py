@@ -93,18 +93,18 @@ def load_from_disk_then_process(
         remove_columns=remove_columns,
         num_proc=96,
         batched=False,
-        load_from_cache_file=False
+        # load_from_cache_file=False
     )
 
     return training_data, eval_data
 
 
 def main():
-    batch_size_per_device = 8
+    batch_size_per_device = 4
 
-    global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+    global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B-Instruct")
     global_model = AutoModelForCausalLM.from_pretrained(
-        "meta-llama/Llama-3.2-1B-Instruct",
+        "meta-llama/Llama-3.2-3B-Instruct",
         torch_dtype=torch.bfloat16,
         # attn_implementation='flash_attention_2',
         attn_implementation='sdpa'
@@ -117,8 +117,8 @@ def main():
     )
 
     ptr_train, ptr_eval = load_from_disk_then_process("text", preprocessor)
-    ptr_mem_train, ptr_mem_eval = load_from_disk_then_process("text_mem", preprocessor)
-    ptr_inst_train, ptr_inst_eval = load_from_disk_then_process("text_inst", preprocessor)
+    # ptr_mem_train, ptr_mem_eval = load_from_disk_then_process("text_mem", preprocessor)
+    # ptr_inst_train, ptr_inst_eval = load_from_disk_then_process("text_inst", preprocessor)
     sft_train, sft_eval = load_from_disk_then_process("tulu", preprocessor)
     sft_mem_train, sft_mem_eval = load_from_disk_then_process("sft_mem", preprocessor)
     qa_train, qa_eval = load_from_disk_then_process("qa", preprocessor)
@@ -162,16 +162,16 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir="training_res/new_data/upper_prompt",
+        output_dir="training_res/new_data/upper_3B",
         report_to="wandb",
-        run_name=f"upper_bsz{batch_size_per_device}_prompt",
+        run_name=f"upper_bsz{batch_size_per_device}_3B",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
         max_steps=6000,
         logging_dir="training_res/logs",
         logging_steps=10,
         save_steps=2000,
-        gradient_accumulation_steps=1,
+        gradient_accumulation_steps=2,
         warmup_ratio=0.1,
         lr_scheduler_type='cosine',
         bf16=True,
@@ -179,7 +179,7 @@ def main():
         do_eval=True,
         per_device_eval_batch_size = batch_size_per_device,
         evaluation_strategy="steps",  # Add this line
-        eval_steps=2000,
+        eval_steps=1000,
         gradient_checkpointing=True,
         # overwrite_output_dir = False
         remove_unused_columns=False,

@@ -1,14 +1,21 @@
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, DynamicCache
-import pandas as pd    
-import json
+import argparse
 import datetime
+import json
 import string
 from typing import List
-from src.data.attention import construct_biased_attention_matrix
+
+import pandas as pd
 import regex
-import argparse
+import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer, DynamicCache
 from datasets import load_dataset
+
+# vocab_size = len(global_tokenizer)
+# base_model.resize_token_embeddings(vocab_size)
+
+# peft_config_path = "/mnt/data/jingbo/kv_dump_combine_mix5_5000steps_5e-6_full/checkpoint-5000"  # Path to the directory where LoRA weights are stored
+
+# global_model = PeftModel.from_pretrained(base_model, peft_config_path)
 
 def normalize_answer(s: str) -> str:
     """Normalization from the SQuAD evaluation script.
@@ -46,27 +53,24 @@ def main():
     parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
     parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
     parser.add_argument('--run', type=str, required=True, help='Checkpoint number')
-    parser.add_argument('--reencode', type=int, required=True, help='Reencode num')
 
     args = parser.parse_args()
 
     ckpt = args.ckpt
     run_name = args.run
-    reencode_num = args.reencode
 
-    special_token_start=128011
-    mem_start=128254
-    mem_end=128255
+    data_list=load_dataset("dgslibisey/MuSiQue", split='validation')
 
-    data_list = load_dataset('json', data_files="data/raw/trivia_qa/dev.jsonl", split='train')
-
-    global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
-
-    global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+    if "meta" in run_name:
+        global_tokenizer = AutoTokenizer.from_pretrained(run_name)
+        global_model = AutoModelForCausalLM.from_pretrained(run_name, torch_dtype=torch.bfloat16)
+    else:
+        global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
+        global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
 
     global_model.to('cuda')
 
-    template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
+    template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
 
     # total_num = len(jsonObj)
     total_num = len(data_list)
@@ -76,47 +80,35 @@ def main():
     for i in range(total_num):
 
         print("Processing sample:", str(i))
+        memory_list = [template]
 
-        sys_id = global_tokenizer(template, add_special_tokens=False).input_ids
-        sys_id = sys_id + [mem_start]
-        memory_list = []
-
-
-        for j in range(0,10):
-            title = data_list[i]['documents'][j]['title']
-            text = " ".join(data_list[i]['documents'][j]['text'])
+        for j in range(len(data_list[i]['paragraphs'])):
+            title = data_list[i]['paragraphs'][j]['title']
+            text = data_list[i]['paragraphs'][j]['paragraph_text']
             memory_list.append(f"Document [{j+1}](Title: {title}) {text}\n")
 
-        biased_index = []
-        concat_id = []
+        id_list = []
 
-        idx = len(sys_id)
+        for st in memory_list:
 
-        for k in range(len(memory_list)):
+            tem_id = global_tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
 
-            tem_id = global_tokenizer(memory_list[k], add_special_tokens=False).input_ids
+            id_list.append(tem_id)
 
-            for sub_idx in range(reencode_num):
-                tem_id = tem_id + [special_token_start + reencode_num * k + sub_idx]
-
-            biased_index.append([idx, idx + len(tem_id) - reencode_num])
-
-            concat_id += tem_id
-
-            idx = idx + len(tem_id)
-
-        concat_id = sys_id + concat_id + [mem_end]
-        concat_id = torch.tensor([concat_id], device=global_model.device)
-        attention_matrix = construct_biased_attention_matrix(concat_id.size(1), biased_index, concat_id.size(1), global_model.device).unsqueeze(0).unsqueeze(0)
-
-        new_prompt = "<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n" + data_list[i]['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        new_prompt = data_list[i]['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         prompt_id = global_tokenizer(new_prompt, return_tensors="pt", add_special_tokens=False).input_ids.to(global_model.device)
 
-        generate_id = torch.cat([concat_id, prompt_id], dim = 1)
+        # id_list.append(prompt_id)
+
+        cache_id = torch.cat(id_list, dim=1).to(global_model.device)
 
         global_model.eval()
+
+        generate_id = torch.cat([cache_id, prompt_id], dim = 1)
+
+        # print(cache_id.size(1))
         with torch.no_grad():
-            outputs = global_model(input_ids = concat_id, attention_mask = attention_matrix)
+            outputs = global_model(input_ids = cache_id)
             past_key_values = outputs.past_key_values
 
             outputs = global_model.generate(
@@ -130,7 +122,7 @@ def main():
             )
         # print(outputs)
         generated_seq = global_tokenizer.batch_decode(outputs, skip_special_tokens=True)
-
+    
         response = generated_seq[0].split('assistant\n\n')[-1]
         # print(response)
         print("response:", response)
@@ -139,16 +131,19 @@ def main():
 
         correct_num = correct_num + int(score)
 
-        res_list.append({"id": str(i),"question": data_list[i]['question'], "response": response, "gold_answer": data_list[i]['answer'], "Score": score})
+        res_list.append({"id": str(i),"question": data_list[i]['question'], "response": response, "gold_answer": [data_list[i]['answer']], "Score": score})
         print("Correct progress", correct_num)
-
+        
     accuracy = correct_num / total_num
     print(accuracy)
 
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/order/sum_{reencode_num}_new_mix_bsz64/wiki_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
+    if "meta" in run_name:
+        file_name = f"result/new_data/original_1B/musique_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
+    else:
+        file_name = f"result/{run_name}/musique_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

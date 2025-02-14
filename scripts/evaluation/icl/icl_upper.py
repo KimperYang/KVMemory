@@ -6,8 +6,8 @@ from datasets import load_dataset
 data = load_dataset("CogComp/trec")
 label_dict = {0:'abbreviation', 1:'entity', 2:'description', 3:'human', 4:'location', 5:'numeric'}
 # Step 1: Load the Pretrained Model and Tokenizer
-model_name = "training_res/new_data/upper_prompt/checkpoint-6000"  # You can choose other models like 'gpt2-medium', 'gpt-neo-125M', etc.
-# model_name = "meta-llama/Llama-3.2-1B-Instruct"
+# model_name = "training_res/new_data/upper_3B/checkpoint-6000"  # You can choose other models like 'gpt2-medium', 'gpt-neo-125M', etc.
+model_name = "meta-llama/Llama-3.2-3B-Instruct"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
 model.eval()

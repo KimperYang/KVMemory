@@ -125,8 +125,8 @@ def main():
     )
 
     ptr_train, ptr_eval = load_from_disk_then_process("text", preprocessor)
-    ptr_mem_train, ptr_mem_eval = load_from_disk_then_process("text_mem", preprocessor)
-    ptr_inst_train, ptr_inst_eval = load_from_disk_then_process("text_inst", preprocessor)
+    # ptr_mem_train, ptr_mem_eval = load_from_disk_then_process("text_mem", preprocessor)
+    # ptr_inst_train, ptr_inst_eval = load_from_disk_then_process("text_inst", preprocessor)
     sft_train, sft_eval = load_from_disk_then_process("tulu", preprocessor)
     sft_mem_train, sft_mem_eval = load_from_disk_then_process("sft_mem", preprocessor)
     qa_train, qa_eval = load_from_disk_then_process("qa", preprocessor)
@@ -171,12 +171,12 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir=f"training_res/sum/sum_{reencode_num}_3B",
+        output_dir=f"training_res/sum/sum_{reencode_num}_3B_10p_8k",
         report_to="wandb",
-        run_name=f"sum_{reencode_num}_bsz{batch_size_per_device}_3B",
+        run_name=f"sum_{reencode_num}_bsz{batch_size_per_device}_3B_10p_8k",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
-        max_steps=6000,
+        max_steps=8000,
         logging_dir="training_res/logs",
         logging_steps=10,
         save_steps=2000,

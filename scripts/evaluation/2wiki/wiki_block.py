@@ -70,7 +70,7 @@ def main():
 
     global_model.to('cuda')
 
-    template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question.<|eot_id|>"
+    template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
 
     # total_num = len(jsonObj)
     total_num = len(data_list)
@@ -101,7 +101,7 @@ def main():
 
             idx = idx + tem_id.size(1)
 
-        new_prompt = "<|start_header_id|>user<|end_header_id|>\n\n" + data_list[i]['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        new_prompt = data_list[i]['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         prompt_id = global_tokenizer(new_prompt, return_tensors="pt", add_special_tokens=False).input_ids.to(global_model.device)
 
         # id_list.append(prompt_id)
@@ -147,7 +147,7 @@ def main():
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
     # file_name = f"result/order/promptcache/wiki_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
-    file_name = f"result/{run_name}/wiki3_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/{run_name}/wiki2_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
