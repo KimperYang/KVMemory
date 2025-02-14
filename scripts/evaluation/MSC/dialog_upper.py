@@ -173,7 +173,7 @@ def main():
             memory_list.append(memory)
 
         memory = " ".join(memory_list)
-        template = f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYour task is to answer a question from the user about your prior conversations.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n The following is a summary of all your prior conversations.\n {memory} Answer from the perspective of the conversation summaries provided (do not say that you are an AI assistant). "
+        template = f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYour task is to answer a question from the user about your prior conversations.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n{memory}Answer from the perspective of the conversation summaries provided (do not say that you are an AI assistant). "
         # print(memory_list)
         # print(new_prompt)
 
@@ -192,7 +192,7 @@ def main():
         print('score:', str(score))
         score_list.append(score)
         res_list.append({"score": str(score),"question": dataset["train"]["self_instruct"][i]["B"], "response": response, "gold_answer": gold_answer})
-        
+
 
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
@@ -200,9 +200,9 @@ def main():
     final_score = sum(score_list) / len(score_list)
 
     if "meta" in run_name:
-        file_name = f"result/new_data/upper/MSC_original_ckpt{ckpt}_{final_score}_{time_str}.json"
+        file_name = f"result/new_data/upper_prompt/MSC2_original_ckpt{ckpt}_{final_score}_{time_str}.json"
     else:
-        file_name = f"result/{run_name}/MSC_ckpt{ckpt}_{final_score}_{time_str}.json"
+        file_name = f"result/{run_name}/MSC2_ckpt{ckpt}_{final_score}_{time_str}.json"
 
     with open(file_name, 'w') as f:
         for entry in res_list:

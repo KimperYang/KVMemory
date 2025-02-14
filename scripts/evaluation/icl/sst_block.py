@@ -8,10 +8,9 @@ data = load_dataset("stanfordnlp/sst2")
 label_dict = {0:'negative', 1:'positive'}
 
 # Step 1: Load the Pretrained Model and Tokenizer
-# model_name = "training_res/new_data/block_new_mix/checkpoint-6000"
+model_name = "training_res/new_data/block_prompt/checkpoint-6000"
 # model_name = "meta-llama/Llama-3.2-1B-Instruct"
-model_name = "/dccstor/scllm/Block-Attention/training_res/checkpoint-624"
-reencode_num = 0
+# model_name = "/dccstor/scllm/Block-Attention/training_res/checkpoint-624"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
 model.eval()
@@ -79,7 +78,7 @@ for idx in range(len(context)):
 
     if "<|begin_of_text|>" not in context[idx]:
 
-        biased_index.append([position, position + len(tem_id) - reencode_num])
+        biased_index.append([position, position + len(tem_id)])
 
     tem_id = torch.tensor([tem_id])
     id_list.append(tem_id)

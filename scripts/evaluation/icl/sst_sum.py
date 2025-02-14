@@ -9,8 +9,8 @@ label_dict = {0:'negative', 1:'positive'}
 
 # Step 1: Load the Pretrained Model and Tokenizer
 # model_name = "/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-30000"
-model_name = "training_res/sum/sum_0_new_mix_bsz64/checkpoint-6000"
-reencode_num = 0
+model_name = "training_res/sum/sum_5_prompt/checkpoint-6000"
+reencode_num = 5
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
 model.eval()
@@ -33,8 +33,8 @@ def construct_examples(data):
         if all(num == num_each_class for num in num_stats) or num_demo == max_demonstration:
             break
         if num_stats[item['label']] < num_each_class:
-            # user = f"<|start_header_id|>user<|end_header_id|>\n\nQuestion: {item['text']}\nTask: Classify this question into one of the following six types: abbreviation, entity, description, human, location, numeric.<|eot_id|>"
-            # asst = f"<|start_header_id|>assistant<|end_header_id|>\n\nType: {label_dict[item['coarse_label']]}<|eot_id|>"
+            # user = f"<|start_header_id|>user<|end_header_id|>\n\nText: {item['sentence']}\nIs the text positive or negative?<|eot_id|>"
+            # asst = f"<|start_header_id|>assistant<|end_header_id|>\n\nAnswer: {label_dict[item['label']]}<|eot_id|>"
             user = f"<|start_header_id|>user<|end_header_id|>\n\nText: {item['sentence']}\nIs the text positive or negative?<|eot_id|>"
             asst = f"<|start_header_id|>assistant<|end_header_id|>\n\nAnswer: {label_dict[item['label']]}<|eot_id|>"
             context.append(user + asst)

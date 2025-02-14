@@ -175,7 +175,7 @@ def main():
     score_list = []
 
     for i in range(total_num):
-        memory_list = ["<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYour task is to answer a question from the user about your prior conversations.<|eot_id|>"]
+        memory_list = ["<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYour task is to answer a question from the user about your prior conversations.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"]
         print("id:", str(i))
 
         for j in range(len(dataset["train"]["summary_speaker_1"][i])):
@@ -197,7 +197,7 @@ def main():
 
             current_position = current_position + tem_id.size(1)
 
-        question = "<|start_header_id|>user<|end_header_id|>\n\n Answer from the perspective of the conversation summaries provided (do not say that you are an AI assistant)." + dataset["train"]["self_instruct"][i]["B"] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        question = "Answer from the perspective of the conversation summaries provided (do not say that you are an AI assistant)." + dataset["train"]["self_instruct"][i]["B"] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         question_ids = global_tokenizer(question, return_tensors="pt", add_special_tokens=False).input_ids
 
         cache_id = torch.cat(id_list, dim=1)
@@ -238,9 +238,9 @@ def main():
     final_score = sum(score_list) / len(score_list)
 
     if "meta" not in run_name:
-        file_name = f"result/new_data/block/MSC_ckpt{ckpt}_{final_score}_{time_str}.json"
+        file_name = f"result/new_data/block_prompt/MSC2_ckpt{ckpt}_{final_score}_{time_str}.json"
     else:
-        file_name = f"result/new_data/block/MSC_promptcache_ckpt{ckpt}_{final_score}_{time_str}.json"
+        file_name = f"result/new_data/block_prompt/MSC2_promptcache_ckpt{ckpt}_{final_score}_{time_str}.json"
 
     with open(file_name, 'w') as f:
         for entry in res_list:
