@@ -96,7 +96,7 @@ def construct_compress_attention_matrix(seq_len, shift_ranges, max_len, device, 
             j = indices[1]
 
             attention_matrix[i : j + num_sum_tokens, 0 : i] = float('-inf')
-            attention_matrix[mem_end_position: , i : j] = float('-inf')
+            attention_matrix[j + num_sum_tokens: , i : j] = float('-inf')
 
     attention_matrix[seq_len :, :] = float('-inf')
     attention_matrix[: ,seq_len :] = float('-inf')
@@ -114,15 +114,18 @@ def construct_compress_input(input_ids, biased_index, max_len):
 
     position_id = get_position_id(new_ids, new_ranges)
 
-    attention_matrix = construct_compress_attention_matrix(len(new_ids), new_ranges, max_len, 'cpu')
+    attention_matrix = construct_compress_attention_matrix(len(new_ids), new_ranges, max_len, 'cpu', len(compress_tokens))
 
     return new_ids, position_id, attention_matrix
 
-# lst     = [1, 2, 3, 4, 5, 6, 7, 8]
-# ranges  = None
-# max_len = 15
+lst     = [0, 1, 2, 3, 4, 5, 6, 7]
+ranges  = [[2,3],[4,5]]
+max_len = 15
 
-# print(construct_compress_input(lst, ranges, max_len))
+new_ids, position_id, attention_matrix = construct_compress_input(lst, ranges, max_len)
+print("new_ids: ", new_ids)
+print("position_id: ", position_id)
+print(attention_matrix)
 
 # def construct_compress_input(input_ids, biased_index, max_len):
 #     mem_start = 128254

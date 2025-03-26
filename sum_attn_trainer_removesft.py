@@ -96,14 +96,14 @@ def load_from_disk_then_process(
         remove_columns=remove_columns,
         num_proc=16,
         batched=False,
-        load_from_cache_file=False
+        # load_from_cache_file=False
     )
 
     return training_data, eval_data
 
 
 def main():
-    batch_size_per_device = 8
+    batch_size_per_device = 4
     reencode_num = 5
 
     global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
@@ -128,10 +128,10 @@ def main():
     # ptr_mem_train, ptr_mem_eval = load_from_disk_then_process("text_mem", preprocessor)
     # ptr_inst_train, ptr_inst_eval = load_from_disk_then_process("text_inst", preprocessor)
     sft_train, sft_eval = load_from_disk_then_process("tulu", preprocessor)
-    sft_mem_train, sft_mem_eval = load_from_disk_then_process("sft_mem", preprocessor)
+    # sft_mem_train, sft_mem_eval = load_from_disk_then_process("sft_mem", preprocessor)
     qa_train, qa_eval = load_from_disk_then_process("qa", preprocessor)
     qa_mem_train, qa_mem_eval = load_from_disk_then_process("qa_mem", preprocessor)
-    # xsum_train, xsum_eval = load_from_disk_then_process("xsum", preprocessor)
+    xsum_train, xsum_eval = load_from_disk_then_process("xsum", preprocessor)
 
     # train_dataset = datasets.interleave_datasets(
     #     [sft_mem_train, sft_train, ptr_train, qa_train, qa_mem_train, xsum_train],
@@ -141,8 +141,8 @@ def main():
     # )
 
     train_dataset = datasets.interleave_datasets(
-        [sft_mem_train, sft_train, ptr_train, qa_train, qa_mem_train],
-        probabilities=[0.2632, 0.3157, 0.2105, 0.1053, 0.1053],
+        [sft_train, ptr_train, qa_train, qa_mem_train, xsum_train],
+        probabilities=[0.40, 0.27, 0.13, 0.13, 0.07],
         seed=42,
         stopping_strategy="all_exhausted",
     )
@@ -150,9 +150,9 @@ def main():
     eval_dataset = datasets.DatasetDict({
         "text": ptr_eval,
         "sft": sft_eval,
-        "sftmem": sft_mem_eval,
         "qa": qa_eval,
-        "qamem": qa_mem_eval
+        "qamem": qa_mem_eval,
+        "xsum": xsum_eval
     })
 
     # eval_dataset = datasets.DatasetDict({
@@ -168,16 +168,16 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir=f"training_res/sum/sum_{reencode_num}_remove_sum",
+        output_dir=f"training_res/sum/sum_{reencode_num}_remove_sftmem",
         report_to="wandb",
-        run_name=f"sum_{reencode_num}_bsz{batch_size_per_device}_remove_sum",
+        run_name=f"sum_{reencode_num}_bsz{batch_size_per_device}_remove_sftmem",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
         max_steps=6000,
         logging_dir="training_res/logs",
         logging_steps=10,
         # save_steps=312,
-        gradient_accumulation_steps=1,
+        gradient_accumulation_steps=2,
         warmup_ratio=0.1,
         lr_scheduler_type='cosine',
         bf16=True,

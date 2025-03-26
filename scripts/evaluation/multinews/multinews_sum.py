@@ -72,8 +72,8 @@ def main():
             outputs = global_model(input_ids = torch.tensor([context_id],device=global_model.device), attention_mask = attention_matrix)
             past_key_values = outputs.past_key_values
 
-    total_num = len(multinews['validation'])
-    # total_num = 500
+    # total_num = len(multinews['validation'])
+    total_num = 500
     total_score = 0
     res_list = []
 
@@ -85,9 +85,6 @@ def main():
         prompt_id = global_tokenizer(new_prompt, add_special_tokens=False).input_ids
 
         generate_id = torch.tensor([context_id + prompt_id], device=global_model.device)
-
-        if generate_id.size(1) > 4096:
-            continue
 
         with torch.no_grad():
 
@@ -120,7 +117,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/{run_name}/multinews_full_demon{num_demon}_{avg_score}_{time_str}.jsonl"
+    file_name = f"result/{run_name}/multinews_500_demon{num_demon}_{avg_score}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

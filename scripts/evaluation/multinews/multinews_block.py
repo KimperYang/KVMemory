@@ -44,7 +44,7 @@ def main():
     context_id = sys_id
 
     biased_index = []
-    num_demon = 3
+    num_demon = 2
     curren_position = len(sys_id)
 
     for idx in range(num_demon):
@@ -112,7 +112,7 @@ def main():
     if "meta" in run_name:
         file_name = f"result/new_data/promptcache_{weight}B/multinews_promptcache_demon{num_demon}_{avg_score}_{time_str}.jsonl"
     else:
-        file_name = f"result/{run_name}/multinews_full_demon{num_demon}_{avg_score}_{time_str}.jsonl"
+        file_name = f"result/{run_name}/multinews_500_demon{num_demon}_{avg_score}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

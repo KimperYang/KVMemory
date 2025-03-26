@@ -1,8 +1,8 @@
 #!/bin/bash
 
-source /u/shiyuucsb/.bashrc
+# source /u/shiyuucsb/.bashrc
 conda activate kvm
-cd /dccstor/scllm/KVMemory
+# cd /dccstor/scllm/KVMemory
 
 export LD_LIBRARY_PATH=$CONDA_PREFIX/lib
 export CUDA_HOME="$CONDA_PREFIX"
