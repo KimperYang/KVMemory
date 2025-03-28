@@ -1,16 +1,20 @@
-import argparse
-import datetime
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig
+import pandas as pd    
 import json
+import datetime
 import string
 from typing import List
-
-import pandas as pd
-import regex
-import torch
-from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
-
 from src.utils.do_blend import append_kv, do_blend
+import regex
+import argparse
 
+# vocab_size = len(global_tokenizer)
+# base_model.resize_token_embeddings(vocab_size)
+
+# peft_config_path = "/mnt/data/jingbo/kv_dump_combine_mix5_5000steps_5e-6_full/checkpoint-5000"  # Path to the directory where LoRA weights are stored
+
+# global_model = PeftModel.from_pretrained(base_model, peft_config_path)
 
 def normalize_answer(s: str) -> str:
     """Normalization from the SQuAD evaluation script.
@@ -44,55 +48,48 @@ def best_subspan_em(prediction: str, ground_truths: List[str]) -> float:
     return 0.0
 
 def main():
+
     parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
-    parser.add_argument('--pos', type=int, required=True, help='Position value')
+    parser.add_argument('--weight', type=int, required=True, help='Checkpoint number')
 
     args = parser.parse_args()
 
-    pos = args.pos
+    weight = args.weight
 
-    if pos in [0, 4, 9]:
-        jsonObj = pd.read_json(path_or_buf=f'data/raw/nq/nq-open-10_{pos}.jsonl', lines=True)
-    else:
-        jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
+    file_path = "data/raw/dev.json"
+    with open(file_path, 'r') as file:
+        data = json.load(file)
+    data_list = data
 
-    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
-    model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16)
-    config = AutoConfig.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+    tokenizer = AutoTokenizer.from_pretrained(f"meta-llama/Llama-3.2-{weight}B-Instruct")
+    model = AutoModelForCausalLM.from_pretrained(f"meta-llama/Llama-3.2-{weight}B-Instruct", torch_dtype=torch.bfloat16)
+    config = AutoConfig.from_pretrained(f"meta-llama/Llama-3.2-{weight}B-Instruct")
     model.to('cuda')
 
     template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
 
-    total_num = 500
+    # total_num = len(jsonObj)
+    total_num = len(data_list)
     correct_num = 0
     res_list = []
 
     for i in range(total_num):
 
         print("Processing sample:", str(i))
-        texts = [template]
-        doc_list = []
-
-        for k in range(0,10):
-            title = jsonObj["ctxs"][i][k]["title"]
-            text = jsonObj["ctxs"][i][k]["text"]
-            doc_list.append({'title': title, 'text':text})
-
-        if pos not in [0,4,9]:
-            ground_truth = doc_list.pop(0)
-            doc_list.insert(pos, ground_truth)
+        memory_list = [template]
 
         for j in range(0,10):
-            title = doc_list[j]["title"]
-            text = doc_list[j]["text"]
-            texts.append(f"Document [{j+1}](Title: {title}) {text}\n")
+            title = data_list[i]['context'][j][0]
+            text = " ".join(data_list[i]['context'][j][1])
+            memory_list.append(f"Document [{j+1}](Title: {title}) {text}" + "\n")
+            # memory_list.append(f"- Title: {title}\n{text}\n")
 
         start_pos = 0
         concat_ids = []
         kv_list = []
         current_pos = start_pos
 
-        for st in texts:
+        for st in memory_list:
             input_ids = tokenizer(st, add_special_tokens=False).input_ids
             position_ids = list(range(current_pos, current_pos + len(input_ids)))
             with torch.no_grad():
@@ -116,13 +113,12 @@ def main():
 
         blend_kv = do_blend(model=model, old_kv=old_kv, golden_kv=golden_kv, recompute_ratio=0.18,first_layer_states=first_layer_states, position_ids=global_position_ids, config=config)
 
-        new_prompt = "<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n" + jsonObj["question"][i] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        new_prompt = "<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n" + data_list[i]["question"] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
 
         prompt_id = tokenizer(new_prompt, add_special_tokens=False).input_ids
 
         generate_id = torch.tensor([concat_ids + prompt_id], device=model.device)
 
-        print("start generation")
         with torch.no_grad():
             outputs = model.generate(
                 input_ids=generate_id,
@@ -138,13 +134,13 @@ def main():
 
         response = generated_seq[0].split('assistant\n\n')[-1]
 
-        print(response)
+        print("response:", response)
 
-        score = best_subspan_em(response, jsonObj["answers"][i])
+        score = best_subspan_em(response, [data_list[i]['answer']])
 
         correct_num = correct_num + int(score)
 
-        res_list.append({"id": str(i),"question": jsonObj["question"][i], "response": response, "gold_answer": jsonObj["answers"][i], "Score": score})
+        res_list.append({"id": str(i),"question": data_list[i]['question'], "response": response, "gold_answer": data_list[i]['answer'], "Score": score})
         print("Correct progress", correct_num)
 
     accuracy = correct_num / total_num
@@ -153,7 +149,8 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/cacheblend/NQ_1B_at{pos}_ratio18_{accuracy}_{time_str}.jsonl"
+    # file_name = f"result/order/promptcache/wiki_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/new_data/cacheblend_3B/wiki2_{weight}B_ratio18_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

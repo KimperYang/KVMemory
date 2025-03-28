@@ -1,13 +1,16 @@
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, DynamicCache
-import pandas as pd    
-import json
+import argparse
 import datetime
+import json
 import string
 from typing import List
-from src.data.attention import construct_biased_attention_matrix
+
+import pandas as pd
 import regex
-import argparse
+import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer, DynamicCache
+
+from src.data.attention import construct_biased_attention_matrix
+
 # vocab_size = len(global_tokenizer)
 # base_model.resize_token_embeddings(vocab_size)
 
@@ -48,29 +51,24 @@ def best_subspan_em(prediction: str, ground_truths: List[str]) -> float:
 
 def main():
 
-    parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
-    parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
-    parser.add_argument('--run', type=str, required=True, help='Checkpoint number')
-
-    args = parser.parse_args()
-
-    run_name = args.run
-    ckpt = args.ckpt
-
     file_path = "data/raw/dev.json"
     with open(file_path, 'r') as file:
         data = json.load(file)
     data_list = data
+    # print("".join(data_list[0]['context'][8][1]))
 
-    global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
-    global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+    # global_tokenizer = AutoTokenizer.from_pretrained(run_name)
 
-    # global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
-    # global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16)
+    # global_model = AutoModelForCausalLM.from_pretrained(run_name, torch_dtype=torch.bfloat16)
+
+    global_tokenizer = AutoTokenizer.from_pretrained(f"meta-llama/Llama-3.2-3B-Instruct")
+
+    global_model = AutoModelForCausalLM.from_pretrained(f"meta-llama/Llama-3.2-3B-Instruct", torch_dtype=torch.bfloat16, attn_implementation="flash_attention_2")
 
     global_model.to('cuda')
+    # template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
 
-    template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+    template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
 
     # total_num = len(jsonObj)
     total_num = len(data_list)
@@ -85,36 +83,30 @@ def main():
         for j in range(0,10):
             title = data_list[i]['context'][j][0]
             text = " ".join(data_list[i]['context'][j][1])
-            memory_list.append(f"Document [{j+1}](Title: {title}) {text}" + "\n")
-            # memory_list.append(f"- Title: {title}\n{text}\n")
-        biased_index = []
-        id_list = []
+            memory_list.append(f"Document [{j+1}](Title: {title}) {text}")
 
-        idx = 0
+        id_list = []
 
         for st in memory_list:
 
             tem_id = global_tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
-            biased_index.append([idx, idx + tem_id.size(1)])
 
             id_list.append(tem_id)
 
-            idx = idx + tem_id.size(1)
-
-        new_prompt = data_list[i]['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        new_prompt = "<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n" + data_list[i]['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         prompt_id = global_tokenizer(new_prompt, return_tensors="pt", add_special_tokens=False).input_ids.to(global_model.device)
 
         # id_list.append(prompt_id)
 
         cache_id = torch.cat(id_list, dim=1).to(global_model.device)
-        attention_matrix = construct_biased_attention_matrix(cache_id.size(1), biased_index, cache_id.size(1), global_model.device).unsqueeze(0).unsqueeze(0)
 
         global_model.eval()
 
         generate_id = torch.cat([cache_id, prompt_id], dim = 1)
 
+        # print(cache_id.size(1))
         with torch.no_grad():
-            outputs = global_model(input_ids = cache_id, attention_mask = attention_matrix)
+            outputs = global_model(input_ids = cache_id)
             past_key_values = outputs.past_key_values
 
             outputs = global_model.generate(
@@ -128,7 +120,7 @@ def main():
             )
         # print(outputs)
         generated_seq = global_tokenizer.batch_decode(outputs, skip_special_tokens=True)
-
+    
         response = generated_seq[0].split('assistant\n\n')[-1]
         # print(response)
         print("response:", response)
@@ -137,17 +129,16 @@ def main():
 
         correct_num = correct_num + int(score)
 
-        res_list.append({"id": str(i),"question": data_list[i]['question'], "response": response, "gold_answer": data_list[i]['answer'], "Score": score})
+        res_list.append({"id": str(i), "question": data_list[i]['question'], "response": response, "gold_answer": data_list[i]['answer'], "Score": score})
         print("Correct progress", correct_num)
-
+        
     accuracy = correct_num / total_num
     print(accuracy)
 
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    # file_name = f"result/order/promptcache/wiki_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
-    file_name = f"result/{run_name}/wiki2_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/new_data/original/wiki_original_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

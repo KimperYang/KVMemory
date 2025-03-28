@@ -1,25 +1,22 @@
 import torch
 import torch.nn.functional as F
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig
 from datasets import load_dataset
-from src.data.attention import construct_biased_attention_matrix
+from src.utils.do_blend import append_kv, do_blend
 
 data = load_dataset("CogComp/trec")
 label_dict = {0:'abbreviation', 1:'entity', 2:'description', 3:'human', 4:'location', 5:'numeric'}
 
-# Step 1: Load the Pretrained Model and Tokenizer
-# model_name = "/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-30000"
-model_name = "training_res/new_data/seq/checkpoint-6000"
+model_name = "meta-llama/Llama-3.2-3B-Instruct"
 
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
+config = AutoConfig.from_pretrained(model_name)
 model.eval()
 
 # Move model to GPU if available
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
-
-special_token_start = 128011
 
 def construct_examples(data):
     num_each_class = 4
@@ -41,12 +38,12 @@ def construct_examples(data):
     return context
 
 # Function to compute log-likelihood
-def compute_log_likelihood(input_ids, attention_matrix, option):
+def compute_log_likelihood(input_ids, kv, option):
     option_ids = tokenizer.encode(option, add_special_tokens=False)
     context_length = input_ids.size(1) - len(option_ids)
     # Get model outputs
     with torch.no_grad():
-        outputs = model(input_ids = input_ids, attention_mask = attention_matrix, use_cache = False)
+        outputs = model(input_ids = input_ids, past_key_values = kv, use_cache = True)
     logits = outputs.logits
     # Shift logits and labels to align
     shift_logits = logits[:, :-1, :].contiguous()
@@ -71,25 +68,34 @@ context = construct_examples(data)
 
 print(len(context))
 
-biased_index = []
-id_list = []
-idx = 0
+start_pos = 0
+concat_ids = []
+kv_list = []
+current_pos = start_pos
 
-for idx in range(len(context)):
-    tem_id = tokenizer(context[idx], add_special_tokens=False).input_ids
+for st in context:
+    input_ids = tokenizer(st, add_special_tokens=False).input_ids
+    position_ids = list(range(current_pos, current_pos + len(input_ids)))
+    with torch.no_grad():
+        output = model(input_ids=torch.tensor([input_ids],device=model.device),
+                    position_ids=torch.tensor([position_ids],device=model.device))
+    kv_list.append(output.past_key_values)
 
-    mem_idx = idx - 1
-    if "<|begin_of_text|>" not in context[idx]:
+    concat_ids += input_ids
+    current_pos += len(input_ids)
 
-        tem_id = [special_token_start + mem_idx * 2] + tem_id + [special_token_start + mem_idx * 2 + 1]
-        biased_index.append([idx + 1, idx + len(tem_id) - 1])
+old_kv = append_kv(kv_list)
 
-    tem_id = torch.tensor([tem_id])
-    id_list.append(tem_id)
-    idx = idx + tem_id.size(1)
+global_position_ids = torch.tensor([list(range(start_pos, start_pos + len(concat_ids)))],device=model.device)
+with torch.no_grad():
+    output = model(input_ids=torch.tensor([concat_ids],device=model.device),
+                    position_ids=global_position_ids,
+                    output_hidden_states=True)
 
-print(biased_index)
-prefix_id = torch.cat(id_list, dim = 1)
+golden_kv = output.past_key_values
+first_layer_states = output.hidden_states[2]
+
+blend_kv = do_blend(model=model, old_kv=old_kv, golden_kv=golden_kv, recompute_ratio=0.18,first_layer_states=first_layer_states, position_ids=global_position_ids, config=config)
 
 for idx in range(total_num):
     print(idx)
@@ -101,27 +107,13 @@ for idx in range(total_num):
     results = []
     for option in options:
         question_id = tokenizer(question + option, return_tensors="pt", add_special_tokens=False).input_ids
-        concat_ids = torch.cat([prefix_id, question_id], dim = 1).to(model.device)
-        attention_matrices = construct_biased_attention_matrix(concat_ids.size(1), biased_index, concat_ids.size(1), model.device).unsqueeze(0).unsqueeze(0)
+        concat_ids = torch.cat([question_id], dim = 1).to(model.device)
 
-        ll, length = compute_log_likelihood(concat_ids, attention_matrices, option)
+        ll, length = compute_log_likelihood(concat_ids, blend_kv, option)
         results.append(ll / length)
-        # results.append({
-        #     'option': option.strip(),
-        #     'log_likelihood': ll,
-        #     'length': length,
-        #     'avg_log_likelihood': ll / length  # For length normalization
-        # })
     if  results.index(max(results)) == data['test'][idx]['coarse_label']:
         correct_num += 1
         print('correct')
-    # Display the Results
-    # print(question)
-    # for res in results:
-    #     print(f"Option: {res['option']}")
-    #     print(f"  Log-Likelihood: {res['log_likelihood']:.4f}")
-    #     print(f"  Length: {res['length']}")
-    #     print(f"  Avg Log-Likelihood (Normalized): {res['avg_log_likelihood']:.4f}\n")
 
 print('correct_num: ', correct_num)
 print('accuracy: ', correct_num / total_num)

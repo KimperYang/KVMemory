@@ -122,7 +122,6 @@ def main():
 
         generate_id = torch.tensor([concat_ids + prompt_id], device=model.device)
 
-        print("start generation")
         with torch.no_grad():
             outputs = model.generate(
                 input_ids=generate_id,
@@ -153,7 +152,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/cacheblend/NQ_1B_at{pos}_ratio18_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/new_data/cacheblend_1B/NQ_at{pos}_ratio18_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

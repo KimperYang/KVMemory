@@ -4,33 +4,32 @@ import pandas as pd
 import json
 import datetime
 import string
+import time
 from typing import List
-from src.data.attention import construct_biased_attention_matrix
 import regex
+
 import argparse
 
 parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
+parser.add_argument('--run', type=str, required=True, help='Path under training_res')
 parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
 parser.add_argument('--pos', type=int, required=True, help='Position value')
-parser.add_argument('--run', type=str, required=True, help='Run name')
+
 args = parser.parse_args()
 
+run_name = args.run
 ckpt = args.ckpt
 pos = args.pos
-run_name = args.run
 
 if pos in [0, 4, 9]:
     jsonObj = pd.read_json(path_or_buf=f'data/raw/nq/nq-open-10_{pos}.jsonl', lines=True)
 else:
     jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
 
-# global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
-
-# global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16)
-
 global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
 
 global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+
 
 def normalize_answer(s: str) -> str:
     """Normalization from the SQuAD evaluation script.
@@ -63,17 +62,37 @@ def best_subspan_em(prediction: str, ground_truths: List[str]) -> float:
             return 1.0
     return 0.0
 
+def inference(input_ids):
+
+    tokenizer = global_tokenizer
+    model = global_model
+
+    model.eval()
+
+    with torch.no_grad():
+
+        outputs = model.generate(
+            input_ids=input_ids,
+            max_new_tokens=200,
+            do_sample=False,
+            temperature=None,
+            top_p=1.0
+        )
+    # print(outputs)
+    generated_sequences = tokenizer.batch_decode(outputs, skip_special_tokens=True)
+
+    return generated_sequences
+
 def main():
     global_model.to('cuda')
-    # template = "[INST] <<SYS>>\nYou are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\n<</SYS>>\n\n"
 
-    # template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a helpful, respectful and honest assistant.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
     template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+
     # total_num = len(jsonObj)
     total_num = 500
     correct_num = 0
     res_list = []
-
+    execution_time = 0
     for i in range(total_num):
 
         print("Processing sample:", str(i))
@@ -93,53 +112,17 @@ def main():
             title = doc_list[j]["title"]
             text = doc_list[j]["text"]
             memory_list.append(f"Document [{j+1}](Title: {title}) {text}\n")
-            # memory_list.append(f"- Title: {title}\n{text}\n") #same as training setting in blockqa data
 
         memory_list.insert(0, template)
 
-        biased_index = []
-        id_list = []
-
-        idx = 0
-
-        for st in memory_list:
-
-            tem_id = global_tokenizer(st, return_tensors="pt", add_special_tokens=False).input_ids
-            biased_index.append([idx, idx + tem_id.size(1)])
-
-            id_list.append(tem_id)
-
-            idx = idx + tem_id.size(1)
-
-        # new_prompt = "Write a high-quality answer for the given question using only the provided search results (some of which might be irrelevant). Question: " + jsonObj["question"][i] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        prompt = "".join(memory_list)
         new_prompt = jsonObj["question"][i] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
-        prompt_id = global_tokenizer(new_prompt, return_tensors="pt", add_special_tokens=False).input_ids.to(global_model.device)
+        prompt += new_prompt
 
-        # id_list.append(prompt_id)
+        prompt_id = global_tokenizer(prompt, return_tensors="pt").input_ids
 
-        concat_id = torch.cat(id_list, dim=1).to(global_model.device)
-        attention_matrix = construct_biased_attention_matrix(concat_id.size(1), biased_index, concat_id.size(1), global_model.device).unsqueeze(0).unsqueeze(0)
+        generated_seq = inference(prompt_id.to(global_model.device))
 
-        global_model.eval()
-
-        generate_id = torch.cat([concat_id, prompt_id], dim = 1)
-
-        with torch.no_grad():
-            outputs = global_model(input_ids = concat_id, attention_mask = attention_matrix)
-            past_key_values = outputs.past_key_values
-
-            outputs = global_model.generate(
-                input_ids=generate_id,
-                max_new_tokens=200,
-                do_sample=False,
-                temperature=None,
-                top_p=1.0,
-                past_key_values=past_key_values,
-                use_cache=True
-            )
-        # print(outputs)
-        generated_seq = global_tokenizer.batch_decode(outputs, skip_special_tokens=True)
-    
         response = generated_seq[0].split('assistant\n\n')[-1]
         print(response)
 
@@ -152,13 +135,10 @@ def main():
 
     accuracy = correct_num / total_num
     print(accuracy)
-
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    # file_name = f"result/order/block/NQ2_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
     file_name = f"result/{run_name}/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
-
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
             json_line = json.dumps(entry)

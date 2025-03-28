@@ -7,6 +7,8 @@ from datasets import load_dataset
 from rouge_score import rouge_scorer
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
+from src.data.attention import construct_biased_attention_matrix
+
 
 def calculate_rouge_l_score(candidate, reference):
     scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
@@ -41,7 +43,7 @@ def main():
     sys_id = global_tokenizer(sys, add_special_tokens=False).input_ids
     context_id = sys_id
 
-    num_demon = 3
+    num_demon = 2
 
     for idx in range(num_demon):
 
@@ -55,7 +57,6 @@ def main():
             outputs = global_model(input_ids = torch.tensor([context_id],device=global_model.device))
             past_key_values = outputs.past_key_values
 
-    # total_num = len(multinews['validation'])
     total_num = 500
     total_score = 0
     res_list = []
@@ -101,9 +102,9 @@ def main():
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
     if "meta" in run_name:
-        file_name = f"result/new_data/original_{weight}B/multinews_original_demon{num_demon}_{avg_score}_{time_str}.jsonl"
+        file_name = f"result/new_data/original_{weight}B/multinews_500_original_demon{num_demon}_{avg_score}_{time_str}.jsonl"
     else:
-        file_name = f"result/{run_name}/multinews_demon{num_demon}_{avg_score}_{time_str}.jsonl"
+        file_name = f"result/{run_name}/multinews_500_demon{num_demon}_{avg_score}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

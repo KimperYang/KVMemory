@@ -125,8 +125,8 @@ def main():
     )
 
     ptr_train, ptr_eval = load_from_disk_then_process("text", preprocessor)
-    ptr_mem_train, ptr_mem_eval = load_from_disk_then_process("text_mem", preprocessor)
-    ptr_inst_train, ptr_inst_eval = load_from_disk_then_process("text_inst", preprocessor)
+    # ptr_mem_train, ptr_mem_eval = load_from_disk_then_process("text_mem", preprocessor)
+    # ptr_inst_train, ptr_inst_eval = load_from_disk_then_process("text_inst", preprocessor)
     sft_train, sft_eval = load_from_disk_then_process("tulu", preprocessor)
     sft_mem_train, sft_mem_eval = load_from_disk_then_process("sft_mem", preprocessor)
     qa_train, qa_eval = load_from_disk_then_process("qa", preprocessor)

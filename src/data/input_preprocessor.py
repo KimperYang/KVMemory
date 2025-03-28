@@ -24,6 +24,45 @@ summary_prompts = [
     "You are an AI assistant. Summarize the text clearly and logically. Organize the main ideas in a coherent sequence."
 ]
 
+# general_prompts = [
+#     "You are an AI assistant. Provide helpful, accurate, and clear answers. When uncertain, explain your reasoning or request clarification.",
+#     "You are an AI assistant. Focus on achieving the user's goal in each interaction. Use concise yet informative explanations.",
+#     "You are an AI assistant. Speak clearly and stay consistent with prior statements. If you need more information, politely ask for it.",
+#     "You are an AI assistant. Provide truthful, well-sourced information whenever possible. Acknowledge any limitations and avoid speculation if unsure.",
+#     "You are an AI assistant. Strive for clarity and correctness in your responses. Offer detailed explanations only when necessary.",
+#     "You are an AI assistant. Use examples or analogies to simplify complex ideas and ensure the user's understanding.",
+#     "You are an AI assistant. Demonstrate empathy and patience. Keep your language accessible and inclusive.",
+#     "You are an AI assistant. Provide step-by-step solutions when needed, but keep your explanations succinct and relevant.",
+#     "You are an AI assistant. Adapt your style to the user's needs while ensuring accuracy and relevance.",
+#     "You are an AI assistant. Verify information before presenting it, and correct any errors promptly and transparently."
+# ]
+
+# qa_prompts = [
+#     "You are an AI assistant. Use the provided documents to answer the user's question. If the information is insufficient, acknowledge the gap or request clarification.",
+#     "You are an AI assistant. Always ground your answers in the retrieved documents and do not add unsupported details. If the documents lack sufficient information, indicate that.",
+#     "You are an AI assistant. Rely solely on the given documents for evidence when answering questions. When necessary, cite or paraphrase the document content accurately.",
+#     "You are an AI assistant. Base your replies on the retrieved documents, ensuring completeness and correctness. Ask for more details if the documents do not cover the question fully.",
+#     "You are an AI assistant. Limit your responses to what the provided documents contain. If the query exceeds that scope, clarify your limitations.",
+#     "You are an AI assistant. Incorporate relevant quotes or references from the documents to support your answers, avoiding speculation.",
+#     "You are an AI assistant. If the documents present conflicting information, acknowledge and compare the discrepancies carefully.",
+#     "You are an AI assistant. When the documents lack the details needed, request more context or provide a disclaimer.",
+#     "You are an AI assistant. Where applicable, cite document sections, page numbers, or timestamps to validate your claims.",
+#     "You are an AI assistant. Synthesize the key points from the documents to form a concise, accurate response without straying from the source material."
+# ]
+
+# summary_prompts = [
+#     "You are an AI assistant. Read the provided text and produce a concise summary. Capture the main points without unnecessary detail.",
+#     "You are an AI assistant. Summarize the essential ideas from the given text. Avoid minor details and focus on critical insights.",
+#     "You are an AI assistant. Provide a brief, high-level overview of the text. Ensure clarity and coherence, prioritizing key themes.",
+#     "You are an AI assistant. Summarize the text clearly and logically. Organize the main ideas in a coherent sequence.",
+#     "You are an AI assistant. Focus on the most critical information in the text, ensuring your summary is accurate and succinct.",
+#     "You are an AI assistant. Avoid adding personal opinions or interpretations. Keep the summary neutral and true to the source.",
+#     "You are an AI assistant. Provide a well-structured summary, using clear headings or bullet points if helpful.",
+#     "You are an AI assistant. Emphasize the text's main arguments and conclusions, omitting superfluous details.",
+#     "You are an AI assistant. Consolidate recurring themes or ideas into a cohesive overview of the text.",
+#     "You are an AI assistant. Deliver a synopsis that helps readers quickly grasp the text's central message, minimizing unnecessary detail."
+# ]
+
 class bias_attention_preprocessor():
     '''
     Apply one piece of memory to non-memory use samples to enable batch forward pass for calculating KV.
@@ -3127,6 +3166,74 @@ class compress_attention_preprocessor():
             'labels': labels,
             'biased_index': biased_index
         }
+    
+    def process_pretraining_compress(
+        self,
+        example: Dict[str, str],
+    ):
+        input_ids = self.tokenizer(example['text']).input_ids
+        input_ids = input_ids[:self.max_len]
+        memory_ids = input_ids[:1001]
+        remaining_ids = input_ids[1001:]
+        biased_index = [[1 + 100 * i, 1 + 100 * (i+1)] for i in range(10)]
+
+        new_input_len = len(input_ids) + 2 + len(biased_index) * self.compress_len
+        labels = [-100] * (new_input_len - len(remaining_ids)) + remaining_ids
+
+        return {
+            'input_ids': input_ids,
+            'labels': labels,
+            'biased_index': biased_index
+        }
+
+    def process_qa_compress(
+        self,
+        example: Dict[str, str],
+    ):
+        system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n" + random.choice(qa_prompts)
+        system_input_ids = self.tokenizer(system, add_special_tokens=False).input_ids
+        input_ids = system_input_ids
+        sys_len = len(system_input_ids)
+
+        current_index = sys_len
+        biased_index = []
+
+        doc_list = []
+
+        for k in range(0,10):
+            title = example['documents'][k]['title']
+            text = example['documents'][k]['text']
+            doc_list.append({'title': title, 'text':text})
+
+        if self.do_shuffle:
+            random.shuffle(doc_list)
+
+        for j in range(0,10):
+            title = doc_list[j]['title']
+            text = doc_list[j]['text']
+            tem_id = self.tokenizer(f"Document [{j+1}](Title: {title}) {text}\n", add_special_tokens=False).input_ids
+
+            biased_index.append([current_index, current_index + len(tem_id)])
+            current_index += len(tem_id)
+
+            input_ids += tem_id
+
+        user = "<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n" + example['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        user_id = self.tokenizer(user, add_special_tokens=False).input_ids
+        input_ids += user_id
+
+        ans_id = self.tokenizer(example['generated'] + "<|eot_id|>", add_special_tokens=False).input_ids
+        input_ids += ans_id
+
+        new_input_len = len(input_ids) + 2 + len(biased_index) * self.compress_len
+        labels = [-100] * (new_input_len - len(ans_id)) + ans_id
+
+        return {
+            'input_ids': input_ids,
+            'labels': labels,
+            'biased_index': biased_index
+        }
+        
 
 def custom_collate_compress(batch, compress_tokens):
 
@@ -3167,7 +3274,6 @@ def custom_collate_compress(batch, compress_tokens):
 
         _position_id = get_position_id(shift_input_ids, shift_biased_index)
         position_ids.append(_position_id + [0] * (max_length - seq_length))
-
         biased_index.append(shift_biased_index + [[0,0]] * (max_mem_num - _mem_num))
 
     return {

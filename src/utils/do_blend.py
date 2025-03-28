@@ -12,14 +12,14 @@ def do_blend(model, old_kv, golden_kv, recompute_ratio, first_layer_states, posi
     sequence_length = old_kv[0][0].size(2)
     topk_num = int(sequence_length * recompute_ratio)
 
-    first_layer_old_value = old_kv[0][1]
-    first_layer_golden_value = golden_kv[0][1]
+    first_layer_old_value = old_kv[1][1]
+    first_layer_golden_value = golden_kv[1][1]
 
     temp_diff = torch.sum((first_layer_golden_value - first_layer_old_value)**2, dim=[0,1,3]) #remain the sequence length dimension
     top_indices = torch.topk(temp_diff, k=topk_num).indices
     # print(top_indices)
     top_indices, _ = torch.sort(top_indices)
-    # print(top_indices)
+    print(top_indices)
     head_dim = config.head_dim
     # Second, starting from the second layer, we need to use the query states on selected indices and the key states in the old_kv to do the attention
     for layer_idx in range(2, len(old_kv)):
@@ -106,7 +106,7 @@ def append_kv(kv_list):
     return concatenated_past_key_values
 
 
-# # A unit test to check whether the blended kv is equal to the golden kv when recompute ratio is 100%
+# A unit test to check whether the blended kv is equal to the golden kv when recompute ratio is 100%
 
 # model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
 # tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
@@ -141,7 +141,7 @@ def append_kv(kv_list):
 # golden_kv = output.past_key_values
 # first_layer_states = output.hidden_states[2]
 
-# blend_kv = do_blend(model=model, old_kv=old_kv, golden_kv=golden_kv, recompute_ratio=1,first_layer_states=first_layer_states, position_ids=global_position_ids, config=config)
+# blend_kv = do_blend(model=model, old_kv=old_kv, golden_kv=golden_kv, recompute_ratio=0.8,first_layer_states=first_layer_states, position_ids=global_position_ids, config=config)
 
 # for layer in range(len(blend_kv)):
 #     diff = 0

@@ -67,7 +67,7 @@ def main():
     config = AutoConfig.from_pretrained(run_name)
     model.to('cuda')
 
-    template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
+    template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
 
     total_num = len(data_list)
     correct_num = 0
@@ -112,7 +112,7 @@ def main():
 
         blend_kv = do_blend(model=model, old_kv=old_kv, golden_kv=golden_kv, recompute_ratio=0.18,first_layer_states=first_layer_states, position_ids=global_position_ids, config=config)
 
-        new_prompt = "<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n" + data_list[i]['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        new_prompt = data_list[i]['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         prompt_id = tokenizer(new_prompt, add_special_tokens=False).input_ids
 
         model.eval()
@@ -149,7 +149,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/new_data/cacheblend_{weight}B/tqa2_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/new_data/cacheblend_{weight}B/tqa_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

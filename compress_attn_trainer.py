@@ -27,7 +27,7 @@ def load_from_disk_then_process(
     """
     load the downloaded data from disk and then pair it with the preprocessor
     """
-    if data_component_name in ["text", "text_mem", "text_inst"]:
+    if data_component_name in ["text", "text_mem", "text_inst", "text_compress"]:
         data_path = f"dataset_cache/processed/fineweb/{data_component_name}"
         if data_component_name == "text":
             preprocessor_fn = preprocessor.process_text
@@ -35,6 +35,9 @@ def load_from_disk_then_process(
             preprocessor_fn = preprocessor.process_textmem
         elif data_component_name == "text_inst":
             preprocessor_fn = preprocessor.process_textinst
+        elif data_component_name == "text_compress":
+            preprocessor_fn = preprocessor.process_pretraining_compress
+            data_path = f"dataset_cache/processed/fineweb/text_mem"
         else:
             raise NotImplementedError()
         remove_columns = [
@@ -92,7 +95,7 @@ def load_from_disk_then_process(
         remove_columns=remove_columns,
         num_proc=16,
         batched=False,
-        # load_from_cache_file=False
+        load_from_cache_file=False
     )
 
     return training_data, eval_data
@@ -102,9 +105,9 @@ def main():
     batch_size_per_device = 8
     compress_tokens = list(range(128011, 128061))
 
-    global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+    global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B")
     global_model = AutoModelForCausalLM.from_pretrained(
-        "meta-llama/Llama-3.2-1B-Instruct",
+        "meta-llama/Llama-3.2-1B",
         torch_dtype=torch.bfloat16,
         attn_implementation='sdpa',
         # use_flash_attention_2=True,
@@ -113,23 +116,24 @@ def main():
     preprocessor = compress_attention_preprocessor(
         tokenizer=global_tokenizer,
         max_len=4096,
-        compress_tokens=compress_tokens
+        compress_tokens=compress_tokens,
+        do_shuffle=True
     )
 
-    ptr_train, ptr_eval = load_from_disk_then_process("text", preprocessor)
-    ptr_mem_train, ptr_mem_eval = load_from_disk_then_process("text_mem", preprocessor)
-    ptr_inst_train, ptr_inst_eval = load_from_disk_then_process("text_inst", preprocessor)
-    sft_train, sft_eval = load_from_disk_then_process("tulu", preprocessor)
-    sft_mem_train, sft_mem_eval = load_from_disk_then_process("sft_mem", preprocessor)
-    qa_train, qa_eval = load_from_disk_then_process("qa", preprocessor)
-    qa_mem_train, qa_mem_eval = load_from_disk_then_process("qa_mem", preprocessor)
+    # ptr_train, ptr_eval = load_from_disk_then_process("text", preprocessor)
+    # ptr_mem_train, ptr_mem_eval = load_from_disk_then_process("text_mem", preprocessor)
+    # ptr_inst_train, ptr_inst_eval = load_from_disk_then_process("text_inst", preprocessor)
+    # sft_train, sft_eval = load_from_disk_then_process("tulu", preprocessor)
+    # sft_mem_train, sft_mem_eval = load_from_disk_then_process("sft_mem", preprocessor)
+    # qa_train, qa_eval = load_from_disk_then_process("qa", preprocessor)
+    # qa_mem_train, qa_mem_eval = load_from_disk_then_process("qa_mem", preprocessor)
 
-    train_dataset = datasets.interleave_datasets(
-        [sft_mem_train, sft_train, ptr_inst_train, ptr_train, ptr_mem_train, qa_train, qa_mem_train],
-        probabilities=[0.2, 0.25, 0.1, 0.25, 0.1, 0.05, 0.05],
-        seed=42,
-        stopping_strategy="all_exhausted",
-    )
+    # train_dataset = datasets.interleave_datasets(
+    #     [sft_mem_train, sft_train, ptr_inst_train, ptr_train, ptr_mem_train, qa_train, qa_mem_train],
+    #     probabilities=[0.2, 0.25, 0.1, 0.25, 0.1, 0.05, 0.05],
+    #     seed=42,
+    #     stopping_strategy="all_exhausted",
+    # )
 
     # train_dataset = datasets.interleave_datasets(
     #     [sft_mem_train, sft_train, ptr_inst_train, ptr_train, ptr_mem_train],
@@ -138,29 +142,31 @@ def main():
     #     stopping_strategy="all_exhausted",
     # )
 
-    eval_dataset = datasets.DatasetDict({
-        "text": ptr_eval,
-        "textmem": ptr_mem_eval,
-        "textinst": ptr_inst_eval,
-        "sft": sft_eval,
-        "sftmem": sft_mem_eval,
-        "qa": qa_eval,
-        "qamem": qa_mem_eval
-    })
+    # eval_dataset = datasets.DatasetDict({
+    #     "text": ptr_eval,
+    #     "textmem": ptr_mem_eval,
+    #     "textinst": ptr_inst_eval,
+    #     "sft": sft_eval,
+    #     "sftmem": sft_mem_eval,
+    #     "qa": qa_eval,
+    #     "qamem": qa_mem_eval
+    # })
+
+    train_dataset, eval_dataset = load_from_disk_then_process("text_compress", preprocessor)
 
     os.environ["WANDB_PROJECT"]="kvmemory"
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir=f"training_res/compress/compress_50",
+        output_dir=f"training_res/compress/compress_pretrain",
         report_to="wandb",
-        run_name=f"compress_50_bsz{batch_size_per_device}_5e-6",
+        run_name=f"compress_50_pretrain_bsz{batch_size_per_device}_5e-6",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
-        max_steps=6000,
+        max_steps=8000,
         logging_dir="training_res/logs",
         logging_steps=10,
-        save_steps=2000,
+        save_steps=4000,
         gradient_accumulation_steps=1,
         warmup_ratio=0.1,
         lr_scheduler_type='cosine',

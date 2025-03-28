@@ -21,21 +21,23 @@ def main():
 
     parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
     parser.add_argument('--run', type=str, required=True, help='Run name')
+    parser.add_argument('--weight', type=int, required=False, help='Run name')
 
     args = parser.parse_args()
 
     run_name = args.run
+    weight = args.weight
 
     if "meta" in run_name:
         global_tokenizer = AutoTokenizer.from_pretrained(run_name)
         global_model = AutoModelForCausalLM.from_pretrained(run_name, torch_dtype=torch.bfloat16)
-    else:
+    else: 
         global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-6000")
         global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-6000", torch_dtype=torch.bfloat16)
 
     global_model.to('cuda')
 
-    multinews = load_dataset("alexfabbri/multi_news", trust_remote_code=True)
+    multinews = load_dataset("alexfabbri/multi_news")
 
     sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an AI assistant who summarizes the article. <|eot_id|>"
     sys_id = global_tokenizer(sys, add_special_tokens=False).input_ids
@@ -63,8 +65,8 @@ def main():
             outputs = global_model(input_ids = torch.tensor([context_id],device=global_model.device), attention_mask = attention_matrix)
             past_key_values = outputs.past_key_values
 
-    total_num = len(multinews['validation'])
-    # total_num = 500
+    # total_num = len(multinews['validation'])
+    total_num = 500
     total_score = 0
     res_list = []
 
@@ -76,9 +78,6 @@ def main():
         prompt_id = global_tokenizer(new_prompt, add_special_tokens=False).input_ids
 
         generate_id = torch.tensor([context_id + prompt_id], device=global_model.device)
-
-        if generate_id.size(1) > 4096:
-            continue
 
         with torch.no_grad():
 
@@ -102,7 +101,6 @@ def main():
 
         res_list.append({"id": str(i),"dialogue": multinews['validation'][i]['document'], "response": response, "gold_answer": multinews['validation'][i]['summary'], "Score": score})
         print("Response", response)
-        # print("Gold_ans", multinews['validation'][i]['summary'])
         print("Score", score)
 
     avg_score = total_score / total_num
@@ -112,9 +110,9 @@ def main():
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
     if "meta" in run_name:
-        file_name = f"result/new_data/block_3B/multinews_promptcache_demon{num_demon}_{avg_score}_{time_str}.jsonl"
+        file_name = f"result/new_data/promptcache_{weight}B/multinews_promptcache_demon{num_demon}_{avg_score}_{time_str}.jsonl"
     else:
-        file_name = f"result/{run_name}/multinews_full_demon{num_demon}_{avg_score}_{time_str}.jsonl"
+        file_name = f"result/{run_name}/multinews_500_demon{num_demon}_{avg_score}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
