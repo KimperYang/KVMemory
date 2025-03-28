@@ -103,12 +103,12 @@ def load_from_disk_then_process(
 
 
 def main():
-    batch_size_per_device = 8
+    batch_size_per_device = 1
     reencode_num = 5
 
-    global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+    global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3-8B-Instruct")
     global_model = AutoModelForCausalLM.from_pretrained(
-        "meta-llama/Llama-3.2-1B-Instruct",
+        "meta-llama/Meta-Llama-3-8B-Instruct",
         torch_dtype=torch.bfloat16,
         attn_implementation='sdpa',
         # use_flash_attention_2=True,
@@ -131,21 +131,21 @@ def main():
     sft_mem_train, sft_mem_eval = load_from_disk_then_process("sft_mem", preprocessor)
     qa_train, qa_eval = load_from_disk_then_process("qa", preprocessor)
     qa_mem_train, qa_mem_eval = load_from_disk_then_process("qa_mem", preprocessor)
-    # xsum_train, xsum_eval = load_from_disk_then_process("xsum", preprocessor)
-
-    # train_dataset = datasets.interleave_datasets(
-    #     [sft_mem_train, sft_train, ptr_train, qa_train, qa_mem_train, xsum_train],
-    #     probabilities=[0.25, 0.30, 0.20, 0.10, 0.10, 0.05],
-    #     seed=42,
-    #     stopping_strategy="all_exhausted",
-    # )
+    xsum_train, xsum_eval = load_from_disk_then_process("xsum", preprocessor)
 
     train_dataset = datasets.interleave_datasets(
-        [sft_mem_train, sft_train, ptr_train, qa_train, qa_mem_train],
-        probabilities=[0.2632, 0.3157, 0.2105, 0.1053, 0.1053],
+        [sft_mem_train, sft_train, ptr_train, qa_train, qa_mem_train, xsum_train],
+        probabilities=[0.25, 0.30, 0.20, 0.10, 0.10, 0.05],
         seed=42,
         stopping_strategy="all_exhausted",
     )
+
+    # train_dataset = datasets.interleave_datasets(
+    #     [sft_mem_train, sft_train, ptr_train, qa_train, qa_mem_train],
+    #     probabilities=[0.2632, 0.3157, 0.2105, 0.1053, 0.1053],
+    #     seed=42,
+    #     stopping_strategy="all_exhausted",
+    # )
 
     eval_dataset = datasets.DatasetDict({
         "text": ptr_eval,
@@ -168,16 +168,16 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir=f"training_res/sum/sum_{reencode_num}_remove_sum",
+        output_dir=f"training_res/sum/sum_{reencode_num}_8B",
         report_to="wandb",
-        run_name=f"sum_{reencode_num}_bsz{batch_size_per_device}_remove_sum",
+        run_name=f"sum_{reencode_num}_bsz{batch_size_per_device}_8B",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
         max_steps=6000,
         logging_dir="training_res/logs",
         logging_steps=10,
-        # save_steps=312,
-        gradient_accumulation_steps=1,
+        save_steps=1000,
+        gradient_accumulation_steps=8,
         warmup_ratio=0.1,
         lr_scheduler_type='cosine',
         bf16=True,
