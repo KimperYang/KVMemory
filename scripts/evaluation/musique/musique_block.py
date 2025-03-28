@@ -1,5 +1,5 @@
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, DynamicCache
+from transformers import AutoTokenizer, AutoModelForCausalLM
 import pandas as pd    
 import json
 import datetime
@@ -46,19 +46,13 @@ def main():
     parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
     parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
     parser.add_argument('--run', type=str, required=True, help='Checkpoint number')
-    parser.add_argument('--reencode', type=int, required=True, help='Reencode num')
 
     args = parser.parse_args()
 
     ckpt = args.ckpt
     run_name = args.run
-    reencode_num = args.reencode
 
-    special_token_start=128011
-    mem_start=128254
-    mem_end=128255
-
-    data_list = load_dataset('json', data_files="data/raw/trivia_qa/dev.jsonl", split='train')
+    data_list=load_dataset("dgslibisey/MuSiQue", split='validation')
 
     global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
 
@@ -66,7 +60,7 @@ def main():
 
     global_model.to('cuda')
 
-    template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
+    template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
 
     # total_num = len(jsonObj)
     total_num = len(data_list)
@@ -78,13 +72,12 @@ def main():
         print("Processing sample:", str(i))
 
         sys_id = global_tokenizer(template, add_special_tokens=False).input_ids
-        sys_id = sys_id + [mem_start]
         memory_list = []
 
 
-        for j in range(0,10):
-            title = data_list[i]['documents'][j]['title']
-            text = " ".join(data_list[i]['documents'][j]['text'])
+        for j in range(len(data_list[i]['paragraphs'])):
+            title = data_list[i]['paragraphs'][j]['title']
+            text = data_list[i]['paragraphs'][j]['paragraph_text']
             memory_list.append(f"Document [{j+1}](Title: {title}) {text}\n")
 
         biased_index = []
@@ -92,24 +85,19 @@ def main():
 
         idx = len(sys_id)
 
-        for k in range(len(memory_list)):
+        for j in range(len(memory_list)):
 
-            tem_id = global_tokenizer(memory_list[k], add_special_tokens=False).input_ids
-
-            for sub_idx in range(reencode_num):
-                tem_id = tem_id + [special_token_start + reencode_num * k + sub_idx]
-
-            biased_index.append([idx, idx + len(tem_id) - reencode_num])
-
+            tem_id = global_tokenizer(memory_list[j], add_special_tokens=False).input_ids
+            biased_index.append([idx, idx + len(tem_id)])
             concat_id += tem_id
 
             idx = idx + len(tem_id)
 
-        concat_id = sys_id + concat_id + [mem_end]
+        concat_id = sys_id + concat_id
         concat_id = torch.tensor([concat_id], device=global_model.device)
         attention_matrix = construct_biased_attention_matrix(concat_id.size(1), biased_index, concat_id.size(1), global_model.device).unsqueeze(0).unsqueeze(0)
 
-        new_prompt = "<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n" + data_list[i]['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        new_prompt = data_list[i]['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         prompt_id = global_tokenizer(new_prompt, return_tensors="pt", add_special_tokens=False).input_ids.to(global_model.device)
 
         generate_id = torch.cat([concat_id, prompt_id], dim = 1)
@@ -128,18 +116,16 @@ def main():
                 past_key_values=past_key_values,
                 use_cache=True
             )
-        # print(outputs)
-        generated_seq = global_tokenizer.batch_decode(outputs, skip_special_tokens=True)
 
+        generated_seq = global_tokenizer.batch_decode(outputs, skip_special_tokens=True)
         response = generated_seq[0].split('assistant\n\n')[-1]
-        # print(response)
         print("response:", response)
 
         score = best_subspan_em(response, [data_list[i]['answer']])
 
         correct_num = correct_num + int(score)
 
-        res_list.append({"id": str(i),"question": data_list[i]['question'], "response": response, "gold_answer": data_list[i]['answer'], "Score": score})
+        res_list.append({"id": str(i),"question": data_list[i]['question'], "response": response, "gold_answer": [data_list[i]['answer']], "Score": score})
         print("Correct progress", correct_num)
 
     accuracy = correct_num / total_num
@@ -148,7 +134,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/order/sum_{reencode_num}_new_mix_bsz64/wiki_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/{run_name}/musiq_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

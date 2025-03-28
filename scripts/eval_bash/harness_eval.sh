@@ -1,11 +1,14 @@
 conda activate unlearning
+HF_ALLOW_CODE_EVAL="1"
 
-CUDA_VISIBLE_DEVICES=1,2,5,6 accelerate launch -m lm_eval --model hf \
-    --model_args pretrained=training_res/sum/sum_5_prompt/checkpoint-6000,revision=step6000,dtype="float" \
-    --tasks  mmlu \
+CUDA_VISIBLE_DEVICES=4,5 accelerate launch -m lm_eval --model hf \
+    --model_args pretrained=training_res/sum/sum_5_only_QA/checkpoint-624,revision=step624,dtype="float" \
+    --tasks  arc_easy,arc_challenge,hellaswag,winogrande,piqa,sciq \
     --batch_size 16
 
+
+    # --confirm_run_unsafe_code \
     # --apply_chat_template \
     # --fewshot_as_multiturn \
-    # --model_args pretrained=training_res/new_data/upper_prompt/checkpoint-6000,revision=step6000,dtype="float" \
-    # --model_args pretrained=meta-llama/Llama-3.2-1B-Instruct,dtype="float" \
+    
+

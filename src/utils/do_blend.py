@@ -17,7 +17,7 @@ def do_blend(model, old_kv, golden_kv, recompute_ratio, first_layer_states, posi
 
     temp_diff = torch.sum((first_layer_golden_value - first_layer_old_value)**2, dim=[0,1,3]) #remain the sequence length dimension
     top_indices = torch.topk(temp_diff, k=topk_num).indices
-    print(top_indices)
+    # print(top_indices)
     top_indices, _ = torch.sort(top_indices)
     # print(top_indices)
     head_dim = config.head_dim

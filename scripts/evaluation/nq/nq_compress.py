@@ -42,7 +42,7 @@ def filter_id(input_ids, intervals_to_remove):
 
 def filter_kv(past_key_values, intervals_to_remove):
     num_layers = len(past_key_values)
-    filtered_past_key_values = ()    
+    filtered_past_key_values = ()
 
     T = past_key_values[0][0].shape[2] 
     mask = torch.ones(T, dtype=bool)
