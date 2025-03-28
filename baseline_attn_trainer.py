@@ -186,7 +186,7 @@ def main():
         # split_batches=True,
         dispatch_batches=False,
         eval_on_start=True,
-        save_total_limit=1,
+        # save_total_limit=1,
         seed=42
     )
 
