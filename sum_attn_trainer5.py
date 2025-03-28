@@ -94,9 +94,9 @@ def load_from_disk_then_process(
     eval_data = eval_dataset.map(
         preprocessor_fn,
         remove_columns=remove_columns,
-        num_proc=16,
+        num_proc=96,
         batched=False,
-        load_from_cache_file=False
+        # load_from_cache_file=False
     )
 
     return training_data, eval_data
@@ -185,7 +185,7 @@ def main():
         do_eval=True,
         per_device_eval_batch_size = batch_size_per_device,
         evaluation_strategy="steps",  # Add this line
-        eval_steps=1000,
+        eval_steps=2000,
         gradient_checkpointing=True,
         save_total_limit=1,
         # overwrite_output_dir = False
