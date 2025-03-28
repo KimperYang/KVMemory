@@ -149,15 +149,10 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-<<<<<<< HEAD
-    # file_name = f"result/order/promptcache/wiki_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
-    file_name = f"result/{run_name}/tqa_{accuracy}_{time_str}.jsonl"
-=======
     if "meta" in run_name:
         file_name = f"result/new_data/promptcache_1B/tqa_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
     else:
         file_name = f"result/{run_name}/tqa_{accuracy}_{time_str}.jsonl"
->>>>>>> refs/remotes/origin/general
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
