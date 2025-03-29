@@ -118,14 +118,14 @@ def construct_compress_input(input_ids, biased_index, max_len):
 
     return new_ids, position_id, attention_matrix
 
-lst     = [0, 1, 2, 3, 4, 5, 6, 7]
-ranges  = [[2,3],[4,5]]
-max_len = 15
+# lst     = [0, 1, 2, 3, 4, 5, 6, 7]
+# ranges  = [[2,3],[4,5]]
+# max_len = 15
 
-new_ids, position_id, attention_matrix = construct_compress_input(lst, ranges, max_len)
-print("new_ids: ", new_ids)
-print("position_id: ", position_id)
-print(attention_matrix)
+# new_ids, position_id, attention_matrix = construct_compress_input(lst, ranges, max_len)
+# print("new_ids: ", new_ids)
+# print("position_id: ", position_id)
+# print(attention_matrix)
 
 # def construct_compress_input(input_ids, biased_index, max_len):
 #     mem_start = 128254
