@@ -100,11 +100,11 @@ def load_from_disk_then_process(
 
 
 def main():
-    batch_size_per_device = 4
+    batch_size_per_device = 2
 
-    global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B-Instruct")
+    global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3-8B-Instruct")
     global_model = AutoModelForCausalLM.from_pretrained(
-        "meta-llama/Llama-3.2-3B-Instruct",
+        "meta-llama/Meta-Llama-3-8B-Instruct",
         torch_dtype=torch.bfloat16,
         # attn_implementation='flash_attention_2',
         attn_implementation='sdpa'
@@ -162,16 +162,16 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir="training_res/new_data/upper_3B",
+        output_dir="training_res/new_data/upper_8B",
         report_to="wandb",
-        run_name=f"upper_bsz{batch_size_per_device}_3B",
+        run_name=f"upper_bsz{batch_size_per_device}_8B",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
         max_steps=6000,
         logging_dir="training_res/logs",
         logging_steps=10,
-        save_steps=2000,
-        gradient_accumulation_steps=2,
+        save_steps=1000,
+        gradient_accumulation_steps=4,
         warmup_ratio=0.1,
         lr_scheduler_type='cosine',
         bf16=True,
@@ -179,13 +179,13 @@ def main():
         do_eval=True,
         per_device_eval_batch_size = batch_size_per_device,
         evaluation_strategy="steps",  # Add this line
-        eval_steps=1000,
+        eval_steps=2000,
         gradient_checkpointing=True,
         # overwrite_output_dir = False
         remove_unused_columns=False,
         # split_batches=True,
         dispatch_batches=False,
-        eval_on_start=True,
+        eval_on_start=False,
         # save_total_limit=1,
         seed=42
     )

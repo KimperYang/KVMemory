@@ -19,8 +19,12 @@ def do_blend(model, old_kv, golden_kv, recompute_ratio, first_layer_states, posi
     top_indices = torch.topk(temp_diff, k=topk_num).indices
     # print(top_indices)
     top_indices, _ = torch.sort(top_indices)
-    print(top_indices)
-    head_dim = config.head_dim
+    # print(top_indices)
+
+    # if "head_dim" in config.keys():
+    #     head_dim = config.head_dim
+    # else:
+    head_dim = config.hidden_size // config.num_attention_heads
     # Second, starting from the second layer, we need to use the query states on selected indices and the key states in the old_kv to do the attention
     for layer_idx in range(2, len(old_kv)):
         if layer_idx == 2:
@@ -47,6 +51,8 @@ def do_blend(model, old_kv, golden_kv, recompute_ratio, first_layer_states, posi
         value_states = value_states.view(bsz, q_len, -1, head_dim).transpose(1, 2)
 
         cos, sin = transformer_block.self_attn.rotary_emb(value_states, position_ids)
+        # print(position_ids)
+        # print(transformer_block.self_attn.rotary_emb.rope_type)
         query_states, key_states = apply_rotary_pos_emb(query_states, key_states, cos, sin)
 
         updated_old_k = old_kv[layer_idx][0].clone()
@@ -99,7 +105,7 @@ def append_kv(kv_list):
         values_list = [kv[layer][1] for kv in kv_list]
 
         concatenated_keys = torch.cat(keys_list, dim=2)
-        concatenated_values = torch.cat(values_list, dim=2) 
+        concatenated_values = torch.cat(values_list, dim=2)
 
         concatenated_past_key_values = concatenated_past_key_values + ((concatenated_keys, concatenated_values),)
 
@@ -108,9 +114,9 @@ def append_kv(kv_list):
 
 # A unit test to check whether the blended kv is equal to the golden kv when recompute ratio is 100%
 
-# model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
-# tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
-# config = AutoConfig.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+# model = AutoModelForCausalLM.from_pretrained("meta-llama/Meta-Llama-3-8B-Instruct")
+# tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3-8B-Instruct")
+# config = AutoConfig.from_pretrained("meta-llama/Meta-Llama-3-8B-Instruct")
 
 # texts = ["Hello world! This is an example.", "Another sentence follows."]
 
@@ -141,7 +147,7 @@ def append_kv(kv_list):
 # golden_kv = output.past_key_values
 # first_layer_states = output.hidden_states[2]
 
-# blend_kv = do_blend(model=model, old_kv=old_kv, golden_kv=golden_kv, recompute_ratio=0.8,first_layer_states=first_layer_states, position_ids=global_position_ids, config=config)
+# blend_kv = do_blend(model=model, old_kv=old_kv, golden_kv=golden_kv, recompute_ratio=0.18,first_layer_states=first_layer_states, position_ids=global_position_ids, config=config)
 
 # for layer in range(len(blend_kv)):
 #     diff = 0

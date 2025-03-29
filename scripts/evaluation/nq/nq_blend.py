@@ -56,9 +56,9 @@ def main():
     else:
         jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
 
-    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
-    model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16)
-    config = AutoConfig.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3-8B-Instruct")
+    model = AutoModelForCausalLM.from_pretrained("meta-llama/Meta-Llama-3-8B-Instruct", torch_dtype=torch.bfloat16)
+    config = AutoConfig.from_pretrained("meta-llama/Meta-Llama-3-8B-Instruct")
     model.to('cuda')
 
     template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
@@ -114,7 +114,7 @@ def main():
         golden_kv = output.past_key_values
         first_layer_states = output.hidden_states[2]
 
-        blend_kv = do_blend(model=model, old_kv=old_kv, golden_kv=golden_kv, recompute_ratio=0.18,first_layer_states=first_layer_states, position_ids=global_position_ids, config=config)
+        blend_kv = do_blend(model=model, old_kv=old_kv, golden_kv=golden_kv, recompute_ratio=0.9, first_layer_states=first_layer_states, position_ids=global_position_ids, config=config)
 
         new_prompt = "<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n" + jsonObj["question"][i] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
 
@@ -152,7 +152,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/new_data/cacheblend_1B/NQ_at{pos}_ratio18_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/rebuttal/cacheblend_8B/NQ_at{pos}_ratio18_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
