@@ -140,14 +140,17 @@ def main():
 
         res_list.append({"id": str(i), "question": data_list[i]['question'], "response": response, "gold_answer": data_list[i]['answer'], "Score": score})
         print("Correct progress", correct_num)
-        
+
     accuracy = correct_num / total_num
     print(accuracy)
 
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/{run_name}/wiki2_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
+    if "meta" in run_name:
+        file_name = f"result/new_data/original_8B/wiki_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
+    else:
+        file_name = f"result/{run_name}/wiki_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

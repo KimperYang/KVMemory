@@ -146,7 +146,7 @@ def main():
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
     if "meta" in run_name:
-        file_name = f"result/new_data/original_1B/tqa_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
+        file_name = f"result/new_data/original_8B/tqa_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
     else:
         file_name = f"result/{run_name}/tqa_{accuracy}_{time_str}.jsonl"
 
