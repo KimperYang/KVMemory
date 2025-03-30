@@ -26,9 +26,12 @@ if pos in [0, 4, 9]:
 else:
     jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
 
-global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
-
-global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+if "meta" in run_name:
+    global_tokenizer = AutoTokenizer.from_pretrained(run_name)
+    global_model = AutoModelForCausalLM.from_pretrained(run_name, torch_dtype=torch.bfloat16)
+else:
+    global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
+    global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
 
 
 def normalize_answer(s: str) -> str:
@@ -92,7 +95,7 @@ def main():
     total_num = 500
     correct_num = 0
     res_list = []
-    execution_time = 0
+
     for i in range(total_num):
 
         print("Processing sample:", str(i))
@@ -138,7 +141,11 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/{run_name}/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
+    if "meta" in run_name:
+        file_name = f"result/new_data/original_8B/NQ_at{pos}_{accuracy}_{time_str}.jsonl"
+    else:
+        file_name = f"result/{run_name}/NQ_at{pos}_{accuracy}_{time_str}.jsonl"
+
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
             json_line = json.dumps(entry)
