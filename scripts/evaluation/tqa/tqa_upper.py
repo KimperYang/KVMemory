@@ -9,8 +9,6 @@ import regex
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, DynamicCache
 
-from src.data.attention import construct_biased_attention_matrix
-
 # vocab_size = len(global_tokenizer)
 # base_model.resize_token_embeddings(vocab_size)
 
