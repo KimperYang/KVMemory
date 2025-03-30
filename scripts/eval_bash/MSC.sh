@@ -4,10 +4,10 @@
 conda activate unlearning
 # cd /dccstor/scllm/KVMemory
 
-CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --run "meta-llama/Meta-Llama-3-8B-Instruct" --ckpt 6000 --pos 8 &
-CUDA_VISIBLE_DEVICES=1 python scripts/evaluation/nq/nq_upper.py --run "meta-llama/Meta-Llama-3-8B-Instruct" --ckpt 6000 --pos 9 &
-CUDA_VISIBLE_DEVICES=2 python scripts/evaluation/nq/nq_upper.py --run "new_data/upper_8B" --ckpt 6000 --pos 8 &
-CUDA_VISIBLE_DEVICES=3 python scripts/evaluation/nq/nq_upper.py --run "new_data/upper_8B" --ckpt 6000 --pos 9 &
+CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/samsum/samsum_upper.py --run "meta-llama/Meta-Llama-3-8B-Instruct" &
+CUDA_VISIBLE_DEVICES=1 python scripts/evaluation/multinews/multinews_upper.py --run "meta-llama/Meta-Llama-3-8B-Instruct" --weight 8&
+CUDA_VISIBLE_DEVICES=2 python scripts/evaluation/samsum/samsum.py --run "new_data/upper_8B" &
+CUDA_VISIBLE_DEVICES=3 python scripts/evaluation/multinews/multinews_upper.py --run "new_data/upper_8B" --weight 8 &
 # CUDA_VISIBLE_DEVICES=4 python scripts/evaluation/nq/nq_upper.py --run "meta-llama/Meta-Llama-3-8B-Instruct" --ckpt 6000 --pos 4 &
 # CUDA_VISIBLE_DEVICES=5 python scripts/evaluation/nq/nq_upper.py --run "meta-llama/Meta-Llama-3-8B-Instruct" --ckpt 6000 --pos 5 &
 # CUDA_VISIBLE_DEVICES=6 python scripts/evaluation/nq/nq_upper.py --run "meta-llama/Meta-Llama-3-8B-Instruct" --ckpt 6000 --pos 6 &
