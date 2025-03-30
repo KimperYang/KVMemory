@@ -66,9 +66,10 @@ def main():
         global_tokenizer = AutoTokenizer.from_pretrained(run_name)
         global_model = AutoModelForCausalLM.from_pretrained(run_name, torch_dtype=torch.bfloat16)
     else:
-        global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
-        global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
-
+        # global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
+        # global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+        global_tokenizer = AutoTokenizer.from_pretrained(f"{run_name}/checkpoint-{ckpt}")
+        global_model = AutoModelForCausalLM.from_pretrained(f"{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
     # global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
     # global_model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", torch_dtype=torch.bfloat16)
 
@@ -152,7 +153,7 @@ def main():
     if "meta" in run_name:
         file_name = f"result/new_data/promptcache_1B/tqa_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
     else:
-        file_name = f"result/{run_name}/tqa_{accuracy}_{time_str}.jsonl"
+        file_name = f"result/rebuttal/block_8B/tqa_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

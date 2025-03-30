@@ -58,12 +58,12 @@ def main():
         global_tokenizer = AutoTokenizer.from_pretrained(run_name)
         global_model = AutoModelForCausalLM.from_pretrained(run_name, torch_dtype=torch.bfloat16)
     else:
-        global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
-        global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+        global_tokenizer = AutoTokenizer.from_pretrained(f"{run_name}/checkpoint-{ckpt}")
+        global_model = AutoModelForCausalLM.from_pretrained(f"{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
 
     global_model.to('cuda')
 
-    template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
+    template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
 
     # total_num = len(jsonObj)
     total_num = len(data_list)
@@ -100,7 +100,7 @@ def main():
         concat_id = torch.tensor([concat_id], device=global_model.device)
         attention_matrix = construct_biased_attention_matrix(concat_id.size(1), biased_index, concat_id.size(1), global_model.device).unsqueeze(0).unsqueeze(0)
 
-        new_prompt = "<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n" + data_list[i]['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        new_prompt = data_list[i]['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         prompt_id = global_tokenizer(new_prompt, return_tensors="pt", add_special_tokens=False).input_ids.to(global_model.device)
 
         generate_id = torch.cat([concat_id, prompt_id], dim = 1)
@@ -140,7 +140,7 @@ def main():
     if "meta" in run_name:
         file_name = f"result/new_data/promptcache_1B/hqa2_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
     else:
-        file_name = f"result/{run_name}/hqa_{accuracy}_{time_str}.jsonl"
+        file_name = f"result/rebuttal/block_8B/hqa2_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

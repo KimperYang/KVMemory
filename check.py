@@ -1,5 +1,5 @@
 from transformers import AutoTokenizer
-
+from transformers import PreTrainedModel
 # Define model names
 model_8b = "meta-llama/Meta-Llama-3-8B-Instruct"
 model_1b = "meta-llama/Llama-3.2-1B-Instruct"
