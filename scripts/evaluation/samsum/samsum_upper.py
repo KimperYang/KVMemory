@@ -67,7 +67,7 @@ def main():
         prompt_id = global_tokenizer(new_prompt, add_special_tokens=False).input_ids
 
         generate_id = torch.tensor([context_id + prompt_id], device=global_model.device)
-
+        print(len(context_id), generate_id.shape)
         with torch.no_grad():
 
             outputs = global_model.generate(
