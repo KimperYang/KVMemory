@@ -7,7 +7,7 @@ from datasets import load_dataset
 from rouge_score import rouge_scorer
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from src.data.attention import construct_biased_attention_matrix
+# from src.data.attention import construct_biased_attention_matrix
 
 
 def calculate_rouge_l_score(candidate, reference):
