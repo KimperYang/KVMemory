@@ -117,8 +117,9 @@ def main():
     special_token_start = len(global_tokenizer)
     max_memory_num = 40
     new_special_tokens = [f"<link_{i}>" for i in range(max_memory_num * reencode_num)] + ["<mem_start>", "<mem_end>"]
+    special_tokens_dict = {"additional_special_tokens": new_special_tokens}
 
-    global_tokenizer.add_special_tokens(new_special_tokens)
+    global_tokenizer.add_special_tokens(special_tokens_dict, replace_additional_special_tokens=False)
     global_model.resize_token_embeddings(len(global_tokenizer))
 
     mem_start = len(global_tokenizer) - 2
