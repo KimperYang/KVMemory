@@ -191,7 +191,7 @@ def main():
         max_steps=6000,
         logging_dir="training_res/logs",
         logging_steps=10,
-        save_steps=1000,
+        save_steps=3000,
         gradient_accumulation_steps=8,
         warmup_ratio=0.1,
         lr_scheduler_type='cosine',
@@ -202,7 +202,7 @@ def main():
         evaluation_strategy="steps",  # Add this line
         eval_steps=2000,
         gradient_checkpointing=True,
-        # save_total_limit=1,
+        save_total_limit=1,
         # overwrite_output_dir = False
         remove_unused_columns=False,
         # split_batches=True,
