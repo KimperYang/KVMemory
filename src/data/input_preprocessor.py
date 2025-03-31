@@ -3233,7 +3233,6 @@ class compress_attention_preprocessor():
             'labels': labels,
             'biased_index': biased_index
         }
-        
 
 def custom_collate_compress(batch, compress_tokens):
 
@@ -3284,3 +3283,316 @@ def custom_collate_compress(batch, compress_tokens):
         'position_ids': torch.LongTensor(position_ids),
         'mem_num': torch.LongTensor(mem_num),
     }
+
+class qwen_sum_attention_preprocessor():
+    def __init__(
+        self,
+        tokenizer: PreTrainedTokenizerBase,
+        max_len: int,
+        special_token_start: int,
+        mem_start: int,
+        mem_end: int,
+        reencode_num: int,
+        do_shuffle: bool
+    ) -> None:
+        self.tokenizer = tokenizer
+        self.max_len = max_len
+        self.special_token_start = special_token_start
+        self.mem_start = mem_start
+        self.mem_end = mem_end
+        self.reencode_num = reencode_num
+        self.do_shuffle = do_shuffle
+
+    def process_sftmem(
+        self,
+        example: Dict[str, str],
+    ):
+        conversation = example["conversations"]
+        sys = "<|im_start|>system\n" + random.choice(general_prompts) + "<|im_end|>\n"
+
+        sys_tokens = self.tokenizer(sys, add_special_tokens= False)['input_ids']
+        sys_tokens += [self.mem_start]
+        sys_len = len(sys_tokens)
+
+        if len(conversation) % 2 != 0:
+            if conversation[0]["from"] == "Assistant":
+                conversation = conversation[1:]
+            elif conversation[-1]["from"] == "User":
+                conversation = conversation[:-1]
+            else:
+                conversation = conversation[:-1]
+
+        current_position = sys_len
+        all_input_ids = sys_tokens
+        biased_index = []
+        for idx in range(0, len(conversation) - 2, 2):
+            if (
+                conversation[idx]["from"] == "User" and
+                conversation[idx + 1]["from"] == "Assistant"
+            ):
+                text = (
+                    "<|im_start|>user\n" + conversation[idx]["value"]
+                    + "<|im_end|>\n<|im_start|>assistant\n"
+                    + conversation[idx + 1]["value"] + "<|im_end|>\n"
+                )
+                memory_tokens = self.tokenizer(text, add_special_tokens = False)['input_ids']
+
+                for sub_idx in range(self.reencode_num):
+                    memory_tokens = memory_tokens + [self.special_token_start + int(idx / 2) * self.reencode_num + sub_idx]
+
+                all_input_ids = all_input_ids + memory_tokens
+
+                mem_len = len(memory_tokens)
+
+                biased_index.append([current_position, current_position + mem_len - self.reencode_num])
+
+                current_position += mem_len
+
+        last_q = (
+            "<|im_start|>user\n" +
+            conversation[len(conversation) - 2]["value"] +
+            "<|im_end|>\n<|im_start|>assistant\n"
+        )
+
+        last_q_ids = self.tokenizer(last_q, add_special_tokens= False)['input_ids']
+        last_q_ids = [self.mem_end] + last_q_ids
+
+        all_input_ids = all_input_ids + last_q_ids
+
+        last_a = conversation[len(conversation) - 1]["value"] + "<|im_end|>"
+        last_a_ids = self.tokenizer(last_a, add_special_tokens= False)['input_ids']
+        all_input_ids = all_input_ids + last_a_ids
+
+
+        seq_len = len(all_input_ids)
+        ans_len = len(last_a_ids)
+        labels = [-100] * (seq_len - ans_len) + last_a_ids
+
+        if len(all_input_ids)>4096:
+            print(f"sftmem Exceed: {len(all_input_ids)}")
+
+        return {
+            'input_ids': all_input_ids,
+            'labels': labels,
+            'biased_index': biased_index
+        }
+
+    def process_text(
+        self,
+        example: Dict[str, str],
+    ):
+        # text_tokens = self.tokenizer(example["text"], return_tensors= "pt")['input_ids']
+        text_tokens = self.tokenizer(example["text"])['input_ids'][:self.max_len]
+        labels = text_tokens
+        return {
+            'input_ids': text_tokens,
+            'labels': labels,
+            'biased_index': None
+        }
+
+    def process_qamem(
+        self,
+        example: Dict[str, str],
+    ):
+        # system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
+        system = "<|im_start|>system\n" + random.choice(qa_prompts)
+        system_input_ids = self.tokenizer(system, add_special_tokens=False).input_ids
+        system_input_ids = system_input_ids + [self.mem_start]
+        input_ids = system_input_ids
+        sys_len = len(system_input_ids)
+
+        current_index = sys_len
+        biased_index = []
+
+        doc_list = []
+
+        for k in range(0,10):
+            title = example['documents'][k]['title']
+            text = example['documents'][k]['text']
+            doc_list.append({'title': title, 'text':text})
+
+        if self.do_shuffle:
+            random.shuffle(doc_list)
+
+        for j in range(0,10):
+            title = doc_list[j]['title']
+            text = doc_list[j]['text']
+            tem_id = self.tokenizer(f"Document [{j+1}](Title: {title}) {text}\n", add_special_tokens=False).input_ids
+
+            for sub_idx in range(self.reencode_num):
+                tem_id = tem_id + [self.special_token_start + self.reencode_num * j + sub_idx]
+
+            biased_index.append([current_index, current_index + len(tem_id) - self.reencode_num])
+            current_index += len(tem_id)
+
+            input_ids += tem_id
+
+        user = "<|im_end|>\n<|im_start|>user\n" + example['question'] + "<|im_end|>\n<|im_start|>assistant\n"
+        user_id = self.tokenizer(user, add_special_tokens=False).input_ids
+        user_id = [self.mem_end] + user_id
+        input_ids += user_id
+
+        ans_id = self.tokenizer(example['generated'] + "<|im_end|>", add_special_tokens=False).input_ids
+        input_ids += ans_id
+
+        ans_len = len(ans_id)
+        input_len = len(input_ids)
+
+        labels = [-100] * (input_len - ans_len) + ans_id
+
+        if len(input_ids)>4096:
+            print(f"qamem Exceed: {len(input_ids)}")
+
+        return {
+            'input_ids': input_ids,
+            'labels': labels,
+            'biased_index': biased_index
+        }
+
+    def process_qa(
+        self,
+        example: Dict[str, str],
+    ):
+        # system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
+        system = "<|im_start|>system\n" + random.choice(qa_prompts)
+        system_input_ids = self.tokenizer(system, add_special_tokens=False).input_ids
+        input_ids = system_input_ids
+
+        doc_list = []
+
+        for k in range(0,10):
+            title = example['documents'][k]['title']
+            text = example['documents'][k]['text']
+            doc_list.append({'title': title, 'text':text})
+
+        if self.do_shuffle:
+            random.shuffle(doc_list)
+
+        for j in range(0,10):
+            title = doc_list[j]['title']
+            text = doc_list[j]['text']
+            tem_id = self.tokenizer(f"Document [{j+1}](Title: {title}) {text}\n", add_special_tokens=False).input_ids
+
+            input_ids += tem_id
+
+        user = "<|im_end|>\n<|im_start|>user\n" + example['question'] + "<|im_end|>\n<|im_start|>assistant\n"
+        user_id = self.tokenizer(user, add_special_tokens=False).input_ids
+        input_ids += user_id
+
+        ans_id = self.tokenizer(example['generated'] + "<|im_end|>", add_special_tokens=False).input_ids
+        input_ids += ans_id
+
+        ans_len = len(ans_id)
+        input_len = len(input_ids)
+
+        labels = [-100] * (input_len - ans_len) + ans_id
+
+        if len(input_ids)>4096:
+            print(f"qa Exceed: {len(input_ids)}")
+
+
+        return {
+            'input_ids': input_ids,
+            'labels': labels,
+            'biased_index': None
+        }
+
+    def process_tulu(
+        self,
+        example: Dict[str, str],
+    ):
+        conversation = example['messages']
+        # Extract "Assistant" responses and mask "User" queries
+        # system = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an assistant who answer the question with the knowledge provided in the prompt<|eot_id|>"
+        system = "<|im_start|>system\n" + random.choice(general_prompts) + "<|im_end|>\n"
+        system_tokenized = self.tokenizer(system, add_special_tokens=False)
+        system_input_ids = system_tokenized.input_ids
+        sys_len = len(system_input_ids)
+
+        input_ids_list = system_input_ids
+        labels = [-100] * sys_len
+        for i in range(len(conversation)):
+
+            if conversation[i]["role"] == "user":
+
+                t = "<|im_start|>user\n" + conversation[i]["content"]  + "<|im_end|>\n"
+
+                tokenized = self.tokenizer(t, add_special_tokens=False)
+
+                input_ids = tokenized.input_ids
+                if len(labels) + len(input_ids) >= self.max_len:
+                    break
+
+                labels.extend([-100] * len(input_ids))
+                input_ids_list += input_ids
+
+            elif conversation[i]["role"] == "assistant":
+                t = "<|im_start|>assistant\n" + conversation[i]["content"]
+                tokenized = self.tokenizer(t, add_special_tokens=False)
+
+                input_ids = tokenized.input_ids
+                if len(labels) + len(input_ids) > self.max_len - 1:
+                    input_ids = input_ids[:self.max_len - 1 - len(labels)]
+
+                input_ids += self.tokenizer("<|im_end|>", add_special_tokens=False).input_ids
+
+                labels.extend(input_ids)
+
+                input_ids_list += input_ids
+
+        if len(input_ids_list)>4096:
+            print(f"sft Exceed: {len(input_ids_list)}")
+
+        return {
+            'input_ids': input_ids_list,
+            'labels': labels,
+            'biased_index': None
+        }
+
+    def process_xsum(
+        self,
+        example: Dict[str, str],
+    ):
+        system = "<|im_start|>system\n" + random.choice(summary_prompts) + "<|im_end|>\n<|im_start|>user\n"
+        system_input_ids = self.tokenizer(system, add_special_tokens=False).input_ids
+        system_input_ids = system_input_ids + [self.mem_start]
+        input_ids = system_input_ids
+        sys_len = len(system_input_ids)
+
+        document_id = self.tokenizer(example['document'], add_special_tokens=False).input_ids
+        chunks = [document_id[i:i+100] for i in range(0, len(document_id), 100)]
+
+        current_index = sys_len
+        biased_index = []
+
+        for j in range(len(chunks)):
+
+            tem_id = chunks[j]
+
+            for sub_idx in range(self.reencode_num):
+                tem_id = tem_id + [self.special_token_start + self.reencode_num * j + sub_idx]
+
+            biased_index.append([current_index, current_index + len(tem_id) - self.reencode_num])
+
+            current_index += len(tem_id)
+
+            input_ids += tem_id
+
+        user =  "<|im_end|>\n<|im_start|>assistant\n"
+        user_id = self.tokenizer(user, add_special_tokens=False).input_ids
+        user_id = [self.mem_end] + user_id
+        input_ids += user_id
+
+        ans_id = self.tokenizer(example['summary'] + "<|im_end|>", add_special_tokens=False).input_ids
+        input_ids += ans_id
+
+        labels = [-100] * (len(input_ids) - len(ans_id)) + ans_id
+
+        if len(input_ids)>4096:
+            print(f"xsum Exceed: {len(input_ids)}")
+
+        return {
+            'input_ids': input_ids,
+            'labels': labels,
+            'biased_index': biased_index
+        }
