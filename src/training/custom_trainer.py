@@ -29,7 +29,7 @@ class CustomTrainerBiasAttn(Trainer):
 
         outputs = model(input_ids = inputs['input_ids'], attention_mask = torch.stack(attention_matrices), labels = inputs['labels'])
         # outputs = model(input_ids = inputs['input_ids'], labels = inputs['labels'])
-        torch.cuda.empty_cache()  # Clear cache to avoid OOM issues, especially for large models
+        # torch.cuda.empty_cache()  # Clear cache to avoid OOM issues, especially for large models
         return (outputs.loss, outputs) if return_outputs else outputs.loss
 
 class CustomTrainerCompressAttn(Trainer):
