@@ -103,7 +103,7 @@ def load_from_disk_then_process(
 
 
 def main():
-    batch_size_per_device = 2
+    batch_size_per_device = 1
     reencode_num = 5
 
     global_tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-14B-Instruct")
@@ -203,7 +203,7 @@ def main():
         logging_dir="training_res/logs",
         logging_steps=10,
         save_steps=3000,
-        gradient_accumulation_steps=2,
+        gradient_accumulation_steps=4,
         warmup_ratio=0.1,
         lr_scheduler_type='cosine',
         bf16=True,
