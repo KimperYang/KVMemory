@@ -93,12 +93,12 @@ def apply_rotary_to_concat_kv(
 
 def main():
 
-    global_tokenizer = AutoTokenizer.from_pretrained("training_res/sum/sum_1_3B/checkpoint-6000")
+    global_tokenizer = AutoTokenizer.from_pretrained("/mnt/data2/jingbo/sum_5_8B/checkpoint-6000")
 
-    global_model = AutoModelForCausalLM.from_pretrained("training_res/sum/sum_1_3B/checkpoint-6000", torch_dtype=torch.bfloat16)
+    global_model = AutoModelForCausalLM.from_pretrained("/mnt/data2/jingbo/sum_5_8B/checkpoint-6000", torch_dtype=torch.bfloat16)
     global_model.to('cuda')
 
-    config = AutoConfig.from_pretrained(pretrained_model_name_or_path="training_res/sum/sum_0_3B/checkpoint-6000")
+    config = AutoConfig.from_pretrained(pretrained_model_name_or_path="/mnt/data2/jingbo/sum_5_8B/checkpoint-6000")
 
     emb = LlamaRotaryEmbedding(
         dim=config.hidden_size // config.num_attention_heads,
@@ -107,7 +107,7 @@ def main():
     ).to(device=global_model.device, dtype=torch.bfloat16)
 
     batch_size = 10
-    sequence_length = 600
+    sequence_length = 500
     reencode_num = 5
 
     vocab_size = 128255

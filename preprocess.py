@@ -8,16 +8,12 @@ CUDA_VISIBLE_DEVICES=0 accelerate launch --config_file configs/single_gpu.yaml \
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch --config_file configs/fsdp.yaml \
     --main_process_port 25678 block_attn_trainer.py
 """
-import os
 from typing import Tuple
 
 import datasets
-import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
 
-from src.data.input_preprocessor import custom_collate_bias, qwen_sum_attention_preprocessor
-from src.training.custom_trainer import CustomTrainerBiasAttn
-
+from src.data.input_preprocessor import qwen_sum_attention_preprocessor
 
 def load_from_disk_then_process(
     data_component_name: str,
@@ -30,10 +26,6 @@ def load_from_disk_then_process(
         data_path = f"dataset_cache/processed/fineweb/{data_component_name}"
         if data_component_name == "text":
             preprocessor_fn = preprocessor.process_text
-        elif data_component_name == "text_mem":
-            preprocessor_fn = preprocessor.process_textmem
-        elif data_component_name == "text_inst":
-            preprocessor_fn = preprocessor.process_textinst
         else:
             raise NotImplementedError()
         remove_columns = [
@@ -41,8 +33,6 @@ def load_from_disk_then_process(
             "file_path", "language", "language_score", "token_count",
         ]
         num_shards = 512
-        if data_component_name in ["text_mem", "text_inst"]:
-            remove_columns.append("num_tokens")
     elif data_component_name in ["sft", "sft_mem"]:
         data_path = f"dataset_cache/processed/daringanteater/{data_component_name}"
         if data_component_name == "sft":
@@ -81,12 +71,15 @@ def load_from_disk_then_process(
     data_component: datasets.DatasetDict = datasets.load_from_disk(data_path)
     # print(data_component.cleanup_cache_files())
 
-    streaming_train_dataset = data_component["train"].to_iterable_dataset(num_shards=num_shards)
-    # streaming_train_dataset = data_component["train"]
+    if data_component_name == "text":
+        streaming_train_dataset = data_component["train"][400000]
+    else
+        streaming_train_dataset = data_component["train"]
+
     training_data = streaming_train_dataset.map(
         preprocessor_fn,
         remove_columns=remove_columns,
-        # num_proc=16,
+        num_proc=64,
         batched=False,
     )
 
@@ -94,25 +87,17 @@ def load_from_disk_then_process(
     eval_data = eval_dataset.map(
         preprocessor_fn,
         remove_columns=remove_columns,
-        num_proc=96,
+        num_proc=64,
         batched=False,
-        # load_from_cache_file=False
     )
 
     return training_data, eval_data
 
 
 def main():
-    batch_size_per_device = 1
-    reencode_num = 5
 
     global_tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-14B-Instruct")
-    global_model = AutoModelForCausalLM.from_pretrained(
-        "Qwen/Qwen2.5-14B-Instruct",
-        torch_dtype=torch.bfloat16,
-        attn_implementation='sdpa',
-        # use_flash_attention_2=True,
-    )
+    reencode_num = 5
 
     special_token_start = len(global_tokenizer)
     max_memory_num = 40
@@ -120,7 +105,6 @@ def main():
     special_tokens_dict = {"additional_special_tokens": new_special_tokens}
 
     global_tokenizer.add_special_tokens(special_tokens_dict, replace_additional_special_tokens=False)
-    global_model.resize_token_embeddings(len(global_tokenizer))
 
     mem_start = len(global_tokenizer) - 2
     mem_end = len(global_tokenizer) - 1
@@ -140,88 +124,35 @@ def main():
         do_shuffle=True
     )
 
-    ptr_train, ptr_eval = load_from_disk_then_process("text", preprocessor)
-    # ptr_mem_train, ptr_mem_eval = load_from_disk_then_process("text_mem", preprocessor)
-    # ptr_inst_train, ptr_inst_eval = load_from_disk_then_process("text_inst", preprocessor)
-    sft_train, sft_eval = load_from_disk_then_process("tulu", preprocessor)
-    sft_mem_train, sft_mem_eval = load_from_disk_then_process("sft_mem", preprocessor)
-    qa_train, qa_eval = load_from_disk_then_process("qa", preprocessor)
-    qa_mem_train, qa_mem_eval = load_from_disk_then_process("qa_mem", preprocessor)
-    xsum_train, xsum_eval = load_from_disk_then_process("xsum", preprocessor)
+    text_train, text_test = load_from_disk_then_process("text", preprocessor)
+    dataset = datasets.DatasetDict({'train': text_train, 'test': text_test})
+    shards = {'train': 128, 'test': 4}
+    dataset.save_to_disk("dataset_cache/processed/qwen_mapped/text", num_shards=shards, num_proc=128)
 
-    train_dataset = datasets.interleave_datasets(
-        [sft_mem_train, sft_train, ptr_train, qa_train, qa_mem_train, xsum_train],
-        probabilities=[0.25, 0.30, 0.20, 0.10, 0.10, 0.05],
-        seed=42,
-        stopping_strategy="all_exhausted",
-    )
+    tulu_train, tulu_test = load_from_disk_then_process("tulu", preprocessor)
+    dataset = datasets.DatasetDict({'train': tulu_train, 'test': tulu_test})
+    shards = {'train': 128, 'test': 4}
+    dataset.save_to_disk("dataset_cache/processed/qwen_mapped/tulu", num_shards=shards, num_proc=128)
 
-    # train_dataset = datasets.interleave_datasets(
-    #     [sft_mem_train, sft_train, ptr_train, qa_train, qa_mem_train],
-    #     probabilities=[0.2632, 0.3157, 0.2105, 0.1053, 0.1053],
-    #     seed=42,
-    #     stopping_strategy="all_exhausted",
-    # )
+    qa_train, qa_test = load_from_disk_then_process("qa", preprocessor)
+    dataset = datasets.DatasetDict({'train': qa_train, 'test': qa_test})
+    shards = {'train': 128, 'test': 4}
+    dataset.save_to_disk("dataset_cache/processed/qwen_mapped/qa", num_shards=shards, num_proc=128)
 
-    eval_dataset = datasets.DatasetDict({
-        "text": ptr_eval,
-        "sft": sft_eval,
-        "sftmem": sft_mem_eval,
-        "qa": qa_eval,
-        "qamem": qa_mem_eval
-    })
+    qamem_train, qamem_test = load_from_disk_then_process("qa_mem", preprocessor)
+    dataset = datasets.DatasetDict({'train': qamem_train, 'test': qamem_test})
+    shards = {'train': 128, 'test': 4}
+    dataset.save_to_disk("dataset_cache/processed/qwen_mapped/qa_mem", num_shards=shards, num_proc=128)
 
-    # eval_dataset = datasets.DatasetDict({
-    #     "text": ptr_eval,
-    #     "sft": sft_eval,
-    #     "sftmem": sft_mem_eval,
-    #     "qa": qa_eval,
-    #     "qamem": qa_mem_eval,
-    #     "xsum": xsum_eval
-    # })
+    xsum_train, xsum_test = load_from_disk_then_process("xsum", preprocessor)
+    dataset = datasets.DatasetDict({'train': xsum_train, 'test': xsum_test})
+    shards = {'train': 128, 'test': 4}
+    dataset.save_to_disk("dataset_cache/processed/qwen_mapped/xsum", num_shards=shards, num_proc=128)
 
-    os.environ["WANDB_PROJECT"]="kvmemory"
-    os.environ["WANDB_WATCH"]="false"
-
-    training_args = TrainingArguments(
-        output_dir=f"training_res/sum/sum_{reencode_num}_qwen",
-        report_to="wandb",
-        run_name=f"sum_{reencode_num}_bsz{batch_size_per_device}_qwen",
-        per_device_train_batch_size= batch_size_per_device,
-        # num_train_epochs=2,
-        max_steps=6000,
-        logging_dir="training_res/logs",
-        logging_steps=10,
-        save_steps=3000,
-        gradient_accumulation_steps=8,
-        warmup_ratio=0.1,
-        lr_scheduler_type='cosine',
-        bf16=True,
-        learning_rate=5e-6,
-        do_eval=True,
-        per_device_eval_batch_size = batch_size_per_device,
-        evaluation_strategy="steps",  # Add this line
-        eval_steps=2000,
-        gradient_checkpointing=True,
-        save_total_limit=1,
-        # overwrite_output_dir = False
-        remove_unused_columns=False,
-        # split_batches=True,
-        dispatch_batches=False,
-        # eval_on_start=True,
-        seed = 42
-    )
-
-    trainer = CustomTrainerBiasAttn(
-        model=global_model,
-        tokenizer=global_tokenizer,
-        args=training_args,
-        train_dataset = train_dataset,
-        eval_dataset = eval_dataset,
-        data_collator = custom_collate_bias
-    )
-
-    trainer.train()
+    sftmem_train, sftmem_test = load_from_disk_then_process("sft_mem", preprocessor)
+    dataset = datasets.DatasetDict({'train': sftmem_train, 'test': sftmem_test})
+    shards = {'train': 128, 'test': 4}
+    dataset.save_to_disk("dataset_cache/processed/qwen_mapped/sft_mem", num_shards=shards, num_proc=128)
 
 if __name__ == "__main__":
     main()
