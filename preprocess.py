@@ -72,7 +72,7 @@ def load_from_disk_then_process(
     # print(data_component.cleanup_cache_files())
 
     if data_component_name == "text":
-        streaming_train_dataset = data_component["train"][400000]
+        streaming_train_dataset = data_component["train"].select(0, 400000)
     else:
         streaming_train_dataset = data_component["train"]
 
