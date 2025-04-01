@@ -73,7 +73,7 @@ def load_from_disk_then_process(
 
     if data_component_name == "text":
         streaming_train_dataset = data_component["train"][400000]
-    else
+    else:
         streaming_train_dataset = data_component["train"]
 
     training_data = streaming_train_dataset.map(
