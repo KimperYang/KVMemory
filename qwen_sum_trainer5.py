@@ -140,14 +140,30 @@ def main():
         do_shuffle=True
     )
 
-    ptr_train, ptr_eval = load_from_disk_then_process("text", preprocessor)
-    # ptr_mem_train, ptr_mem_eval = load_from_disk_then_process("text_mem", preprocessor)
-    # ptr_inst_train, ptr_inst_eval = load_from_disk_then_process("text_inst", preprocessor)
-    sft_train, sft_eval = load_from_disk_then_process("tulu", preprocessor)
-    sft_mem_train, sft_mem_eval = load_from_disk_then_process("sft_mem", preprocessor)
-    qa_train, qa_eval = load_from_disk_then_process("qa", preprocessor)
-    qa_mem_train, qa_mem_eval = load_from_disk_then_process("qa_mem", preprocessor)
-    xsum_train, xsum_eval = load_from_disk_then_process("xsum", preprocessor)
+    # ptr_train, ptr_eval = load_from_disk_then_process("text", preprocessor)
+    # sft_train, sft_eval = load_from_disk_then_process("tulu", preprocessor)
+    # sft_mem_train, sft_mem_eval = load_from_disk_then_process("sft_mem", preprocessor)
+    # qa_train, qa_eval = load_from_disk_then_process("qa", preprocessor)
+    # qa_mem_train, qa_mem_eval = load_from_disk_then_process("qa_mem", preprocessor)
+    # xsum_train, xsum_eval = load_from_disk_then_process("xsum", preprocessor)
+
+    text_dataset = datasets.load_from_disk("dataset_cache/processed/qwen_mapped/text")
+    ptr_train, ptr_eval = text_dataset["train"], text_dataset["test"]
+
+    tulu_dataset = datasets.load_from_disk("dataset_cache/processed/qwen_mapped/tulu")
+    sft_train, sft_eval = tulu_dataset["train"], tulu_dataset["test"]
+
+    sftmem_dataset = datasets.load_from_disk("dataset_cache/processed/qwen_mapped/sft_mem")
+    sft_mem_train, sft_mem_eval = sftmem_dataset["train"], sftmem_dataset["test"]
+
+    qa_dataset = datasets.load_from_disk("dataset_cache/processed/qwen_mapped/qa")
+    qa_train, qa_eval = qa_dataset["train"], qa_dataset["test"]
+
+    qamem_dataset = datasets.load_from_disk("dataset_cache/processed/qwen_mapped/qa_mem")
+    qa_mem_train, qa_mem_eval = qamem_dataset["train"], qamem_dataset["test"]
+
+    xsum_dataset = datasets.load_from_disk("dataset_cache/processed/qwen_mapped/xsum")
+    xsum_train, xsum_eval = xsum_dataset["train"], xsum_dataset["test"]
 
     train_dataset = datasets.interleave_datasets(
         [sft_mem_train, sft_train, ptr_train, qa_train, qa_mem_train, xsum_train],
@@ -156,19 +172,13 @@ def main():
         stopping_strategy="all_exhausted",
     )
 
-    # train_dataset = datasets.interleave_datasets(
-    #     [sft_mem_train, sft_train, ptr_train, qa_train, qa_mem_train],
-    #     probabilities=[0.2632, 0.3157, 0.2105, 0.1053, 0.1053],
-    #     seed=42,
-    #     stopping_strategy="all_exhausted",
-    # )
-
     eval_dataset = datasets.DatasetDict({
         "text": ptr_eval,
         "sft": sft_eval,
         "sftmem": sft_mem_eval,
         "qa": qa_eval,
-        "qamem": qa_mem_eval
+        "qamem": qa_mem_eval,
+        "xsum": xsum_eval
     })
 
     # eval_dataset = datasets.DatasetDict({
