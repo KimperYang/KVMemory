@@ -1,1 +1,1 @@
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch --config_file configs/step4.yaml --main_process_port 25678 qwen_sum_trainer5.py
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch --config_file configs/step8.yaml --main_process_port 25678 sum_attn_trainer5.py
