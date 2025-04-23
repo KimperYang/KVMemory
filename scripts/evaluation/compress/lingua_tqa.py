@@ -33,10 +33,11 @@ global_tokenizer = AutoTokenizer.from_pretrained(f"{run_name}/checkpoint-{ckpt}"
 
 global_model = AutoModelForCausalLM.from_pretrained(f"{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
 
-llm_lingua = PromptCompressor(
-    model_name="microsoft/llmlingua-2-xlm-roberta-large-meetingbank",
-    use_llmlingua2=True, # Whether to use llmlingua-2
-)
+# llm_lingua = PromptCompressor(
+#     model_name="microsoft/llmlingua-2-xlm-roberta-large-meetingbank",
+#     use_llmlingua2=True, # Whether to use llmlingua-2
+# )
+llm_lingua = PromptCompressor()
 
 def append_kv(kv_list, d):  #d=0 batch size; d=2 sequence length
     num_layers = len(kv_list[0])
@@ -213,7 +214,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/lingua/tqa_ckpt{ckpt}_{accuracy}_{time_str}_{reencode_num}.jsonl"
+    file_name = f"result/lingua1/tqa_ckpt{ckpt}_{accuracy}_{time_str}_{reencode_num}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
