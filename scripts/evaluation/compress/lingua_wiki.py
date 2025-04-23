@@ -14,14 +14,14 @@ import argparse
 parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
 parser.add_argument('--run', type=str, required=True, help='Path under training_res')
 parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
-parser.add_argument('--pos', type=int, required=True, help='Position value')
+
 parser.add_argument('--reencode', type=int, required=True, help='Reencode num')
 
 args = parser.parse_args()
 
 run_name = args.run
 ckpt = args.ckpt
-pos = args.pos
+
 reencode_num = args.reencode
 
 file_path = "data/raw/dev.json"
@@ -213,7 +213,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/lingua/wiki_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}_{reencode_num}.jsonl"
+    file_name = f"result/lingua/wiki_ckpt{ckpt}_{accuracy}_{time_str}_{reencode_num}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
