@@ -33,7 +33,12 @@ global_tokenizer = AutoTokenizer.from_pretrained(f"{run_name}/checkpoint-{ckpt}"
 
 global_model = AutoModelForCausalLM.from_pretrained(f"{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
 
-compression_model = AutoModelForCausalLM.from_pretrained("training_res/anchor_1B/checkpoint-4000", torch_dtype=torch.bfloat16)
+# llm_lingua = PromptCompressor(
+#     model_name="microsoft/llmlingua-2-xlm-roberta-large-meetingbank",
+#     use_llmlingua2=True, # Whether to use llmlingua-2
+# )
+
+llm_lingua = PromptCompressor()
 
 def append_kv(kv_list, d):  #d=0 batch size; d=2 sequence length
     num_layers = len(kv_list[0])
@@ -115,16 +120,6 @@ def construct_inference_inputs(system_ids, doc_id_list, user_ids, special_token_
     return input_ids, attention_matrix, cache_position_ids, input_position_ids, new_prompt_ids,
 
 def main():
-    # system_ids = ["sys"] * 3
-    # doc_id_list = [["doc1", "doc1"], ["doc2", "doc2"], ["doc3"]]
-    # user_ids = ["user"] * 2
-    # special_token_start = 128011
-    # reencode_num = 1
-    # input_ids, attention_matrix, cache_position_ids, input_position_ids = construct_inference_inputs(system_ids, doc_id_list, user_ids, special_token_start, reencode_num)
-    # print("Input IDs:", input_ids)
-    # print("Attention Matrix:", attention_matrix)
-    # print("Cache Position IDs:", cache_position_ids)
-    # print("Input Position IDs:", input_position_ids)
     global_model.to('cuda')
 
     special_token_start=128011
@@ -153,6 +148,7 @@ def main():
         for j in range(0,10):
             title = doc_list[j]["title"]
             text = doc_list[j]["text"]
+            compressed_text = llm_lingua.compress_prompt(text, rate=0.5, force_tokens = ['\n', '?'])['compressed_prompt']
             memory_list.append(f"Document [{j+1}](Title: {title}) {compressed_text}\n")
 
         # memory_list.insert(0, template)
@@ -230,8 +226,8 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    # file_name = f"result/{run_name}/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
-    file_name = f"result/lingua1/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}_{reencode_num}.jsonl"
+    # file_name = f"result/{run_name}/NQ_3B_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/lingua1/NQ_3B_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}_{reencode_num}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
