@@ -187,7 +187,7 @@ def main():
         evaluation_strategy="steps",  # Add this line
         eval_steps=2000,
         gradient_checkpointing=True,
-        # save_total_limit=1,
+        save_total_limit=1,
         # overwrite_output_dir = False
         remove_unused_columns=False,
         # split_batches=True,
@@ -205,7 +205,7 @@ def main():
         data_collator = custom_collate_bias
     )
 
-    trainer.train()
+    trainer.train(resume_from_checkpoint=True)
 
 if __name__ == "__main__":
     main()
