@@ -103,7 +103,7 @@ def load_from_disk_then_process(
 
 
 def main():
-    batch_size_per_device = 1
+    batch_size_per_device = 2
     reencode_num = 5
 
     global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.1-8B-Instruct")
