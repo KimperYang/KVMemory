@@ -205,7 +205,7 @@ def main():
         data_collator = custom_collate_bias
     )
 
-    trainer.train(resume_from_checkpoint=True)
+    trainer.train()
 
 if __name__ == "__main__":
     main()
