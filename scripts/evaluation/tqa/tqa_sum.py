@@ -5,7 +5,7 @@ import json
 import datetime
 import string
 from typing import List
-from src.data.attention import construct_biased_attention_matrix
+# from src.data.attention import construct_biased_attention_matrix
 import regex
 import argparse
 # vocab_size = len(global_tokenizer)
@@ -14,6 +14,37 @@ import argparse
 # peft_config_path = "/mnt/data/jingbo/kv_dump_combine_mix5_5000steps_5e-6_full/checkpoint-5000"  # Path to the directory where LoRA weights are stored
 
 # global_model = PeftModel.from_pretrained(base_model, peft_config_path)
+
+def construct_biased_attention_matrix(seq_len, biased_ranges, max_len, device):
+    """
+    Constructs a padded biased attention matrix.
+
+    Parameters:
+    - seq_len: The actual sequence length of the input.
+    - biased_ranges: List of [start, end] indices defining biased position ranges.
+    - max_len: The maximum sequence length for padding.
+
+    Returns:
+    - A numpy array representing the padded biased attention matrix.
+    """
+    # Initialize the attention matrix with -inf for masking
+    attention_matrix = torch.triu(torch.full((max_len, max_len), float('-inf'), dtype=torch.bfloat16, device = device), diagonal= 1)
+
+    if biased_ranges is not None:
+        for indices in biased_ranges:
+            i = indices[0]
+            j = indices[1]
+
+            attention_matrix[i : j, 0 : i] = float('-inf')
+
+    attention_matrix[seq_len :, :] = float('-inf')
+    attention_matrix[: ,seq_len :] = float('-inf')
+
+    if  attention_matrix.max() != 0:
+        print("wrong", seq_len, biased_ranges, max_len)
+        print(attention_matrix)
+
+    return attention_matrix
 
 def normalize_answer(s: str) -> str:
     """Normalization from the SQuAD evaluation script.
