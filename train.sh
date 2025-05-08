@@ -1,4 +1,4 @@
-CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file config/4gpu_step8.yaml --main_process_port 25678 blkattn_trainer.py
+CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file config/4gpu_step8.yaml --main_process_port 25678 sum_attn_trainer1.py
 
 # CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/compress/lingua.py --run training_res/sum/sum_5_3B --reencode 5 --ckpt 6000 --pos 2 &
 # CUDA_VISIBLE_DEVICES=1 python scripts/evaluation/compress/lingua.py --run training_res/sum/sum_5_3B --reencode 5 --ckpt 6000 --pos 3 &
