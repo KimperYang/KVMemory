@@ -52,7 +52,7 @@ def load_from_disk_then_process(
             raise NotImplementedError()
         remove_columns=["system", "mask", "dataset", "conversations"]
         num_shards = 32
-    elif data_component_name in ["qa", "qa_mem"]:
+    elif data_component_name in ["qa", "qa_mem", "full_qa"]:
         data_path = f"dataset_cache/processed/block_qa/{data_component_name}"
         if data_component_name == "qa":
             preprocessor_fn = preprocessor.process_qa
