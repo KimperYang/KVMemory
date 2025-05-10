@@ -69,6 +69,7 @@ def load_from_disk_then_process(
             preprocessor_fn = preprocessor.process_qamem
         elif data_component_name == "full_qa":
             preprocessor_fn = preprocessor.process_qamem
+            data_path = f"dataset_cache/processed/compress_qa"
         else:
             raise NotImplementedError()
         remove_columns=['prompt', 'question', 'answers', 'generated', 'inputs', 'documents']
@@ -126,14 +127,12 @@ def main():
         do_shuffle=True
     )
 
-    ptr_train, ptr_eval = load_from_disk_then_process("text", preprocessor)
-    # ptr_mem_train, ptr_mem_eval = load_from_disk_then_process("text_mem", preprocessor)
-    # ptr_inst_train, ptr_inst_eval = load_from_disk_then_process("text_inst", preprocessor)
-    sft_train, sft_eval = load_from_disk_then_process("tulu", preprocessor)
-    sft_mem_train, sft_mem_eval = load_from_disk_then_process("sft_mem", preprocessor)
-    qa_train, qa_eval = load_from_disk_then_process("qa", preprocessor)
-    qa_mem_train, qa_mem_eval = load_from_disk_then_process("qa_mem", preprocessor)
-    xsum_train, xsum_eval = load_from_disk_then_process("xsum", preprocessor)
+    # ptr_train, ptr_eval = load_from_disk_then_process("text", preprocessor)
+    # sft_train, sft_eval = load_from_disk_then_process("tulu", preprocessor)
+    # sft_mem_train, sft_mem_eval = load_from_disk_then_process("sft_mem", preprocessor)
+    # qa_train, qa_eval = load_from_disk_then_process("qa", preprocessor)
+    # qa_mem_train, qa_mem_eval = load_from_disk_then_process("qa_mem", preprocessor)
+    # xsum_train, xsum_eval = load_from_disk_then_process("xsum", preprocessor)
 
     # train_dataset = datasets.interleave_datasets(
     #     [sft_mem_train, sft_train, ptr_train, qa_train, qa_mem_train, xsum_train],
