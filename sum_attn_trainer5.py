@@ -159,8 +159,8 @@ def main():
         report_to="wandb",
         run_name=f"sum_{reencode_num}_bsz{batch_size_per_device}_31_qa",
         per_device_train_batch_size= batch_size_per_device,
-        # num_train_epochs=2,
-        max_steps=6000,
+        num_train_epochs=2,
+        # max_steps=6000,
         logging_dir="training_res/logs",
         logging_steps=10,
         save_steps=1000,
@@ -171,8 +171,8 @@ def main():
         learning_rate=5e-6,
         do_eval=True,
         per_device_eval_batch_size = batch_size_per_device,
-        evaluation_strategy="steps",  # Add this line
-        eval_steps=2000,
+        evaluation_strategy="epoch",  # Add this line
+        # eval_steps=2000,
         gradient_checkpointing=True,
         save_total_limit=1,
         # overwrite_output_dir = False
