@@ -58,6 +58,8 @@ def load_from_disk_then_process(
             preprocessor_fn = preprocessor.process_qa
         elif data_component_name == "qa_mem":
             preprocessor_fn = preprocessor.process_qamem
+        elif data_component_name == "full_qa":
+            preprocessor_fn = preprocessor.process_qamem
         else:
             raise NotImplementedError()
         remove_columns=['prompt', 'question', 'answers', 'generated', 'inputs', 'documents']
@@ -128,45 +130,30 @@ def main():
     xsum_train, xsum_eval = load_from_disk_then_process("xsum", preprocessor)
 
     # train_dataset = datasets.interleave_datasets(
-    #     [sft_mem_train, sft_train, ptr_inst_train, ptr_train, ptr_mem_train, qa_train, qa_mem_train],
-    #     probabilities=[0.2, 0.25, 0.1, 0.25, 0.1, 0.05, 0.05],
+    #     [sft_mem_train, sft_train, ptr_train, qa_train, qa_mem_train, xsum_train],
+    #     probabilities=[0.25, 0.30, 0.20, 0.10, 0.10, 0.05],
     #     seed=42,
     #     stopping_strategy="all_exhausted",
     # )
 
-    train_dataset = datasets.interleave_datasets(
-        [sft_mem_train, sft_train, ptr_train, qa_train, qa_mem_train, xsum_train],
-        probabilities=[0.25, 0.30, 0.20, 0.10, 0.10, 0.05],
-        seed=42,
-        stopping_strategy="all_exhausted",
-    )
-
     # eval_dataset = datasets.DatasetDict({
     #     "text": ptr_eval,
-    #     "textmem": ptr_mem_eval,
-    #     "textinst": ptr_inst_eval,
     #     "sft": sft_eval,
     #     "sftmem": sft_mem_eval,
     #     "qa": qa_eval,
-    #     "qamem": qa_mem_eval
+    #     "qamem": qa_mem_eval,
+    #     "xsum": xsum_eval
     # })
 
-    eval_dataset = datasets.DatasetDict({
-        "text": ptr_eval,
-        "sft": sft_eval,
-        "sftmem": sft_mem_eval,
-        "qa": qa_eval,
-        "qamem": qa_mem_eval,
-        "xsum": xsum_eval
-    })
+    train_dataset, eval_dataset = load_from_disk_then_process("full_qa", preprocessor)
 
     os.environ["WANDB_PROJECT"]="kvmemory"
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir="training_res/new_data/block_31_8B",
+        output_dir="training_res/new_data/block_31_8B_qa",
         report_to="wandb",
-        run_name=f"block_bsz{batch_size_per_device}_31_8B",
+        run_name=f"block_bsz{batch_size_per_device}_31_8B_qa",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
         max_steps=6000,

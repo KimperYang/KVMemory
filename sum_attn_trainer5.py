@@ -61,11 +61,13 @@ def load_from_disk_then_process(
             raise NotImplementedError()
         remove_columns=["id", "messages", "source"]
         num_shards = 32
-    elif data_component_name in ["qa", "qa_mem"]:
+    elif data_component_name in ["qa", "qa_mem", "full_qa"]:
         data_path = f"dataset_cache/processed/block_qa/{data_component_name}"
         if data_component_name == "qa":
             preprocessor_fn = preprocessor.process_qa
         elif data_component_name == "qa_mem":
+            preprocessor_fn = preprocessor.process_qamem
+        elif data_component_name == "full_qa":
             preprocessor_fn = preprocessor.process_qamem
         else:
             raise NotImplementedError()
@@ -133,44 +135,30 @@ def main():
     qa_mem_train, qa_mem_eval = load_from_disk_then_process("qa_mem", preprocessor)
     xsum_train, xsum_eval = load_from_disk_then_process("xsum", preprocessor)
 
-    train_dataset = datasets.interleave_datasets(
-        [sft_mem_train, sft_train, ptr_train, qa_train, qa_mem_train, xsum_train],
-        probabilities=[0.25, 0.30, 0.20, 0.10, 0.10, 0.05],
-        seed=42,
-        stopping_strategy="all_exhausted",
-    )
-
     # train_dataset = datasets.interleave_datasets(
-    #     [sft_mem_train, sft_train, ptr_train, qa_train, qa_mem_train],
-    #     probabilities=[0.2632, 0.3157, 0.2105, 0.1053, 0.1053],
+    #     [sft_mem_train, sft_train, ptr_train, qa_train, qa_mem_train, xsum_train],
+    #     probabilities=[0.25, 0.30, 0.20, 0.10, 0.10, 0.05],
     #     seed=42,
     #     stopping_strategy="all_exhausted",
     # )
-
-    eval_dataset = datasets.DatasetDict({
-        "text": ptr_eval,
-        "sft": sft_eval,
-        "sftmem": sft_mem_eval,
-        "qa": qa_eval,
-        "qamem": qa_mem_eval
-    })
 
     # eval_dataset = datasets.DatasetDict({
     #     "text": ptr_eval,
     #     "sft": sft_eval,
     #     "sftmem": sft_mem_eval,
     #     "qa": qa_eval,
-    #     "qamem": qa_mem_eval,
-    #     "xsum": xsum_eval
+    #     "qamem": qa_mem_eval
     # })
+
+    train_dataset, eval_dataset = load_from_disk_then_process("full_qa", preprocessor)
 
     os.environ["WANDB_PROJECT"]="kvmemory"
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir=f"training_res/sum/sum_{reencode_num}_31_8B",
+        output_dir=f"training_res/sum/sum_{reencode_num}_31_8B_qa",
         report_to="wandb",
-        run_name=f"sum_{reencode_num}_bsz{batch_size_per_device}_31_8B",
+        run_name=f"sum_{reencode_num}_bsz{batch_size_per_device}_31_qa",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
         max_steps=6000,
