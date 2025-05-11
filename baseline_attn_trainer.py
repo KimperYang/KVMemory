@@ -102,9 +102,9 @@ def load_from_disk_then_process(
 def main():
     batch_size_per_device = 2
 
-    global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3-8B-Instruct")
+    global_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.1-8B-Instruct")
     global_model = AutoModelForCausalLM.from_pretrained(
-        "meta-llama/Meta-Llama-3-8B-Instruct",
+        "meta-llama/Llama-3.1-8B-Instruct",
         torch_dtype=torch.bfloat16,
         attn_implementation='flash_attention_2',
         # attn_implementation='sdpa'
@@ -162,7 +162,7 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir="training_res/new_data/upper_8B",
+        output_dir="training_res/new_data/upper_31_8B",
         report_to="wandb",
         run_name=f"upper_bsz{batch_size_per_device}_8B",
         per_device_train_batch_size= batch_size_per_device,
@@ -171,7 +171,7 @@ def main():
         logging_dir="training_res/logs",
         logging_steps=10,
         save_steps=1000,
-        gradient_accumulation_steps=4,
+        gradient_accumulation_steps=8,
         warmup_ratio=0.1,
         lr_scheduler_type='cosine',
         bf16=True,
