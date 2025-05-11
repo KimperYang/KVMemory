@@ -106,8 +106,8 @@ def main():
     global_model = AutoModelForCausalLM.from_pretrained(
         "meta-llama/Llama-3.1-8B-Instruct",
         torch_dtype=torch.bfloat16,
-        attn_implementation='flash_attention_2',
-        # attn_implementation='sdpa'
+        # attn_implementation='flash_attention_2',
+        attn_implementation='sdpa'
     )
 
     preprocessor = baseline_attention_preprocessor(
