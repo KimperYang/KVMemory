@@ -178,7 +178,7 @@ def main():
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
     # file_name = f"result/order/promptcache/wiki_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
-    file_name = f"result/new_data/block_31_8B/wiki2_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/qa/block_8B/wiki2_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

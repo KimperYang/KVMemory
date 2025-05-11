@@ -184,7 +184,7 @@ def main():
     if "meta" in run_name:
         file_name = f"result/new_data/promptcache_1B/tqa_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
     else:
-        file_name = f"result/new_data/block_31_8B/tqa_{accuracy}_{time_str}.jsonl"
+        file_name = f"result/qa/block_8B/tqa_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
