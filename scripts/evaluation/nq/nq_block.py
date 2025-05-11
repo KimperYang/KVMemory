@@ -162,7 +162,7 @@ def main():
 
     # file_name = f"result/order/block/NQ2_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
     # file_name = f"result/{run_name}/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
-    file_name = f"result/rebuttal/block_8B/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/qa/block_8B/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
