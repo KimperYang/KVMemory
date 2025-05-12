@@ -182,7 +182,7 @@ def main():
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
     if "meta" in run_name:
-        file_name = f"result/new_data/promptcache_1B/tqa_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
+        file_name = f"result/llama31/promptcache/tqa_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
     else:
         file_name = f"result/qa/block_8B/tqa_{accuracy}_{time_str}.jsonl"
 
