@@ -7,7 +7,7 @@ export WANDB_API_KEY="297fefc6714432e38b47736829a56f96e540206a"
 
 CUDA_VISIBLE_DEVICES=1 python scripts/evaluation/hqa/hqa_blend.py &
 CUDA_VISIBLE_DEVICES=5 python scripts/evaluation/2wiki/wiki_blend.py &
-CUDA_VISIBLE_DEVICES=5 python scripts/evaluation/musique/musique_blend.py &
+CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/musique/musique_blend.py &
 CUDA_VISIBLE_DEVICES=6 python scripts/evaluation/tqa/tqa_blend.py &
 
 # wait
