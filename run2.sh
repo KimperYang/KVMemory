@@ -6,11 +6,11 @@
 # export WANDB_API_KEY="297fefc6714432e38b47736829a56f96e540206a"
 
 # CUDA_VISIBLE_DEVICES=5 python scripts/evaluation/hqa/hqa_block.py --ckpt 6000 --run "meta-llama/Llama-3.1-8B-Instruct" &
-CUDA_VISIBLE_DEVICES=6 python scripts/evaluation/tqa/tqa_block.py --ckpt 6000 --run "meta-llama/Llama-3.1-8B-Instruct" &
+# CUDA_VISIBLE_DEVICES=6 python scripts/evaluation/tqa/tqa_block.py --ckpt 6000 --run "meta-llama/Llama-3.1-8B-Instruct" &
 # CUDA_VISIBLE_DEVICES=7 python scripts/evaluation/musique/musique_block.py --ckpt 6000 --run "meta-llama/Llama-3.1-8B-Instruct" &
 # CUDA_VISIBLE_DEVICES=4 python scripts/evaluation/2wiki/wiki_block.py --ckpt 6000 --run "meta-llama/Llama-3.1-8B-Instruct" &
 
-wait
+# wait
 
 CUDA_VISIBLE_DEVICES=5 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "meta-llama/Llama-3.1-8B-Instruct" --pos 0 &
 CUDA_VISIBLE_DEVICES=6 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "meta-llama/Llama-3.1-8B-Instruct" --pos 1 &

@@ -5,7 +5,7 @@ import json
 import datetime
 import string
 from typing import List
-from src.utils.do_blend import append_kv, do_blend
+from src.utils.do_blend import append_kv, do_blend_filter
 import regex
 import argparse
 
@@ -49,21 +49,14 @@ def best_subspan_em(prediction: str, ground_truths: List[str]) -> float:
 
 def main():
 
-    parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
-    parser.add_argument('--weight', type=int, required=True, help='Checkpoint number')
-
-    args = parser.parse_args()
-
-    weight = args.weight
-
     file_path = "data/raw/dev.json"
     with open(file_path, 'r') as file:
         data = json.load(file)
     data_list = data
 
-    tokenizer = AutoTokenizer.from_pretrained(f"meta-llama/Llama-3.2-{weight}B-Instruct")
-    model = AutoModelForCausalLM.from_pretrained(f"meta-llama/Llama-3.2-{weight}B-Instruct", torch_dtype=torch.bfloat16)
-    config = AutoConfig.from_pretrained(f"meta-llama/Llama-3.2-{weight}B-Instruct")
+    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.1-8B-Instruct")
+    model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.1-8B-Instruct", torch_dtype=torch.bfloat16)
+    config = AutoConfig.from_pretrained("meta-llama/Llama-3.1-8B-Instruct")
     model.to('cuda')
 
     template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question."
@@ -111,7 +104,7 @@ def main():
         golden_kv = output.past_key_values
         first_layer_states = output.hidden_states[2]
 
-        blend_kv = do_blend(model=model, old_kv=old_kv, golden_kv=golden_kv, recompute_ratio=0.18,first_layer_states=first_layer_states, position_ids=global_position_ids, config=config)
+        blend_kv = do_blend_filter(model=model, old_kv=old_kv, golden_kv=golden_kv, recompute_ratio=0.18,first_layer_states=first_layer_states, position_ids=global_position_ids, config=config)
 
         new_prompt = "<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n" + data_list[i]["question"] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
 
@@ -150,7 +143,7 @@ def main():
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
     # file_name = f"result/order/promptcache/wiki_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
-    file_name = f"result/new_data/cacheblend_3B/wiki2_{weight}B_ratio18_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/llama31/cacheblend/wiki2_ratio18_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
