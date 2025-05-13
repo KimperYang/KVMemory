@@ -149,7 +149,7 @@ def main():
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
     if "meta" in run_name:
-        file_name = f"result/new_data/original_8B/wiki_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
+        file_name = f"result/llama31/original_8B/wiki_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
     else:
         file_name = f"result/{run_name}/wiki_{accuracy}_{time_str}.jsonl"
 

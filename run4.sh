@@ -1,9 +1,18 @@
-startTime=$(date +%s)
+# startTime=$(date +%s)
 
-output_dir=$1
-run_name=$2
+# output_dir=$1
+# run_name=$2
 
-export WANDB_API_KEY="297fefc6714432e38b47736829a56f96e540206a"
+# export WANDB_API_KEY="297fefc6714432e38b47736829a56f96e540206a"
 
-python scripts/evaluation/2wiki/wiki_sum.py --ckpt 1122 --run "training_res/sum/sum_5_31_8B_qa" --reencode 5
-python scripts/evaluation/2wiki/wiki_block.py --ckpt 1122 --run "training_res/new_data/block_31_8B_qa"
+
+# CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --pos 4 &
+# CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --pos 5 &
+# CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --pos 6 &
+# CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --pos 7 &
+# CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --pos 4 &
+# CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --pos 5 &
+# CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --pos 6 &
+# CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --pos 7 &
+# CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --pos 8 &
+# CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --pos 9 &
