@@ -146,6 +146,7 @@ def main():
         concat_id = sys_id + concat_id + [mem_end]
         concat_id = torch.tensor([concat_id], device=global_model.device)
         attention_matrix = construct_biased_attention_matrix(concat_id.size(1), biased_index, concat_id.size(1), global_model.device).unsqueeze(0).unsqueeze(0)
+        attention_matrix = attention_matrix.to(global_model.dtype) 
 
         new_prompt = data_list[i]['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         prompt_id = global_tokenizer(new_prompt, return_tensors="pt", add_special_tokens=False).input_ids.to(global_model.device)
