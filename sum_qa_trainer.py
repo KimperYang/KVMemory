@@ -117,7 +117,7 @@ def main():
     weight = args.weight
     reencode_num = args.reencode
 
-    batch_size_per_device = 4
+    batch_size_per_device = 2
 
     if weight == 8:
         model_name = "meta-llama/Llama-3.1-8B-Instruct"
@@ -156,7 +156,7 @@ def main():
         logging_dir="training_res/logs",
         logging_steps=10,
         save_steps=1000,
-        gradient_accumulation_steps=4,
+        gradient_accumulation_steps=8,
         warmup_ratio=0.1,
         lr_scheduler_type='cosine',
         bf16=True,
