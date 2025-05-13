@@ -89,7 +89,7 @@ def main():
     mem_start=128254
     mem_end=128255
 
-    data_list=load_dataset("hotpotqa/hotpot_qa", 'distractor', split='validation')
+    data_list=load_dataset("hotpotqa/hotpot_qa", 'distractor', split='validation', trust_remote_code=True)
 
     # global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
 
