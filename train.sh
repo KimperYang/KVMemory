@@ -1,15 +1,15 @@
-# startTime=$(date +%s)
+startTime=$(date +%s)
 
-# output_dir=$1
-# run_name=$2
+output_dir=$1
+run_name=$2
 
-# export WANDB_API_KEY="297fefc6714432e38b47736829a56f96e540206a"
+export WANDB_API_KEY="297fefc6714432e38b47736829a56f96e540206a"
 
-CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file config/4gpu_step4.yaml --main_process_port 25678 sum_qa_trainer.py --reencode 5 --weight 3
-CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file config/4gpu_step4.yaml --main_process_port 25678 sum_qa_trainer.py --reencode 1 --weight 3
-CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file config/4gpu_step4.yaml --main_process_port 25678 sum_qa_trainer.py --reencode 0 --weight 3
-CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file config/4gpu_step4.yaml --main_process_port 25678 sum_qa_trainer.py --reencode 1 --weight 1
-CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file config/4gpu_step4.yaml --main_process_port 25678 sum_qa_trainer.py --reencode 0 --weight 1
+# CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file config/4gpu_step4.yaml --main_process_port 25678 sum_qa_trainer.py --reencode 5 --weight 3
+CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file configs/4gpu_step4.yaml --main_process_port 25678 sum_qa_trainer.py --reencode 1 --weight 3
+CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file configs/4gpu_step4.yaml --main_process_port 25678 sum_qa_trainer.py --reencode 0 --weight 3
+CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file configs/4gpu_step4.yaml --main_process_port 25678 sum_qa_trainer.py --reencode 1 --weight 1
+CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file configs/4gpu_step4.yaml --main_process_port 25678 sum_qa_trainer.py --reencode 0 --weight 1
 
 
 
