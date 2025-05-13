@@ -1,23 +1,24 @@
-# startTime=$(date +%s)
+CUDA_VISIBLE_DEVICES=5 python scripts/evaluation/nq/nq_block.py --ckpt 1122 --run "training_res/qa/3B/block_3B_qa" --pos 0 &
+CUDA_VISIBLE_DEVICES=4 python scripts/evaluation/nq/nq_block.py --ckpt 1122 --run "training_res/qa/3B/block_3B_qa" --pos 1 &
 
-# output_dir=$1
-# run_name=$2
+wait
 
-# export WANDB_API_KEY="297fefc6714432e38b47736829a56f96e540206a"
+CUDA_VISIBLE_DEVICES=5 python scripts/evaluation/nq/nq_block.py --ckpt 1122 --run "training_res/qa/3B/block_3B_qa" --pos 2 &
+CUDA_VISIBLE_DEVICES=4 python scripts/evaluation/nq/nq_block.py --ckpt 1122 --run "training_res/qa/3B/block_3B_qa" --pos 3 &
 
-CUDA_VISIBLE_DEVICES=3 python scripts/evaluation/hqa/hqa_upper.py --run "meta-llama/Llama-3.1-8B-Instruct" --ckpt 0&
-CUDA_VISIBLE_DEVICES=4 python scripts/evaluation/2wiki/wiki_upper.py --run "meta-llama/Llama-3.1-8B-Instruct" --ckpt 0&
-CUDA_VISIBLE_DEVICES=5 python scripts/evaluation/musique/musique_upper.py --run "meta-llama/Llama-3.1-8B-Instruct" --ckpt 0&
-CUDA_VISIBLE_DEVICES=6 python scripts/evaluation/tqa/tqa_upper.py --run "meta-llama/Llama-3.1-8B-Instruct" --ckpt 0&
+wait
 
-# wait
+CUDA_VISIBLE_DEVICES=5 python scripts/evaluation/nq/nq_block.py --ckpt 1122 --run "training_res/qa/3B/block_3B_qa" --pos 4 &
+CUDA_VISIBLE_DEVICES=4 python scripts/evaluation/nq/nq_block.py --ckpt 1122 --run "training_res/qa/3B/block_3B_qa" --pos 5 &
 
-# CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --pos 4 &
-# CUDA_VISIBLE_DEVICES=4 python scripts/evaluation/nq/nq_upper.py --pos 5 &
-# CUDA_VISIBLE_DEVICES=5 python scripts/evaluation/nq/nq_upper.py --pos 6 &
-# CUDA_VISIBLE_DEVICES=6 python scripts/evaluation/nq/nq_upper.py --pos 7 &
+wait
 
-# wait
+CUDA_VISIBLE_DEVICES=5 python scripts/evaluation/nq/nq_block.py --ckpt 1122 --run "training_res/qa/3B/block_3B_qa" --pos 6 &
+CUDA_VISIBLE_DEVICES=4 python scripts/evaluation/nq/nq_block.py --ckpt 1122 --run "training_res/qa/3B/block_3B_qa" --pos 7 &
 
-# CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --pos 8 &
-# CUDA_VISIBLE_DEVICES=4 python scripts/evaluation/nq/nq_upper.py --pos 9 &
+wait
+
+CUDA_VISIBLE_DEVICES=5 python scripts/evaluation/nq/nq_block.py --ckpt 1122 --run "training_res/qa/3B/block_3B_qa" --pos 8 &
+CUDA_VISIBLE_DEVICES=4 python scripts/evaluation/nq/nq_block.py --ckpt 1122 --run "training_res/qa/3B/block_3B_qa" --pos 9 &
+
+wait
