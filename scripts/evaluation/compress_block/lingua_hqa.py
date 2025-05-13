@@ -24,17 +24,16 @@ ckpt = args.ckpt
 
 reencode_num = args.reencode
 
-data_list=load_dataset("dgslibisey/MuSiQue", split='validation')
+data_list=load_dataset("hotpotqa/hotpot_qa", 'distractor', split='validation')
 
 global_tokenizer = AutoTokenizer.from_pretrained(f"{run_name}/checkpoint-{ckpt}")
 
-global_model = AutoModelForCausalLM.from_pretrained(f"{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+global_model = AutoModelForCausalLM.from_pretrained(f"{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16, load_in_8bit=True, device_map="cuda:0")
 
 llm_lingua = PromptCompressor(
     model_name="microsoft/llmlingua-2-xlm-roberta-large-meetingbank",
     use_llmlingua2=True, # Whether to use llmlingua-2
 )
-
 # llm_lingua = PromptCompressor()
 
 def append_kv(kv_list, d):  #d=0 batch size; d=2 sequence length
@@ -117,11 +116,9 @@ def construct_inference_inputs(system_ids, doc_id_list, user_ids, special_token_
     return input_ids, attention_matrix, cache_position_ids, input_position_ids, new_prompt_ids,
 
 def main():
-    global_model.to('cuda')
+    # global_model.to('cuda')
 
     special_token_start=128011
-    mem_start=128254
-    mem_end=128255
 
     template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
     total_num = len(data_list)
@@ -131,15 +128,14 @@ def main():
     for i in tqdm(range(total_num)):
         memory_list = []
 
-        for j in range(len(data_list[i]['paragraphs'])):
-            title = data_list[i]['paragraphs'][j]['title']
-            text = data_list[i]['paragraphs'][j]['paragraph_text']
+        for j in range(len(data_list[i]['context']['title'])):
+            title = data_list[i]['context']['title'][j]
+            text = ''.join(data_list[i]['context']['sentences'][j])
             compressed_text = llm_lingua.compress_prompt(text, rate=0.5, force_tokens = ['\n', '?'])['compressed_prompt']
             memory_list.append(f"Document [{j+1}](Title: {title}) {compressed_text}\n")
 
         # memory_list.insert(0, template)
         sys_ids = global_tokenizer(template, add_special_tokens=False).input_ids
-        sys_ids = sys_ids + [mem_start]
 
         current_position = len(sys_ids)
         kv_list = []
@@ -157,7 +153,7 @@ def main():
 
 
         user_prompt = data_list[i]['question'] + "<|eot_id|>"
-        user_ids = [mem_end] + global_tokenizer(user_prompt, add_special_tokens=False).input_ids
+        user_ids = global_tokenizer(user_prompt, add_special_tokens=False).input_ids
 
         input_ids, attention_matrix, cache_position_ids, input_position_ids, new_prompt_ids = construct_inference_inputs(sys_ids, doc_id_list, user_ids, special_token_start, reencode_num)
 
@@ -212,7 +208,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/lingua_25_sum/musique_ckpt{ckpt}_{accuracy}_{time_str}_{reencode_num}.jsonl"
+    file_name = f"result/lingua_25_block/HQA_ckpt{ckpt}_{accuracy}_{time_str}_{reencode_num}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

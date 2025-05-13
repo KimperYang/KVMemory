@@ -120,8 +120,6 @@ def main():
     global_model.to('cuda')
 
     special_token_start=128011
-    mem_start=128254
-    mem_end=128255
 
     template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
     total_num = len(data_list)
@@ -139,7 +137,6 @@ def main():
 
         # memory_list.insert(0, template)
         sys_ids = global_tokenizer(template, add_special_tokens=False).input_ids
-        sys_ids = sys_ids + [mem_start]
 
         current_position = len(sys_ids)
         kv_list = []
@@ -157,7 +154,7 @@ def main():
 
 
         user_prompt = data_list[i]['question'] + "<|eot_id|>"
-        user_ids = [mem_end] + global_tokenizer(user_prompt, add_special_tokens=False).input_ids
+        user_ids = global_tokenizer(user_prompt, add_special_tokens=False).input_ids
 
         input_ids, attention_matrix, cache_position_ids, input_position_ids, new_prompt_ids = construct_inference_inputs(sys_ids, doc_id_list, user_ids, special_token_start, reencode_num)
 
@@ -212,7 +209,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/lingua_25_sum/musique_ckpt{ckpt}_{accuracy}_{time_str}_{reencode_num}.jsonl"
+    file_name = f"result/lingua_25_block/musique_ckpt{ckpt}_{accuracy}_{time_str}_{reencode_num}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

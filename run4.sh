@@ -1,18 +1,3 @@
-# startTime=$(date +%s)
 
-# output_dir=$1
-# run_name=$2
-
-# export WANDB_API_KEY="297fefc6714432e38b47736829a56f96e540206a"
-
-
-# CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --pos 4 &
-# CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --pos 5 &
-# CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --pos 6 &
-# CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --pos 7 &
-# CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --pos 4 &
-# CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --pos 5 &
-# CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --pos 6 &
-# CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --pos 7 &
-# CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --pos 8 &
-# CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_upper.py --pos 9 &
+python scripts/evaluation/compress/lingua_wiki.py --run "training_res/sum/sum_5_1B_qa" --reencode 5 --ckpt 1122
+python scripts/evaluation/compress_block/lingua_wiki.py --run "training_res/new_data/block_1B_qa" --reencode 0 --ckpt 1122

@@ -1,6 +1,5 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, DynamicCache
-from datasets import load_dataset
 import pandas as pd    
 import json
 import datetime
@@ -14,17 +13,21 @@ import argparse
 parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
 parser.add_argument('--run', type=str, required=True, help='Path under training_res')
 parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
-
+parser.add_argument('--pos', type=int, required=True, help='Position value')
 parser.add_argument('--reencode', type=int, required=True, help='Reencode num')
 
 args = parser.parse_args()
 
 run_name = args.run
 ckpt = args.ckpt
-
+pos = args.pos
 reencode_num = args.reencode
 
-data_list=load_dataset("dgslibisey/MuSiQue", split='validation')
+if pos in [0, 4, 9]:
+    jsonObj = pd.read_json(path_or_buf=f'data/raw/nq/nq-open-10_{pos}.jsonl', lines=True)
+else:
+    jsonObj = pd.read_json(path_or_buf='data/raw/nq/nq-open-10_0.jsonl', lines=True)
+
 
 global_tokenizer = AutoTokenizer.from_pretrained(f"{run_name}/checkpoint-{ckpt}")
 
@@ -117,29 +120,48 @@ def construct_inference_inputs(system_ids, doc_id_list, user_ids, special_token_
     return input_ids, attention_matrix, cache_position_ids, input_position_ids, new_prompt_ids,
 
 def main():
+    # system_ids = ["sys"] * 3
+    # doc_id_list = [["doc1", "doc1"], ["doc2", "doc2"], ["doc3"]]
+    # user_ids = ["user"] * 2
+    # special_token_start = 128011
+    # reencode_num = 1
+    # input_ids, attention_matrix, cache_position_ids, input_position_ids = construct_inference_inputs(system_ids, doc_id_list, user_ids, special_token_start, reencode_num)
+    # print("Input IDs:", input_ids)
+    # print("Attention Matrix:", attention_matrix)
+    # print("Cache Position IDs:", cache_position_ids)
+    # print("Input Position IDs:", input_position_ids)
     global_model.to('cuda')
 
     special_token_start=128011
-    mem_start=128254
-    mem_end=128255
+
 
     template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
-    total_num = len(data_list)
+    # total_num = len(jsonObj)
+    total_num = 500
     correct_num = 0
     res_list = []
 
     for i in tqdm(range(total_num)):
         memory_list = []
+        doc_list = []
 
-        for j in range(len(data_list[i]['paragraphs'])):
-            title = data_list[i]['paragraphs'][j]['title']
-            text = data_list[i]['paragraphs'][j]['paragraph_text']
-            compressed_text = llm_lingua.compress_prompt(text, rate=0.5, force_tokens = ['\n', '?'])['compressed_prompt']
+        for k in range(0,10):
+            title = jsonObj["ctxs"][i][k]["title"]
+            text = jsonObj["ctxs"][i][k]["text"]
+            doc_list.append({'title': title, 'text':text})
+
+        if pos not in [0,4,9]:
+            ground_truth = doc_list.pop(0)
+            doc_list.insert(pos, ground_truth)
+
+        for j in range(0,10):
+            title = doc_list[j]["title"]
+            text = doc_list[j]["text"]
+            compressed_text = llm_lingua.compress_prompt(text, rate=0.25, force_tokens = ['\n', '?'])['compressed_prompt']
             memory_list.append(f"Document [{j+1}](Title: {title}) {compressed_text}\n")
 
         # memory_list.insert(0, template)
         sys_ids = global_tokenizer(template, add_special_tokens=False).input_ids
-        sys_ids = sys_ids + [mem_start]
 
         current_position = len(sys_ids)
         kv_list = []
@@ -156,8 +178,8 @@ def main():
             kv_list.append(tem_kv)
 
 
-        user_prompt = data_list[i]['question'] + "<|eot_id|>"
-        user_ids = [mem_end] + global_tokenizer(user_prompt, add_special_tokens=False).input_ids
+        user_prompt = jsonObj["question"][i] + "<|eot_id|>"
+        user_ids = global_tokenizer(user_prompt, add_special_tokens=False).input_ids
 
         input_ids, attention_matrix, cache_position_ids, input_position_ids, new_prompt_ids = construct_inference_inputs(sys_ids, doc_id_list, user_ids, special_token_start, reencode_num)
 
@@ -196,14 +218,14 @@ def main():
         generated_seq = global_tokenizer.batch_decode(outputs, skip_special_tokens=True)
 
         response = generated_seq[0].split('assistant\n\n')[-1]
-        print(data_list[i]['question'])
+        print(jsonObj["question"][i])
         print(response)
 
-        score = best_subspan_em(response, [data_list[i]['answer']])
+        score = best_subspan_em(response, jsonObj["answers"][i])
 
         correct_num = correct_num + int(score)
 
-        res_list.append({"id": str(i),"question": data_list[i]['question'], "response": response, "gold_answer": [data_list[i]['answer']], "Score": score})
+        res_list.append({"id": str(i),"question": jsonObj["question"][i], "response": response, "gold_answer": jsonObj["answers"][i], "Score": score})
         print("Accuracy", correct_num / (i+1))
 
     accuracy = correct_num / total_num
@@ -212,7 +234,8 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/lingua_25_sum/musique_ckpt{ckpt}_{accuracy}_{time_str}_{reencode_num}.jsonl"
+    # file_name = f"result/{run_name}/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/lingua_25_block/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}_{reencode_num}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
