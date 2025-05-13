@@ -23,7 +23,7 @@ def construct_biased_attention_matrix(seq_len, biased_ranges, max_len, device):
     - A numpy array representing the padded biased attention matrix.
     """
     # Initialize the attention matrix with -inf for masking
-    attention_matrix = torch.triu(torch.full((max_len, max_len), float('-inf'), device = device), diagonal= 1)
+    attention_matrix = torch.triu(torch.full((max_len, max_len), float('-inf'), dtype=torch.bfloat16, device = device), diagonal= 1)
 
     if biased_ranges is not None:
         for indices in biased_ranges:
@@ -141,6 +141,7 @@ def main():
         concat_id = sys_id + concat_id + [mem_end]
         concat_id = torch.tensor([concat_id], device=global_model.device)
         attention_matrix = construct_biased_attention_matrix(concat_id.size(1), biased_index, concat_id.size(1), global_model.device).unsqueeze(0).unsqueeze(0)
+        attention_matrix.dtype = concat_id.dtype
 
         new_prompt = data_list[i]['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         prompt_id = global_tokenizer(new_prompt, return_tensors="pt", add_special_tokens=False).input_ids.to(global_model.device)

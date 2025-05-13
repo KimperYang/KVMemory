@@ -28,7 +28,7 @@ def construct_biased_attention_matrix(seq_len, biased_ranges, max_len, device):
     - A numpy array representing the padded biased attention matrix.
     """
     # Initialize the attention matrix with -inf for masking
-    attention_matrix = torch.triu(torch.full((max_len, max_len), float('-inf'), device = device), diagonal= 1)
+    attention_matrix = torch.triu(torch.full((max_len, max_len), float('-inf'), dtype=torch.bfloat16, device = device), diagonal= 1)
 
     if biased_ranges is not None:
         for indices in biased_ranges:
