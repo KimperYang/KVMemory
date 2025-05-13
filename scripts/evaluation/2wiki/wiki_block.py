@@ -93,11 +93,11 @@ def main():
         data = json.load(file)
     data_list = data
 
-    # global_tokenizer = AutoTokenizer.from_pretrained(f"{run_name}/checkpoint-{ckpt}")
-    # global_model = AutoModelForCausalLM.from_pretrained(f"{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
+    global_tokenizer = AutoTokenizer.from_pretrained(f"{run_name}/checkpoint-{ckpt}")
+    global_model = AutoModelForCausalLM.from_pretrained(f"{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16)
 
-    global_tokenizer = AutoTokenizer.from_pretrained(run_name)
-    global_model = AutoModelForCausalLM.from_pretrained(run_name, torch_dtype=torch.bfloat16)
+    # global_tokenizer = AutoTokenizer.from_pretrained(run_name)
+    # global_model = AutoModelForCausalLM.from_pretrained(run_name, torch_dtype=torch.bfloat16)
 
     global_model.to('cuda')
 
