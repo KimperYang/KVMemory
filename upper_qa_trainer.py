@@ -14,10 +14,9 @@ from typing import Tuple
 import argparse
 import datasets
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
+from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments, Trainer
 
-from src.data.input_preprocessor import custom_collate_bias, baseline_attention_preprocessor
-from src.training.custom_trainer import CustomTrainerBiasAttn
+from src.data.input_preprocessor import custom_collate_baseline, baseline_attention_preprocessor
 
 
 def load_from_disk_then_process(
@@ -169,13 +168,13 @@ def main():
         seed = 42
     )
 
-    trainer = CustomTrainerBiasAttn(
+    trainer = Trainer(
         model=global_model,
         tokenizer=global_tokenizer,
         args=training_args,
         train_dataset = train_dataset,
         eval_dataset = eval_dataset,
-        data_collator = custom_collate_bias
+        data_collator = custom_collate_baseline
     )
 
     trainer.train()
