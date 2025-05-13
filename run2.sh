@@ -28,18 +28,28 @@
 
 # CUDA_VISIBLE_DEVICES=5 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "meta-llama/Llama-3.1-8B-Instruct" --pos 8 &
 # CUDA_VISIBLE_DEVICES=6 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "meta-llama/Llama-3.1-8B-Instruct" --pos 9 &
-CUDA_VISIBLE_DEVICES=7 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_31_8B" --pos 8 &
-CUDA_VISIBLE_DEVICES=4 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_31_8B" --pos 9 &
-wait
 
-CUDA_VISIBLE_DEVICES=5 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_31_8B" --pos 0 &
-CUDA_VISIBLE_DEVICES=6 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_31_8B" --pos 1 &
-CUDA_VISIBLE_DEVICES=7 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_31_8B" --pos 2 &
-CUDA_VISIBLE_DEVICES=4 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_31_8B" --pos 3 &
+
+CUDA_VISIBLE_DEVICES=5 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_1B_qa" --pos 0 &
+CUDA_VISIBLE_DEVICES=6 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_1B_qa" --pos 1 &
+CUDA_VISIBLE_DEVICES=7 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_1B_qa" --pos 2 &
+CUDA_VISIBLE_DEVICES=4 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_1B_qa" --pos 3 &
 
 wait
 
-CUDA_VISIBLE_DEVICES=5 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_31_8B" --pos 4 &
-CUDA_VISIBLE_DEVICES=6 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_31_8B" --pos 5 &
-CUDA_VISIBLE_DEVICES=7 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_31_8B" --pos 6 &
-CUDA_VISIBLE_DEVICES=4 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_31_8B" --pos 7 &
+CUDA_VISIBLE_DEVICES=5 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_1B_qa" --pos 4 &
+CUDA_VISIBLE_DEVICES=6 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_1B_qa" --pos 5 &
+CUDA_VISIBLE_DEVICES=7 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_1B_qa" --pos 6 &
+CUDA_VISIBLE_DEVICES=4 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_1B_qa" --pos 7 &
+
+wait
+
+CUDA_VISIBLE_DEVICES=7 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_1B_qa" --pos 8 &
+CUDA_VISIBLE_DEVICES=4 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_1B_qa" --pos 9 &
+
+wait
+
+CUDA_VISIBLE_DEVICES=5 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_1B_qa"  &
+CUDA_VISIBLE_DEVICES=6 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_1B_qa"  &
+CUDA_VISIBLE_DEVICES=7 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_1B_qa"  &
+CUDA_VISIBLE_DEVICES=4 python scripts/evaluation/nq/nq_block.py --ckpt 6000 --run "training_res/new_data/block_1B_qa"  &
