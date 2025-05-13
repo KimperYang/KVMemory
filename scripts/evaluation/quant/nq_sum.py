@@ -105,7 +105,6 @@ def best_subspan_em(prediction: str, ground_truths: List[str]) -> float:
     return 0.0
 
 def main():
-    global_model.to('cuda')
 
     special_token_start=128011
     mem_start=128254

@@ -99,8 +99,6 @@ def main():
 
     global_model = AutoModelForCausalLM.from_pretrained(f"{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16, device_map="cuda:0", load_in_8bit=True)
 
-    global_model.to('cuda')
-
     template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
 
     # total_num = len(jsonObj)
