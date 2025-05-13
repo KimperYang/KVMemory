@@ -30,11 +30,11 @@ else:
 
 # global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}")
 
-# global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16, device_map="cuda:0", load_in_8bit=True)
+# global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-{ckpt}",  device_map="cuda:0", load_in_8bit=True)
 
 global_tokenizer = AutoTokenizer.from_pretrained(f"{run_name}/checkpoint-{ckpt}")
 
-global_model = AutoModelForCausalLM.from_pretrained(f"{run_name}/checkpoint-{ckpt}", torch_dtype=torch.bfloat16, device_map="cuda:0", load_in_8bit=True)
+global_model = AutoModelForCausalLM.from_pretrained(f"{run_name}/checkpoint-{ckpt}",  device_map="cuda:0", load_in_8bit=True)
 # vocab_size = len(global_tokenizer)
 # base_model.resize_token_embeddings(vocab_size)
 
