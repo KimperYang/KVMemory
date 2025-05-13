@@ -10,7 +10,6 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file config/4gpu_step4.y
 CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file config/4gpu_step4.yaml --main_process_port 25678 sum_qa_trainer.py --reencode 0 --weight 3
 CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file config/4gpu_step4.yaml --main_process_port 25678 sum_qa_trainer.py --reencode 1 --weight 1
 CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file config/4gpu_step4.yaml --main_process_port 25678 sum_qa_trainer.py --reencode 0 --weight 1
-CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file config/4gpu_step4.yaml --main_process_port 25678 sum_qa_trainer.py --reencode 1 --weight 8
 
 
 
