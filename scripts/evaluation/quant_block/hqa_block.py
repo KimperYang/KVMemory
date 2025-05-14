@@ -1,0 +1,185 @@
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM
+import pandas as pd    
+import json
+import datetime
+import string
+from typing import List
+# from src.data.attention import construct_biased_attention_matrix
+import regex
+import argparse
+from datasets import load_dataset
+
+def construct_biased_attention_matrix(seq_len, biased_ranges, max_len, device):
+    """
+    Constructs a padded biased attention matrix.
+
+    Parameters:
+    - seq_len: The actual sequence length of the input.
+    - biased_ranges: List of [start, end] indices defining biased position ranges.
+    - max_len: The maximum sequence length for padding.
+
+    Returns:
+    - A numpy array representing the padded biased attention matrix.
+    """
+    # Initialize the attention matrix with -inf for masking
+    attention_matrix = torch.triu(torch.full((max_len, max_len), float('-inf'), dtype=torch.bfloat16, device = device), diagonal= 1)
+
+    if biased_ranges is not None:
+        for indices in biased_ranges:
+            i = indices[0]
+            j = indices[1]
+
+            attention_matrix[i : j, 0 : i] = float('-inf')
+
+    attention_matrix[seq_len :, :] = float('-inf')
+    attention_matrix[: ,seq_len :] = float('-inf')
+
+    if  attention_matrix.max() != 0:
+        print("wrong", seq_len, biased_ranges, max_len)
+        print(attention_matrix)
+
+    return attention_matrix
+
+def normalize_answer(s: str) -> str:
+    """Normalization from the SQuAD evaluation script.
+
+    See https://worksheets.codalab.org/rest/bundles/0x6b567e1cf2e041ec80d7098f031c5c9e/contents/blob/
+    """
+
+    def remove_articles(text):
+        return regex.sub(r"\b(a|an|the)\b", " ", text)
+
+    def white_space_fix(text):
+        return " ".join(text.split())
+
+    def remove_punc(text):
+        exclude = set(string.punctuation)
+        return "".join(ch for ch in text if ch not in exclude)
+
+    def lower(text):
+        return text.lower()
+
+    return white_space_fix(remove_articles(remove_punc(lower(s))))
+
+
+def best_subspan_em(prediction: str, ground_truths: List[str]) -> float:
+    normalized_prediction = normalize_answer(prediction)
+
+    for ground_truth in ground_truths:
+        normalized_ground_truth = normalize_answer(ground_truth)
+        if normalized_ground_truth.lower() in normalized_prediction.lower():
+            return 1.0
+    return 0.0
+
+def main():
+
+    parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
+    parser.add_argument('--ckpt', type=int, required=True, help='Checkpoint number')
+    parser.add_argument('--run', type=str, required=True, help='Checkpoint number')
+
+    args = parser.parse_args()
+
+    ckpt = args.ckpt
+    run_name = args.run
+
+    data_list=load_dataset("hotpotqa/hotpot_qa", 'distractor', split='validation')
+
+    if "meta" in run_name:
+        global_tokenizer = AutoTokenizer.from_pretrained(run_name)
+        global_model = AutoModelForCausalLM.from_pretrained(run_name, torch_dtype=torch.bfloat16)
+    else:
+        global_tokenizer = AutoTokenizer.from_pretrained(f"{run_name}/checkpoint-{ckpt}")
+        global_model = AutoModelForCausalLM.from_pretrained(f"{run_name}/checkpoint-{ckpt}",  device_map="cuda:0", load_in_8bit=True)
+
+
+
+    template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. Below are some reference documents that may help you in answering the user's question.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+
+    # total_num = len(jsonObj)
+    total_num = len(data_list)
+    correct_num = 0
+    res_list = []
+
+    for i in range(total_num):
+
+        print("Processing sample:", str(i))
+
+        sys_id = global_tokenizer(template, add_special_tokens=False).input_ids
+        memory_list = []
+
+
+        for j in range(len(data_list[i]['context']['title'])):
+            title = data_list[i]['context']['title'][j]
+            text = ''.join(data_list[i]['context']['sentences'][j])
+            memory_list.append(f"Document [{j+1}](Title: {title}) {text}\n")
+
+        biased_index = []
+        concat_id = []
+
+        idx = len(sys_id)
+
+        for j in range(len(memory_list)):
+
+            tem_id = global_tokenizer(memory_list[j], add_special_tokens=False).input_ids
+            biased_index.append([idx, idx + len(tem_id)])
+            concat_id += tem_id
+
+            idx = idx + len(tem_id)
+
+        concat_id = sys_id + concat_id
+        concat_id = torch.tensor([concat_id], device=global_model.device)
+        attention_matrix = construct_biased_attention_matrix(concat_id.size(1), biased_index, concat_id.size(1), global_model.device).unsqueeze(0).unsqueeze(0)
+        attention_matrix = attention_matrix.to(global_model.dtype) 
+
+        new_prompt = data_list[i]['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        prompt_id = global_tokenizer(new_prompt, return_tensors="pt", add_special_tokens=False).input_ids.to(global_model.device)
+
+        generate_id = torch.cat([concat_id, prompt_id], dim = 1)
+
+        global_model.eval()
+        with torch.no_grad():
+            outputs = global_model(input_ids = concat_id, attention_mask = attention_matrix)
+            past_key_values = outputs.past_key_values
+
+            outputs = global_model.generate(
+                input_ids=generate_id,
+                max_new_tokens=200,
+                do_sample=False,
+                temperature=None,
+                top_p=1.0,
+                past_key_values=past_key_values,
+                use_cache=True
+            )
+
+        generated_seq = global_tokenizer.batch_decode(outputs, skip_special_tokens=True)
+        response = generated_seq[0].split('assistant\n\n')[-1]
+        print("response:", response)
+
+        score = best_subspan_em(response, [data_list[i]['answer']])
+
+        correct_num = correct_num + int(score)
+
+        res_list.append({"id": str(i),"question": data_list[i]['question'], "response": response, "gold_answer": [data_list[i]['answer']], "Score": score})
+        print("Correct progress", correct_num)
+
+    accuracy = correct_num / total_num
+    print(accuracy)
+
+    current_time = datetime.datetime.now()
+    time_str = current_time.strftime("%Y%m%d-%H%M%S")
+
+    if "meta" in run_name:
+        file_name = f"result/llama31/promptcache/hqa2_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
+    else:
+        file_name = f"result/quant/block/hqa2_{accuracy}_{time_str}.jsonl"
+
+    with open(file_name, 'w', encoding='utf-8') as f:
+        for entry in res_list:
+            json_line = json.dumps(entry)
+            f.write(json_line + '\n')
+
+    print(f"Dumped at {file_name}")
+
+if __name__ == "__main__":
+    main()
