@@ -40,7 +40,6 @@ def main(argv):
     num_samples = FLAGS.num_samples
     dataset = load_dataset(
         "HuggingFaceFW/fineweb",
-        "CC-MAIN-2013-20",
         name="sample-10BT",
         split="train"
     )
