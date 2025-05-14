@@ -5,7 +5,7 @@ run_name=$2
 
 export WANDB_API_KEY="297fefc6714432e38b47736829a56f96e540206a"
 
-CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file configs/4gpu_step8.yaml --main_process_port 25678 sum_attn_trainer.py
+CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file configs/4gpu_step8.yaml --main_process_port 25678 baseline_attn_trainer.py
 # CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file configs/4gpu_step8.yaml --main_process_port 25678 sum_qa_trainer.py --reencode 0 --weight 8
 # CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file configs/4gpu_step8.yaml --main_process_port 25678 sum_attn_trainer1.py
 # CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file configs/4gpu_step8.yaml --main_process_port 25678 sum_attn_trainer.py
