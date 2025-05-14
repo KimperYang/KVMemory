@@ -1,9 +1,9 @@
 
-CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_sum.py --ckpt 1122 --run "training_res/qa/3B/sum_1_3B_qa" --reencode 1 --pos 0 &
-CUDA_VISIBLE_DEVICES=1 python scripts/evaluation/nq/nq_sum.py --ckpt 1122 --run "training_res/qa/3B/sum_1_3B_qa" --reencode 1 --pos 1 &
-CUDA_VISIBLE_DEVICES=2 python scripts/evaluation/nq/nq_sum.py --ckpt 1122 --run "training_res/qa/3B/sum_1_3B_qa" --reencode 1 --pos 2 &
+# CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_sum.py --ckpt 1122 --run "training_res/qa/3B/sum_1_3B_qa" --reencode 1 --pos 0 &
+# CUDA_VISIBLE_DEVICES=1 python scripts/evaluation/nq/nq_sum.py --ckpt 1122 --run "training_res/qa/3B/sum_1_3B_qa" --reencode 1 --pos 1 &
+# CUDA_VISIBLE_DEVICES=2 python scripts/evaluation/nq/nq_sum.py --ckpt 1122 --run "training_res/qa/3B/sum_1_3B_qa" --reencode 1 --pos 2 &
 
-wait
+# wait
 
 CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/nq/nq_sum.py --ckpt 1122 --run "training_res/qa/3B/sum_1_3B_qa" --reencode 1 --pos 3 &
 CUDA_VISIBLE_DEVICES=1 python scripts/evaluation/nq/nq_sum.py --ckpt 1122 --run "training_res/qa/3B/sum_1_3B_qa" --reencode 1 --pos 4 &
