@@ -188,7 +188,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/qa/sum_{reencode_num}_3B/wiki2_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/qa/sum_{reencode_num}_8B/wiki2_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
