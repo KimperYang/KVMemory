@@ -179,7 +179,14 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/qa/sum_{reencode_num}_8B/musiq_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
+    if "1B" in run_name:
+        weight = 1
+    elif "3B" in run_name:
+        weight = 3
+    else:
+        weight = 8
+
+    file_name = f"result/qa/sum_{reencode_num}_{weight}B/musiq_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

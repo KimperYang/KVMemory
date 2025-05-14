@@ -143,10 +143,17 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
+    if "1B" in run_name:
+        weight = 1
+    elif "3B" in run_name:
+        weight = 3
+    else:
+        weight = 8
+
     if "meta" in run_name:
         file_name = f"result/llama31/original_8B/tqa_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
     else:
-        file_name = f"result/{run_name}/tqa_{accuracy}_{time_str}.jsonl"
+        file_name = f"result/qa/upper_{weight}B/tqa_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
