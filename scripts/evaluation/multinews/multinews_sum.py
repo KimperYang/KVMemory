@@ -35,7 +35,7 @@ def main():
     global_model = AutoModelForCausalLM.from_pretrained(f"{run_name}/checkpoint-6000", torch_dtype=torch.bfloat16)
     global_model.to('cuda')
 
-    multinews = load_dataset("alexfabbri/multi_news")
+    multinews = load_dataset("alexfabbri/multi_news", trust_remote_code=True)
 
     sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an AI assistant who summarizes the article. <|eot_id|>"
     sys_id = global_tokenizer(sys, add_special_tokens=False).input_ids

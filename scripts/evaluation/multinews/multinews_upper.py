@@ -21,12 +21,10 @@ def main():
 
     parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
     parser.add_argument('--run', type=str, required=True, help='Run name')
-    parser.add_argument('--weight', type=int, required=False, help='Run name')
 
     args = parser.parse_args()
 
     run_name = args.run
-    weight = args.weight
 
     if "meta" in run_name:
         global_tokenizer = AutoTokenizer.from_pretrained(run_name)
@@ -37,7 +35,7 @@ def main():
 
     global_model.to('cuda')
 
-    multinews = load_dataset("alexfabbri/multi_news")
+    multinews = load_dataset("alexfabbri/multi_news", trust_remote_code=True)
 
     sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou're an AI assistant who summarizes the article. <|eot_id|>"
     sys_id = global_tokenizer(sys, add_special_tokens=False).input_ids
