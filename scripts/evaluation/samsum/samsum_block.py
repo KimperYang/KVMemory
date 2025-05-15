@@ -30,8 +30,8 @@ def main():
         global_tokenizer = AutoTokenizer.from_pretrained(run_name)
         global_model = AutoModelForCausalLM.from_pretrained(run_name, torch_dtype=torch.bfloat16)
     else: 
-        global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-624")
-        global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-624", torch_dtype=torch.bfloat16)
+        global_tokenizer = AutoTokenizer.from_pretrained(f"training_res/{run_name}/checkpoint-6000")
+        global_model = AutoModelForCausalLM.from_pretrained(f"training_res/{run_name}/checkpoint-6000", torch_dtype=torch.bfloat16)
 
     global_model.to('cuda')
 
