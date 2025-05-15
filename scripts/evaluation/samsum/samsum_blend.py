@@ -7,7 +7,7 @@ from datasets import load_dataset
 from rouge_score import rouge_scorer
 from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig
 
-from src.utils.do_blend import append_kv, do_blend
+from src.utils.do_blend import append_kv, do_blend_filter
 
 
 def calculate_rouge_l_score(candidate, reference):
@@ -19,7 +19,7 @@ def calculate_rouge_l_score(candidate, reference):
 
 def main():
 
-    model_name = "meta-llama/Llama-3.2-1B-Instruct"
+    model_name = "meta-llama/Llama-3.1-8B-Instruct"
 
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     config = AutoConfig.from_pretrained(model_name)
@@ -65,7 +65,7 @@ def main():
     golden_kv = output.past_key_values
     first_layer_states = output.hidden_states[2]
 
-    blend_kv = do_blend(model=model, old_kv=old_kv, golden_kv=golden_kv, recompute_ratio=0.18,first_layer_states=first_layer_states, position_ids=global_position_ids, config=config)
+    blend_kv = do_blend_filter(model=model, old_kv=old_kv, golden_kv=golden_kv, recompute_ratio=0.18,first_layer_states=first_layer_states, position_ids=global_position_ids, config=config)
 
     total_num = len(samsum['test'])
     total_score = 0
@@ -111,7 +111,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/new_data/cacheblend_1B/Samsum_demon{num_demon}_{avg_score}_{time_str}.jsonl"
+    file_name = f"result/llama31/cacheblend/Samsum_demon{num_demon}_{avg_score}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
