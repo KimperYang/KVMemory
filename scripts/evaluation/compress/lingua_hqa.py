@@ -116,7 +116,7 @@ def construct_inference_inputs(system_ids, doc_id_list, user_ids, special_token_
     return input_ids, attention_matrix, cache_position_ids, input_position_ids, new_prompt_ids,
 
 def main():
-    # global_model.to('cuda')
+    global_model.to('cuda')
 
     special_token_start=128011
     mem_start=128254
