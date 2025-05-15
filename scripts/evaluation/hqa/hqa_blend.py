@@ -98,7 +98,6 @@ def main():
 
         golden_kv = output.past_key_values
         first_layer_states = output.hidden_states[2]
-
         blend_kv = do_blend_filter(model=model, old_kv=old_kv, golden_kv=golden_kv, recompute_ratio=0.18,first_layer_states=first_layer_states, position_ids=global_position_ids, config=config)
 
         new_prompt = data_list[i]['question'] + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"

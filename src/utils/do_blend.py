@@ -150,6 +150,11 @@ def do_blend_filter(model, old_kv, golden_kv, recompute_ratio, first_layer_state
 
         temp_diff = torch.sum((updated_old_v[:, :, top_indices, :] - old_kv[layer_idx][1][:, :, top_indices, :])**2, dim=[0,1,3])
         topk_num = int(top_indices.size(0) * 0.95)
+
+        if topk_num == 0:
+            blended_kv += old_kv[layer_idx:]
+            return blended_kv
+
         top_indices = torch.topk(temp_diff, k=topk_num).indices
         # print(top_indices)
         top_indices, _ = torch.sort(top_indices)
