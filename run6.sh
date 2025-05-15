@@ -1,4 +1,4 @@
-CUDA_VISIBLE_DEVICES=2 python scripts/evaluation/nq/nq_sum.py --ckpt 6000 --run "training_res/sum_0_31_8B" --reencode 0 --pos 0
+# CUDA_VISIBLE_DEVICES=2 python scripts/evaluation/nq/nq_sum.py --ckpt 6000 --run "training_res/sum_0_31_8B" --reencode 0 --pos 0
 CUDA_VISIBLE_DEVICES=2 python scripts/evaluation/nq/nq_sum.py --ckpt 6000 --run "training_res/sum_0_31_8B" --reencode 0 --pos 1
 CUDA_VISIBLE_DEVICES=2 python scripts/evaluation/nq/nq_sum.py --ckpt 6000 --run "training_res/sum_0_31_8B" --reencode 0 --pos 2
 CUDA_VISIBLE_DEVICES=2 python scripts/evaluation/nq/nq_sum.py --ckpt 6000 --run "training_res/sum_0_31_8B" --reencode 0 --pos 3
