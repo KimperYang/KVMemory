@@ -150,7 +150,7 @@ def main():
     if "meta" in run_name:
         file_name = f"result/llama31/original_8B/musique_ckpt{ckpt}_{accuracy}_{time_str}.jsonl"
     else:
-        file_name = f"result/qa/upper_{weight}B/musique_{accuracy}_{time_str}.jsonl"
+        file_name = f"result/llama31/upper_{weight}B/musique_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

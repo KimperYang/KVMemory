@@ -1,0 +1,1 @@
+python scripts/evaluation/hqa/hqa_upper.py --ckpt 6000 --run "new_data/upper_31_8B"
