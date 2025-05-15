@@ -59,7 +59,7 @@ def main():
     ckpt = args.ckpt
     run_name = args.run
 
-    data_list=load_dataset("hotpotqa/hotpot_qa", 'distractor', split='validation')
+    data_list=load_dataset("hotpotqa/hotpot_qa", 'distractor', split='validation', trust_remote_code=True)
 
     if "meta" in run_name:
         global_tokenizer = AutoTokenizer.from_pretrained(run_name)
