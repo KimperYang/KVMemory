@@ -26,7 +26,7 @@ def main():
     model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
     model.to('cuda')
 
-    samsum = load_dataset("Samsung/samsum")
+    samsum = load_dataset("Samsung/samsum", trust_remote_code=True)
 
     sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nSummarize the dialogue into a few short sentences. <|eot_id|>"
 

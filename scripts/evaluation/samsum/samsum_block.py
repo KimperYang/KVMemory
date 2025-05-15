@@ -35,7 +35,7 @@ def main():
 
     global_model.to('cuda')
 
-    samsum = load_dataset("Samsung/samsum")
+    samsum = load_dataset("Samsung/samsum", trust_remote_code=True)
 
     sys = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nSummarize the dialogue into a few short sentences. <|eot_id|>"
     sys_id = global_tokenizer(sys, add_special_tokens=False).input_ids
