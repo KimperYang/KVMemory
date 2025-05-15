@@ -214,7 +214,7 @@ def main():
     else:
         weight = 8
 
-    file_name = f"result/qa/sum_{reencode_num}_{weight}B/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/llama31/sum_{reencode_num}_{weight}B/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

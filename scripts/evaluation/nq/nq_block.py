@@ -195,7 +195,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/qa/block_8B/NQ2_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/llama31/block_8B/NQ2_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
     # file_name = f"result/{run_name}/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
     # file_name = f"result/new_data/block_31_8B/NQ_ckpt{ckpt}_at{pos}_{accuracy}_{time_str}.jsonl"
 
