@@ -21,12 +21,10 @@ def main():
 
     parser = argparse.ArgumentParser(description="Run script with specified ckpt and pos.")
     parser.add_argument('--run', type=str, required=True, help='Run name')
-    parser.add_argument('--weight', type=int, required=False, help='Run name')
 
     args = parser.parse_args()
 
     run_name = args.run
-    weight = args.weight
 
     if "meta" in run_name:
         global_tokenizer = AutoTokenizer.from_pretrained(run_name)
@@ -110,9 +108,9 @@ def main():
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
     if "meta" in run_name:
-        file_name = f"result/new_data/promptcache_{weight}B/multinews_promptcache_demon{num_demon}_{avg_score}_{time_str}.jsonl"
+        file_name = f"result/llama31/promptcache/multinews_promptcache_demon{num_demon}_{avg_score}_{time_str}.jsonl"
     else:
-        file_name = f"result/{run_name}/multinews_500_demon{num_demon}_{avg_score}_{time_str}.jsonl"
+        file_name = f"result/llama31/block_8B/multinews_500_demon{num_demon}_{avg_score}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:

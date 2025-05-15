@@ -102,9 +102,9 @@ def main():
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
     if "meta" in run_name:
-        file_name = f"result/new_data/original_{weight}B/multinews_500_original_demon{num_demon}_{avg_score}_{time_str}.jsonl"
+        file_name = f"result/new_data/original/multinews_500_original_demon{num_demon}_{avg_score}_{time_str}.jsonl"
     else:
-        file_name = f"result/{run_name}/multinews_500_demon{num_demon}_{avg_score}_{time_str}.jsonl"
+        file_name = f"result/llama31/upper_8B/multinews_500_demon{num_demon}_{avg_score}_{time_str}.jsonl"
 
     with open(file_name, 'w', encoding='utf-8') as f:
         for entry in res_list:
