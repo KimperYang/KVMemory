@@ -2,7 +2,7 @@
 HF_ALLOW_CODE_EVAL="1"
 
 CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --num_processes 4 --num_machines 1 -m lm_eval --model hf \
-    --model_args pretrained=training_res/sum_5_31_8B/checkpoint-6000,dtype="float" \
+    --model_args pretrained=training_res/sum_1_31_8B/checkpoint-6000,dtype="float" \
     --tasks mmlu,arc_easy,arc_challenge,hellaswag,winogrande,piqa,sciq \
     --batch_size 8
 
