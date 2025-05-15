@@ -132,7 +132,7 @@ def main():
         for j in range(len(data_list[i]['paragraphs'])):
             title = data_list[i]['paragraphs'][j]['title']
             text = data_list[i]['paragraphs'][j]['paragraph_text']
-            compressed_text = llm_lingua.compress_prompt(text, rate=0.5, force_tokens = ['\n', '?'])['compressed_prompt']
+            compressed_text = llm_lingua.compress_prompt(text, rate=0.25, force_tokens = ['\n', '?'])['compressed_prompt']
             memory_list.append(f"Document [{j+1}](Title: {title}) {compressed_text}\n")
 
         # memory_list.insert(0, template)
