@@ -13,6 +13,6 @@ training_res/
 model_cache/
 run_logs/
 launch_script/
-configs/
+# configs/
 config/
 __pycache__/
