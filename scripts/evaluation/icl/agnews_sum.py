@@ -9,7 +9,7 @@ label_dict = {1:'World', 2:'Sports', 3:'Business', 4:'Sci/Tech'}
 
 # Step 1: Load the Pretrained Model and Tokenizer
 # model_name = "/mnt/data/jingbo/kv_dump_combine_mix5_30000steps_warmup0.1_decaycosine_5e-6_full/checkpoint-30000"
-model_name = "training_res/sum/sum_5_prompt/checkpoint-6000"
+model_name = "Shiyu-Lab/Llama1B-KVLink5"
 reencode_num = 5
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
@@ -19,8 +19,8 @@ model.eval()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
 
-mem_start = 128054
-mem_end = 128055
+mem_start = 128254
+mem_end = 128255
 special_start_token = 128011
 
 def construct_examples(data):

@@ -39,6 +39,7 @@ from src.common import move_to_target_device
 from src.data.titan_preprocessor import make_segment_mask
 
 parser = argparse.ArgumentParser(description="Run script with specified ckpt.")
+parser.add_argument("--pos", type=int, required=True, default=0, help="The position of the ground-truth document in the context.")
 parser.add_argument(
     "--ckpt_path",
     type=str,
@@ -53,7 +54,7 @@ parser.add_argument(
     help="attention types.",
     choices=["standard", "blocked"],
 )
-parser.add_argument("--reencode_num", type=int, default=5, help="Number of the link tokens.")
+parser.add_argument("--weight", type=int, required=True, default=1, help="Model weight.")
 parser.add_argument("--hf", type=bool, default=False, help="Use HuggingFace checkpoints.")
 
 args = parser.parse_args()
@@ -112,7 +113,7 @@ def best_subspan_em(prediction: str, ground_truths: List[str]) -> float:
             return 1.0
     return 0.0
 
-def preprocess_fn(example: Dict[str, str], tokenizer, reencode_num: int, mem_start: int, mem_end: int, special_token_start:int):
+def preprocess_fn(example: Dict[str, str], target_position, tokenizer, doc_start: int, doc_end: int):
     system = (
         "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a intelligent AI assistant. Please answer questions based on the user's instruction. "
         "Below are some reference documents that may help you in answering the user's question.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
@@ -120,27 +121,37 @@ def preprocess_fn(example: Dict[str, str], tokenizer, reencode_num: int, mem_sta
     question = example["question"]
     memory_list = []
 
-    for j in range(len(example['context']['title'])):
-        title = example['context']['title'][j]
-        text = ''.join(example['context']['sentences'][j])
+    doc_list = [example["ctxs"][x]["text"] for x in range(10)]
+    title_list  = [example["ctxs"][x]["title"] for x in range(10)]
+    # If target_position == 1, for example, then the code will read from the data source that
+    # always put groud-truth at position 0.
+    if target_position not in [0, 4, 9]:
+        ground_truth_doc = doc_list.pop(0)
+        ground_truth_title = title_list.pop(0)
+        doc_list.insert(target_position, ground_truth_doc)
+        title_list.insert(target_position, ground_truth_title)
+
+    for j in range(0,10):
+        title = title_list[j]
+        text = doc_list[j]
         memory_list.append(f"Document [{j+1}](Title: {title}) {text}\n")
 
     qa_system_input_ids = tokenizer(system, add_special_tokens = False)["input_ids"]
-    input_ids = qa_system_input_ids[:] + [mem_start]
+    input_ids = qa_system_input_ids[:]
     segment_ids = [0] * len(input_ids)
 
     for mem_id, st in enumerate(memory_list):
         tem_id = tokenizer(st, add_special_tokens = False)["input_ids"]
-        segment_ids = segment_ids + [mem_id + 1] * len(tem_id) + [0] * reencode_num
+        tem_id = [doc_start] + tem_id + [doc_end]
 
-        for sub_idx in range(reencode_num):
-            tem_id = tem_id + [special_token_start + reencode_num * mem_id + sub_idx]
+        segment_ids = segment_ids + [mem_id + 1] * len(tem_id)
+
         input_ids = input_ids + tem_id
 
     new_prompt = question
     prompt_id = tokenizer(new_prompt, add_special_tokens = False)["input_ids"]
-    input_ids = input_ids + [mem_end] + prompt_id
-    segment_ids = segment_ids + [0] + [0] * len(prompt_id)
+    input_ids = input_ids + prompt_id
+    segment_ids = segment_ids + [0] * len(prompt_id)
     return {
         "input_ids": input_ids,
         "segment_ids": segment_ids,
@@ -178,22 +189,27 @@ class DataCollatorForGeneration():
 
 
 def main():
+    pos = args.pos
     ckpt_path = args.ckpt_path
-    reencode_num: int  = args.reencode_num
     batch_size: int = args.batch_size
+    weight = args.weight
     device = torch.device("cuda")
     hf: bool = args.hf
 
-    mem_start = 128254
-    mem_end = 128255
-    special_token_start = 128011
+    doc_start = 128254
+    doc_end = 128255
 
-    dataset = datasets.load_dataset("hotpotqa/hotpot_qa", 'distractor', split='validation')
+    if pos in [0, 4, 9]:
+        data_path = f"data/raw/nq/nq-open-10_{pos}.jsonl"
+    else:
+        data_path = "data/raw/nq/nq-open-10_0.jsonl"
+    dataset = datasets.load_dataset("json", data_files=data_path, split="train")
     print(dataset)
-    all_answers = dataset["answer"]
+    all_answers = dataset["answers"]
     print(all_answers[:10])
 
-    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3-8B-Instruct")
+    # tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3-8B-Instruct")
+    tokenizer = AutoTokenizer.from_pretrained(ckpt_path)
     tokenizer.pad_token_id = 128004
     tokenizer.pad_token = "<|reserved_special_token_2|>"
 
@@ -207,7 +223,7 @@ def main():
     if args.ckpt_path is None:
         print("Will NOT load fine-tuned models!")
     elif hf:
-        model = AutoModelForCausalLM.from_pretrained(args.ckpt_path, torch_dtype=torch.bfloat16)
+        model = AutoModelForCausalLM.from_pretrained(ckpt_path, torch_dtype=torch.bfloat16)
     # else:
         # state_dict = load_model_weights(ckpt_path)
         # model.load_state_dict(state_dict, strict=False)
@@ -221,15 +237,14 @@ def main():
         num_proc=16,
         remove_columns=exist_columns,
         fn_kwargs=dict(
+            target_position=pos,  
             tokenizer=tokenizer,
-            reencode_num=reencode_num,
-            mem_start=mem_start,
-            mem_end=mem_end,
-            special_token_start=special_token_start
+            doc_start=doc_start,
+            doc_end=doc_end,
         ),
     )
 
-    total_num = len(dataset)
+    total_num = 500
     dataset = dataset.select(np.arange(total_num))
     correct_num = 0
     res_list = []
@@ -308,7 +323,7 @@ def main():
             print("Ground-truth: ", batch_answers[idx])
             print("------\n")
 
-        scores = [best_subspan_em(responses[idx], [batch_answers[idx]]) for idx in range(curr_batch_size)]
+        scores = [best_subspan_em(responses[idx], batch_answers[idx]) for idx in range(curr_batch_size)]
         for idx, score in enumerate(scores):
             correct_num = correct_num + int(score)
             res_list.append(
@@ -328,7 +343,7 @@ def main():
     current_time = datetime.datetime.now()
     time_str = current_time.strftime("%Y%m%d-%H%M%S")
 
-    file_name = f"result/rebuttal/sum_5_8B/hqa_{accuracy}_{time_str}.jsonl"
+    file_name = f"result/turbo/turbo_{weight}B/nq_at{pos}_{accuracy}_{time_str}.jsonl"
     if not os.path.exists(os.path.dirname(file_name)):
         os.makedirs(os.path.dirname(file_name))
 

@@ -21,8 +21,8 @@ model.eval()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
 
-mem_start = 128054
-mem_end = 128055
+mem_start = 128254
+mem_end = 128255
 special_start_token = 128011
 
 data = load_dataset("clinc/clinc_oos", 'small')

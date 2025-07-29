@@ -106,9 +106,9 @@ def main():
     batch_size_per_device = 2
     reencode_num = 5
 
-    global_tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-32B-Instruct")
+    global_tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-7B-Instruct")
     global_model = AutoModelForCausalLM.from_pretrained(
-        "Qwen/Qwen2.5-32B-Instruct",
+        "Qwen/Qwen2.5-7B-Instruct",
         torch_dtype=torch.bfloat16,
         attn_implementation='sdpa',
         # use_flash_attention_2=True,
@@ -194,9 +194,9 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir=f"/mnt/tmp/training_res/sum/sum_{reencode_num}_qwen_32B",
+        output_dir=f"/mnt/tmp/training_res/sum/sum_{reencode_num}_qwen_2e-5",
         report_to="wandb",
-        run_name=f"sum_{reencode_num}_bsz{batch_size_per_device}_qwen_32B",
+        run_name=f"sum_{reencode_num}_bsz{batch_size_per_device}_qwen_2e-5",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
         max_steps=6000,
@@ -207,7 +207,7 @@ def main():
         warmup_ratio=0.1,
         lr_scheduler_type='cosine',
         bf16=True,
-        learning_rate=5e-6,
+        learning_rate=2e-5,
         do_eval=False,
         # per_device_eval_batch_size = batch_size_per_device,
         # evaluation_strategy="steps",  # Add this line

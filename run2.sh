@@ -1,11 +1,7 @@
-CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/samsum/samsum_sum.py  --run "training_res/sum_0_31_8B" --reencode 0 &
-CUDA_VISIBLE_DEVICES=1 python scripts/evaluation/samsum/samsum_sum.py  --run "training_res/sum_1_31_8B" --reencode 1 &
-CUDA_VISIBLE_DEVICES=2 python scripts/evaluation/samsum/samsum_sum.py  --run "training_res/sum_5_31_8B" --reencode 5 &
-CUDA_VISIBLE_DEVICES=3 python scripts/evaluation/samsum/samsum_block.py  --run "block_31_8B" &
 
+CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/batch/musique_qwen_sum.py --ckpt_path "/mnt/tmp/training_res/sum/sum_5_qwen_2e-5/checkpoint-6000" --batch_size 4 --attn_type "blocked" --reencode_num 5 --hf True &
+CUDA_VISIBLE_DEVICES=1 python scripts/evaluation/batch/hqa_qwen_sum.py --ckpt_path "/mnt/tmp/training_res/sum/sum_5_qwen_2e-5/checkpoint-6000" --batch_size 4 --attn_type "blocked" --reencode_num 5 --hf True &
+# CUDA_VISIBLE_DEVICES=6 python scripts/evaluation/batch/hqa_qwen_sum.py --ckpt_path "/mnt/tmp/training_res/sum/sum_5_qwen/checkpoint-6000" --batch_size 4 --attn_type "blocked" --reencode_num 5 --hf True &
+# CUDA_VISIBLE_DEVICES=7 python scripts/evaluation/batch/hqa_qwen_blk.py --ckpt_path "/mnt/tmp/training_res/sum/blk_qwen/checkpoint-6000" --batch_size 4 --attn_type "blocked" --hf True &
 wait
 
-CUDA_VISIBLE_DEVICES=0 python scripts/evaluation/samsum/samsum_upper.py  --run "meta-llama/Llama-3.1-8B-Instruct" &
-CUDA_VISIBLE_DEVICES=1 python scripts/evaluation/samsum/samsum_blend.py &
-CUDA_VISIBLE_DEVICES=2 python scripts/evaluation/samsum/samsum_block.py  --run "meta-llama/Llama-3.1-8B-Instruct" &
-# CUDA_VISIBLE_DEVICES=3 python scripts/evaluation/nq/nq_upper.py  --run "training_res/sum_5_31_8B" --pos 7 &

@@ -15,13 +15,13 @@ import datasets
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
 
-from src.data.input_preprocessor import custom_collate_bias, qwen_sum_attention_preprocessor
+from src.data.input_preprocessor import custom_collate_bias, qwen_blk_attention_preprocessor
 from src.training.custom_trainer import CustomTrainerBiasAttn
 
 
 def load_from_disk_then_process(
     data_component_name: str,
-    preprocessor: qwen_sum_attention_preprocessor,
+    preprocessor: qwen_blk_attention_preprocessor,
 ) -> Tuple[datasets.IterableDataset, datasets.Dataset]:
     """
     load the downloaded data from disk and then pair it with the preprocessor
@@ -104,7 +104,6 @@ def load_from_disk_then_process(
 
 def main():
     batch_size_per_device = 2
-    reencode_num = 5
 
     global_tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-32B-Instruct")
     global_model = AutoModelForCausalLM.from_pretrained(
@@ -114,29 +113,9 @@ def main():
         # use_flash_attention_2=True,
     )
 
-    special_token_start = len(global_tokenizer)
-    max_memory_num = 40
-    new_special_tokens = [f"<link_{i}>" for i in range(max_memory_num * reencode_num)] + ["<mem_start>", "<mem_end>"]
-    special_tokens_dict = {"additional_special_tokens": new_special_tokens}
-
-    global_tokenizer.add_special_tokens(special_tokens_dict, replace_additional_special_tokens=False)
-    global_model.resize_token_embeddings(len(global_tokenizer))
-
-    mem_start = len(global_tokenizer) - 2
-    mem_end = len(global_tokenizer) - 1
-
-    assert global_tokenizer.convert_tokens_to_ids("<mem_start>") == mem_start
-    assert global_tokenizer.convert_tokens_to_ids("<mem_end>") == mem_end
-
-    print("Using special tokens: Special_token_start: ", special_token_start, " Mem_start: ", mem_start, " Mem_end: ", mem_end)
-
-    preprocessor = qwen_sum_attention_preprocessor(
+    preprocessor = qwen_blk_attention_preprocessor(
         tokenizer=global_tokenizer,
         max_len=4096,
-        special_token_start=special_token_start,
-        mem_start=mem_start,
-        mem_end=mem_end,
-        reencode_num=reencode_num,
         do_shuffle=True
     )
 
@@ -194,9 +173,9 @@ def main():
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir=f"/mnt/tmp/training_res/sum/sum_{reencode_num}_qwen_32B",
+        output_dir=f"/mnt/tmp/training_res/sum/blk_qwen_32b",
         report_to="wandb",
-        run_name=f"sum_{reencode_num}_bsz{batch_size_per_device}_qwen_32B",
+        run_name=f"blk_bsz{batch_size_per_device}_qwen_32b",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
         max_steps=6000,
