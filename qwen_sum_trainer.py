@@ -9,6 +9,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch --config_file configs/fsd
     --main_process_port 25678 block_attn_trainer.py
 """
 import os
+import argparse
 from typing import Tuple
 
 import datasets
@@ -94,16 +95,26 @@ def load_from_disk_then_process(
     eval_data = eval_dataset.map(
         preprocessor_fn,
         remove_columns=remove_columns,
-        # num_proc=96,
+        num_proc=96,
         batched=False,
-        # load_from_cache_file=False
+        load_from_cache_file=False
     )
 
     return training_data, eval_data
 
 
 def main():
-    batch_size_per_device = 2
+    
+    parser = argparse.ArgumentParser(description="Qwen2.5 Summarization Trainer")
+    parser.add_argument("--bsz", type=int, default=2, help="Batch size per device")
+    parser.add_argument('--steps', type=int, default=4, help="Gradient accumulation steps")
+    parser.add_argument('--lr', type=float, default=5e-6, help="Learning rate")
+    parser.add_argument('--output_dir', type=str, default="training_res/qwen_link5", help="Output directory for training results")
+
+    args = parser.parse_args()
+
+
+    batch_size_per_device = args.bsz
     reencode_num = 5
 
     global_tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-7B-Instruct")
@@ -147,24 +158,6 @@ def main():
     qa_mem_train, qa_mem_eval = load_from_disk_then_process("qa_mem", preprocessor)
     xsum_train, xsum_eval = load_from_disk_then_process("xsum", preprocessor)
 
-    # text_dataset = datasets.load_from_disk("dataset_cache/processed/qwen_mapped/text")
-    # ptr_train, ptr_eval = text_dataset["train"], text_dataset["test"]
-
-    # tulu_dataset = datasets.load_from_disk("dataset_cache/processed/qwen_mapped/tulu")
-    # sft_train, sft_eval = tulu_dataset["train"], tulu_dataset["test"]
-
-    # sftmem_dataset = datasets.load_from_disk("dataset_cache/processed/qwen_mapped/sft_mem")
-    # sft_mem_train, sft_mem_eval = sftmem_dataset["train"], sftmem_dataset["test"]
-
-    # qa_dataset = datasets.load_from_disk("dataset_cache/processed/qwen_mapped/qa")
-    # qa_train, qa_eval = qa_dataset["train"], qa_dataset["test"]
-
-    # qamem_dataset = datasets.load_from_disk("dataset_cache/processed/qwen_mapped/qa_mem")
-    # qa_mem_train, qa_mem_eval = qamem_dataset["train"], qamem_dataset["test"]
-
-    # xsum_dataset = datasets.load_from_disk("dataset_cache/processed/qwen_mapped/xsum")
-    # xsum_train, xsum_eval = xsum_dataset["train"], xsum_dataset["test"]
-
     train_dataset = datasets.interleave_datasets(
         [sft_mem_train, sft_train, ptr_train, qa_train, qa_mem_train, xsum_train],
         probabilities=[0.25, 0.30, 0.20, 0.10, 0.10, 0.05],
@@ -181,44 +174,35 @@ def main():
         "xsum": xsum_eval
     })
 
-    # eval_dataset = datasets.DatasetDict({
-    #     "text": ptr_eval,
-    #     "sft": sft_eval,
-    #     "sftmem": sft_mem_eval,
-    #     "qa": qa_eval,
-    #     "qamem": qa_mem_eval,
-    #     "xsum": xsum_eval
-    # })
-
     os.environ["WANDB_PROJECT"]="kvmemory"
     os.environ["WANDB_WATCH"]="false"
 
     training_args = TrainingArguments(
-        output_dir=f"/mnt/tmp/training_res/sum/sum_{reencode_num}_qwen_2e-5",
+        output_dir=args.output_dir,
         report_to="wandb",
-        run_name=f"sum_{reencode_num}_bsz{batch_size_per_device}_qwen_2e-5",
+        run_name=f"sum_{reencode_num}_bsz{batch_size_per_device}_qwen_{args.lr}",
         per_device_train_batch_size= batch_size_per_device,
         # num_train_epochs=2,
         max_steps=6000,
-        logging_dir="/mnt/tmp/training_res/logs",
+        logging_dir="training_logs",
         logging_steps=10,
         save_steps=3000,
-        gradient_accumulation_steps=4,
+        gradient_accumulation_steps=args.steps,
         warmup_ratio=0.1,
         lr_scheduler_type='cosine',
         bf16=True,
-        learning_rate=2e-5,
-        do_eval=False,
-        # per_device_eval_batch_size = batch_size_per_device,
-        # evaluation_strategy="steps",  # Add this line
-        # eval_steps=2000,
+        learning_rate=args.lr,
+        do_eval=True,
+        per_device_eval_batch_size = batch_size_per_device,
+        evaluation_strategy="steps",  # Add this line
+        eval_steps=2000,
         gradient_checkpointing=True,
         save_total_limit=1,
         # overwrite_output_dir = False
         remove_unused_columns=False,
         # split_batches=True,
         dispatch_batches=False,
-        # eval_on_start=True,
+        eval_on_start=True,
         seed = 42
     )
 
@@ -227,7 +211,7 @@ def main():
         tokenizer=global_tokenizer,
         args=training_args,
         train_dataset = train_dataset,
-        # eval_dataset = eval_dataset,
+        eval_dataset = eval_dataset,
         data_collator = custom_collate_bias
     )
 
