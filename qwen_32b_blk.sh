@@ -1,1 +1,0 @@
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch --config_file configs/zero3_step4.yaml --main_process_port 25678 qwen_blk_trainer.py
