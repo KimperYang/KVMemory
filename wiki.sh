@@ -1,1 +1,0 @@
-python scripts/evaluation/2wiki/wiki_upper.py --ckpt 6000 --run "new_data/upper_31_8B"
