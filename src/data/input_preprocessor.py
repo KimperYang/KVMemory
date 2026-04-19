@@ -2423,8 +2423,6 @@ class qwen_blk_attention_preprocessor():
             'biased_index': biased_index
         }
 
-
-
 class granite_sum_attention_preprocessor():
     '''
     Apply one piece of memory to non-memory use samples to enable batch forward pass for calculating KV.
@@ -2719,4 +2717,194 @@ class granite_sum_attention_preprocessor():
             'input_ids': input_ids,
             'labels': labels,
             'biased_index': biased_index
+        }
+
+class granite_baseline_attention_preprocessor():
+    '''
+    Apply one piece of memory to non-memory use samples to enable batch forward pass for calculating KV.
+    '''
+    def __init__(
+        self,
+        tokenizer: PreTrainedTokenizerBase,
+        max_len: int,
+        do_shuffle: bool
+    ) -> None:
+        self.tokenizer = tokenizer
+        self.max_len = max_len
+        self.do_shuffle = do_shuffle
+
+    def process_sftmem(
+        self,
+        example: Dict[str, str],
+    ):
+        conversation = example["conversations"]
+        sys = "<|start_of_role|>system<|end_of_role|>" + random.choice(general_prompts) + "<|end_of_text|>\n"
+        sys_tokens = self.tokenizer(sys, add_special_tokens= False)['input_ids']
+        sys_len = len(sys_tokens)
+
+        if len(conversation) % 2 != 0:
+            if conversation[0]["from"] == "Assistant":
+                conversation = conversation[1:]
+            elif conversation[-1]["from"] == "User":
+                conversation = conversation[:-1]
+            else:
+                conversation = conversation[:-1]
+
+        all_input_ids = sys_tokens
+
+        for idx in range(0, len(conversation) - 2, 2):
+            if (
+                conversation[idx]["from"] == "User" and
+                conversation[idx + 1]["from"] == "Assistant"
+            ):
+                text = (
+                    "<|start_of_role|>user<|end_of_role|>" + conversation[idx]["value"]
+                    + "<|end_of_text|>\n<|start_of_role|>assistant<|end_of_role|>"
+                    + conversation[idx + 1]["value"] + "<|end_of_text|>\n"
+                )
+                memory_tokens = self.tokenizer(text, add_special_tokens = False)['input_ids']
+                all_input_ids = all_input_ids + memory_tokens
+
+        last_q = (
+            "<|start_of_role|>user<|end_of_role>" +
+            conversation[len(conversation) - 2]["value"] +
+            "<|end_of_text|>\n<|start_of_role|>assistant<|end_of_role|>"
+        )
+        last_q_ids = self.tokenizer(last_q, add_special_tokens= False)['input_ids']
+        all_input_ids = all_input_ids + last_q_ids
+
+        last_a = conversation[len(conversation) - 1]["value"] + "<|end_of_text|>"
+        last_a_ids = self.tokenizer(last_a, add_special_tokens= False)['input_ids']
+        all_input_ids = all_input_ids + last_a_ids
+
+
+        seq_len = len(all_input_ids)
+        ans_len = len(last_a_ids)
+        labels = [-100] * (seq_len - ans_len) + last_a_ids
+
+        return {
+            'input_ids': all_input_ids,
+            'labels': labels
+        }
+
+    def process_text(
+        self,
+        example: Dict[str, str],
+    ):
+        text_tokens = self.tokenizer(example["text"])['input_ids'][:self.max_len]
+        labels = text_tokens
+        return {
+            'input_ids': text_tokens,
+            'labels': labels
+        }
+
+    def process_qa(
+        self,
+        example: Dict[str, str],
+    ):
+        system = "<|start_of_role|>system<|end_of_role|>" + random.choice(qa_prompts)
+        system_input_ids = self.tokenizer(system, add_special_tokens=False).input_ids
+        input_ids = system_input_ids
+        doc_list = []
+
+        for k in range(0,10):
+            title = example['documents'][k]['title']
+            text = example['documents'][k]['text']
+            doc_list.append({'title': title, 'text':text})
+
+        if self.do_shuffle:
+            random.shuffle(doc_list)
+
+        for j in range(0,10):
+            title = doc_list[j]['title']
+            text = doc_list[j]['text']
+            tem_id = self.tokenizer(f"Document [{j+1}](Title: {title}) {text}\n", add_special_tokens=False).input_ids
+
+            input_ids += tem_id
+
+        user = "<|end_of_text|>\n<|start_of_role|>user<|end_of_role|>" + example['question'] + "<|end_of_text|>\n<|start_of_role|>assistant<|end_of_role|>"
+        user_id = self.tokenizer(user, add_special_tokens=False).input_ids
+        input_ids += user_id
+
+        ans_id = self.tokenizer(example['generated'] + "<|end_of_text|>", add_special_tokens=False).input_ids
+        input_ids += ans_id
+
+        ans_len = len(ans_id)
+        input_len = len(input_ids)
+
+        labels = [-100] * (input_len - ans_len) + ans_id
+
+
+        return {
+            'input_ids': input_ids,
+            'labels': labels
+        }
+
+    def process_tulu(
+        self,
+        example: Dict[str, str],
+    ):
+        conversation = example['messages']
+        system = "<|start_of_role|>system<|end_of_role|>" + random.choice(general_prompts) + "<|end_of_text|>\n"
+        system_tokenized = self.tokenizer(system, add_special_tokens=False)
+        system_input_ids = system_tokenized.input_ids
+        sys_len = len(system_input_ids)
+
+        input_ids_list = system_input_ids
+        labels = [-100] * sys_len
+        for i in range(len(conversation)):
+
+            if conversation[i]["role"] == "user":
+
+                t = "<|start_of_role|>user<|end_of_role|>" + conversation[i]["content"]  + "<|end_of_text|>\n"
+
+                tokenized = self.tokenizer(t, add_special_tokens=False)
+
+                input_ids = tokenized.input_ids
+                if len(labels) + len(input_ids) >= self.max_len:
+                    break
+
+                labels.extend([-100] * len(input_ids))
+                input_ids_list += input_ids
+
+            elif conversation[i]["role"] == "assistant":
+                t = "<|start_of_role|>assistant<|end_of_role|>" + conversation[i]["content"]
+                tokenized = self.tokenizer(t, add_special_tokens=False)
+
+                input_ids = tokenized.input_ids
+                if len(labels) + len(input_ids) > self.max_len - 1:
+                    input_ids = input_ids[:self.max_len - 1 - len(labels)]
+
+                input_ids += [100257]
+
+                labels.extend(input_ids)
+
+                input_ids_list += input_ids
+
+        return {
+            'input_ids': input_ids_list,
+            'labels': labels
+        }
+
+    def process_xsum(
+        self,
+        example: Dict[str, str],
+    ):
+        system = "<|start_of_role|>system<|end_of_role|>" + random.choice(summary_prompts) + "<|end_of_text|>\n<|start_of_role|>user<|end_of_role|>"
+        system_input_ids = self.tokenizer(system, add_special_tokens=False).input_ids
+        system_input_ids = system_input_ids
+
+        document_id = self.tokenizer(example['document'], add_special_tokens=False).input_ids
+
+        user =  "<|end_of_text|>\n<|start_of_role|>assistant<|end_of_role|>"
+        user_id = self.tokenizer(user, add_special_tokens=False).input_ids
+
+        ans_id = self.tokenizer(example['summary'] + "<|end_of_text|>", add_special_tokens=False).input_ids
+
+        input_ids = system_input_ids + document_id + user_id + ans_id
+        labels = [-100] * (len(input_ids) - len(ans_id)) + ans_id
+
+        return {
+            'input_ids': input_ids,
+            'labels': labels
         }
