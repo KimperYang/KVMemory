@@ -29,6 +29,7 @@ All three settings share the same data mix (FineWeb text, Tulu SFT, DaringAnteat
 | 2WikiMultihopQA | manual (`dev.json`) | `2WikiMultihopQA/dev.json` |
 | HotpotQA (distractor) | pulled automatically by the eval script | — |
 | MuSiQue | pulled automatically by the eval script | — |
+| TriviaQA | manual download: [tqa.zip](https://drive.google.com/file/d/1wnIZGQo3vMrVH9AQ8_Lnhzkk1bpkLuJD/view?usp=sharing) | `data/raw/tqa/eval.jsonl` |
 
 Set up the Block-QA source first:
 
@@ -186,7 +187,17 @@ CUDA_VISIBLE_DEVICES=0 python scripts/granite/musique.py \
 
 Dataset is pulled automatically from `dgslibisey/MuSiQue`. Output: `result/musique_{acc}_{timestamp}.jsonl`.
 
-### 3.6 Which `--attn_type` / `--reencode_num` to pair with which checkpoint
+### 3.6 Trivia QA
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python scripts/granite/tqa.py \
+    --ckpt_path training_res/kvlink_5_granite_8B/checkpoint-6000 \
+    --batch_size 4 --attn_type blocked --reencode_num 5 --hf True
+```
+
+Requires the manually downloaded JSONL at `data/raw/tqa/eval.jsonl` (each row has `question`, `answers`, and 10 `documents` with `title`/`text`). Dataset is available [here](https://drive.google.com/file/d/1wnIZGQo3vMrVH9AQ8_Lnhzkk1bpkLuJD/view?usp=sharing). Output: `result/tqa_{acc}_{timestamp}.jsonl`.
+
+### 3.7 Which `--attn_type` / `--reencode_num` to pair with which checkpoint
 
 | Checkpoint source | `--attn_type` | `--reencode_num` |
 |---|---|---|
