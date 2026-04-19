@@ -2,6 +2,15 @@
 
 Train and evaluate long-context language models with memory-token attention. This README covers the end-to-end pipeline for the Granite 4.1 8B line of experiments: data preprocessing → training (three settings) → evaluation.
 
+## Setup
+
+```bash
+pip install -r requirements.txt
+pip install -e .
+```
+
+The project is pinned against `transformers==4.43.x`. DeepSpeed is required for the 8×H100 config (`configs/h100_config.yaml`); FSDP users can skip it if they only launch with `configs/fsdp.yaml`.
+
 ## Training settings
 
 Three Granite training entry points live at the repo root, each corresponding to a different attention/memory configuration:
