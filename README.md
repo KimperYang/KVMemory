@@ -1,23 +1,12 @@
 # KVMemory
 
-## Run
-```
-CUDA_VISIBLE_DEVICES=1,2 torchrun --nproc_per_node=2 finetune.py 
-```
-```
-CUDA_VISIBLE_DEVICES=3,4,5,6 accelerate launch --config_file ../.cache/huggingface/accelerate/default_config.yaml --main_process_port 25678 finetune_bias.py
-```
-accelerate launch --config_file /dccstor/scllm/.cache/accelerate/default_config.yaml --main_process_port 25678 finetune_bias.py
+## QA Data
 
-## Ifeval
-```
-python3 -m instruction_following_eval.evaluation_main \
-  --input_data=./instruction_following_eval/data/input_data.jsonl \
-  --input_response_data=./instruction_following_eval/data/input_response_data_gpt4_20231107_145030.jsonl \
-  --output_dir=./instruction_following_eval/data/
-```
+QA questions and answers are available [here](https://drive.google.com/file/d/1wjSX2C0OzvmWY18JL76Y0VLj-WiMIA_6/view?usp=sharing).
 
-python3 -m instruction_following_eval.evaluation_main \
-  --input_data=/home/jingbo/KVMemory/data/raw/ifeval/input_data.jsonl \
-  --input_response_data=/home/jingbo/KVMemory/result/ifeval_special_20241009-092708.jsonl \
-  --output_dir=/home/jingbo/KVMemory/result/ifeval_special
+```
+unzip block_qa.zip
+mkdir data/raw/block_qa
+mv block_qa.jsonl data/raw/block_qa
+python 
+```

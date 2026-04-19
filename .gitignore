@@ -16,3 +16,4 @@ launch_script/
 configs/
 config/
 __pycache__/
+.deepseek_env
