@@ -2659,10 +2659,10 @@ class granite_sum_attention_preprocessor():
                 tokenized = self.tokenizer(t, add_special_tokens=False)
 
                 input_ids = tokenized.input_ids
-                if len(labels) + len(input_ids) > self.max_len - 1:
-                    input_ids = input_ids[:self.max_len - 1 - len(labels)]
+                if len(labels) + len(input_ids) > self.max_len - 2:
+                    input_ids = input_ids[:self.max_len - 2 - len(labels)]
 
-                input_ids += [100257]
+                input_ids += [100257, 198]
 
                 labels.extend(input_ids)
 
@@ -2766,7 +2766,7 @@ class granite_baseline_attention_preprocessor():
                 all_input_ids = all_input_ids + memory_tokens
 
         last_q = (
-            "<|start_of_role|>user<|end_of_role>" +
+            "<|start_of_role|>user<|end_of_role|>" +
             conversation[len(conversation) - 2]["value"] +
             "<|end_of_text|>\n<|start_of_role|>assistant<|end_of_role|>"
         )
@@ -2872,10 +2872,10 @@ class granite_baseline_attention_preprocessor():
                 tokenized = self.tokenizer(t, add_special_tokens=False)
 
                 input_ids = tokenized.input_ids
-                if len(labels) + len(input_ids) > self.max_len - 1:
-                    input_ids = input_ids[:self.max_len - 1 - len(labels)]
+                if len(labels) + len(input_ids) > self.max_len - 2:
+                    input_ids = input_ids[:self.max_len - 2 - len(labels)]
 
-                input_ids += [100257]
+                input_ids += [100257, 198]
 
                 labels.extend(input_ids)
 
