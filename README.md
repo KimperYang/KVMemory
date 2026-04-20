@@ -206,7 +206,53 @@ CUDA_VISIBLE_DEVICES=0 python scripts/granite/tqa.py \
 
 Requires the manually downloaded JSONL at `data/raw/tqa/eval.jsonl` (each row has `question`, `answers`, and 10 `documents` with `title`/`text`). Dataset is available [here](https://drive.google.com/file/d/1wnIZGQo3vMrVH9AQ8_Lnhzkk1bpkLuJD/view?usp=sharing). Output: `result/tqa_{acc}_{timestamp}.jsonl`.
 
-### 3.7 Which `--attn_type` / `--reencode_num` to pair with which checkpoint
+### 3.7 PromptCache baseline (training-free)
+
+A reference baseline that uses the **base** `ibm-granite/granite-4.1-8b` — no fine-tuning, no `<mem_start>` / `<mem_end>` / link tokens. Prefill runs under a block-diagonal causal mask where each segment (system, each document, user question) can only attend itself. The per-segment KVs are then concatenated and fed to `generate`, which does full causal attention over the cache.
+
+Use this to measure how much of the kvlink gain comes from fine-tuning + boundary/link tokens vs. just the block-diagonal prefill structure.
+
+Scripts live under `scripts/granite/promptcache/`, one per benchmark:
+
+| Benchmark | Script | Data source |
+|---|---|---|
+| NQ | `scripts/granite/promptcache/nq.py` | `data/raw/nq/nq-open-10_{pos}.jsonl` |
+| 2WikiMultihopQA | `scripts/granite/promptcache/2wiki.py` | `2WikiMultihopQA/dev.json` |
+| HotpotQA (distractor) | `scripts/granite/promptcache/hqa.py` | auto-pulled from `hotpotqa/hotpot_qa` |
+| MuSiQue | `scripts/granite/promptcache/musique.py` | auto-pulled from `dgslibisey/MuSiQue` |
+| TriviaQA | `scripts/granite/promptcache/tqa.py` | `data/raw/tqa/eval.jsonl` |
+
+```bash
+# NQ — sweep gold-document position (--pos required)
+for pos in 0 1 2 3 4 5 6 7 8 9; do
+    CUDA_VISIBLE_DEVICES=0 python scripts/granite/promptcache/nq.py --pos $pos --batch_size 1
+done
+
+# The other four benchmarks take only --batch_size
+CUDA_VISIBLE_DEVICES=0 python scripts/granite/promptcache/2wiki.py   --batch_size 1
+CUDA_VISIBLE_DEVICES=0 python scripts/granite/promptcache/hqa.py     --batch_size 1
+CUDA_VISIBLE_DEVICES=0 python scripts/granite/promptcache/musique.py --batch_size 1
+CUDA_VISIBLE_DEVICES=0 python scripts/granite/promptcache/tqa.py     --batch_size 1
+```
+
+No `--ckpt_path`, no `--attn_type`, no `--reencode_num` — the baseline has no knobs beyond batch size. Outputs are written to `result/promptcache_{benchmark}_{acc}_{timestamp}.jsonl`.
+
+#### 3.7.1 PromptCache without position-id alignment
+
+A stricter variant lives under `scripts/granite/promptcache_unaligned/` (same 5 benchmarks, same CLI). The only difference: during prefill, **each segment's `position_ids` restart from 0** (system at `0..L_sys-1`, each doc at `0..L_doc-1`, user question at `0..L_q-1`). Cached KVs are therefore rotated by local-slot positions rather than global ones, so query/key RoPE are no longer aligned across segments. Generation-time tokens still fall back to HF's default global positions continuing from the flat prefill length, which exposes the misalignment. Use this to isolate the contribution of consistent positional anchoring to the kvlink gains.
+
+```bash
+# Same CLI as the aligned scripts, different folder
+python scripts/granite/promptcache_unaligned/nq.py --pos 0 --batch_size 1
+python scripts/granite/promptcache_unaligned/2wiki.py   --batch_size 1
+python scripts/granite/promptcache_unaligned/hqa.py     --batch_size 1
+python scripts/granite/promptcache_unaligned/musique.py --batch_size 1
+python scripts/granite/promptcache_unaligned/tqa.py     --batch_size 1
+```
+
+Outputs: `result/promptcache_unaligned_{benchmark}_{acc}_{timestamp}.jsonl`.
+
+### 3.8 Which `--attn_type` / `--reencode_num` to pair with which checkpoint
 
 | Checkpoint source | `--attn_type` | `--reencode_num` |
 |---|---|---|
